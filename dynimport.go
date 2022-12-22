@@ -90,5 +90,6 @@ func (i Import) run() {
 }
 
 func (i Import) Remove() {
-	i.Value().Remove()
+	i.jsVal.Remove()
+	delete(Imported, i.name)
 }

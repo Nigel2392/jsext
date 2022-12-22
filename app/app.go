@@ -4,12 +4,15 @@
 package app
 
 import (
+	"net/url"
+
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/components/loaders"
 	"github.com/Nigel2392/jsext/router"
-	"net/url"
 )
+
+const JSEXT_PRELOADER_ID = "jsext-preload-container"
 
 var AppExport jsext.Export
 
@@ -89,6 +92,12 @@ func (a *Application) run() int {
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
+
+	// Get the preloader
+	var preloader = jsext.QuerySelector("#" + JSEXT_PRELOADER_ID)
+	if !preloader.Value().IsUndefined() {
+		preloader.Remove()
+	}
 	<-WAITER
 	return 0
 }
