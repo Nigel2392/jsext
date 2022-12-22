@@ -54,7 +54,7 @@ func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element
 	})
 }
 
-func (f *Form) OnubmitToStruct(strct any, fn func(strct any, elements []jsext.Element)) {
+func (f *Form) OnSubmitToStruct(strct any, fn func(strct any, elements []jsext.Element)) {
 	f.OnSubmit(func(data map[string]string, elements []jsext.Element) {
 		var err = FormDataToStruct(data, strct)
 		if err != nil {
@@ -83,6 +83,7 @@ func StructToForm(s any, labelClass, inputClass, action, method string) *Form {
 		var name = label
 		var value = item[1]
 		var typ = item[2]
+		label = strings.ReplaceAll(label, "_", " ")
 		var elemLabel = elements.Label(label, name)
 		var elemInput = elements.Input(typ, name, label).AttrValue(value)
 		if inputClass != "" {

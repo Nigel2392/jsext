@@ -92,10 +92,8 @@ func (a *Application) run() int {
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
-
-	// Get the preloader
-	var preloader = jsext.QuerySelector("#" + JSEXT_PRELOADER_ID)
-	if !preloader.Value().IsUndefined() {
+	// Get the preloader, remove it if it exists
+	if preloader := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); !preloader.Value().IsUndefined() {
 		preloader.Remove()
 	}
 	<-WAITER
