@@ -142,7 +142,7 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 			left: 0;
 			width: 100%;
 			height: 100%;
-			background-color: rgba(` + r_str + `, ` + g_str + `, ` + b_str + `, 0.5);
+			background-color: rgba(` + r_str + `, ` + g_str + `, ` + b_str + `, 0.8);
 			display: flex;
 			justify-content: center;
 			align-items: center;
