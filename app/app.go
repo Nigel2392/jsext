@@ -4,10 +4,10 @@
 package app
 
 import (
-	"create_elems/jsext"
-	"create_elems/jsext/components"
-	"create_elems/jsext/components/loaders"
-	"create_elems/jsext/router"
+	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/components"
+	"github.com/Nigel2392/jsext/components/loaders"
+	"github.com/Nigel2392/jsext/router"
 	"net/url"
 )
 

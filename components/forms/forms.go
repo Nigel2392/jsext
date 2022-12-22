@@ -1,14 +1,15 @@
 package forms
 
 import (
-	"create_elems/jsext"
-	"create_elems/jsext/elements"
 	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/elements"
 )
 
 type Form struct {

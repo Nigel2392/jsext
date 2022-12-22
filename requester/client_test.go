@@ -4,9 +4,9 @@
 package requester_test
 
 import (
-	"create_elems/jsext/requester"
 	"encoding/json"
 	"encoding/xml"
+	"github.com/Nigel2392/jsext/requester"
 	"net/http"
 	"testing"
 )

@@ -1,7 +1,7 @@
 package components
 
 import (
-	"create_elems/jsext"
+	"github.com/Nigel2392/jsext"
 )
 
 type Component interface {

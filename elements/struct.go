@@ -4,10 +4,11 @@
 package elements
 
 import (
-	"create_elems/jsext"
 	"strings"
 	"sync"
 	"syscall/js"
+
+	"github.com/Nigel2392/jsext"
 )
 
 // https://github.com/golang/go/blob/master/src/html/escape.go

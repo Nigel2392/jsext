@@ -3,6 +3,12 @@
 
 package app
 
+import (
+	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/components"
+	"github.com/Nigel2392/jsext/router"
+)
+
 type Application struct {
 	BaseElementID string
 	Router        *router.Router

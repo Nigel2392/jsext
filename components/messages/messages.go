@@ -4,12 +4,13 @@
 package messages
 
 import (
-	"create_elems/jsext/helpers"
-	"create_elems/jsext/helpers/csshelpers"
 	"strings"
 	"sync"
 	"syscall/js"
 	"time"
+
+	"github.com/Nigel2392/jsext/helpers"
+	"github.com/Nigel2392/jsext/helpers/csshelpers"
 )
 
 const tickerWaitMS = 100

@@ -1,8 +1,9 @@
 package forms_test
 
 import (
-	"create_elems/jsext/components/forms"
 	"testing"
+
+	"github.com/Nigel2392/jsext/components/forms"
 )
 
 func TestForms(t *testing.T) {

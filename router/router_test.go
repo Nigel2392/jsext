@@ -1,9 +1,10 @@
 package router_test
 
 import (
-	"create_elems/jsext/router"
 	"net/url"
 	"testing"
+
+	"github.com/Nigel2392/jsext/router"
 )
 
 func TestRouter(t *testing.T) {

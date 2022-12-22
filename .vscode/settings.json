@@ -1,0 +1,7 @@
+{
+    "workbench.colorTheme": "2077",
+    "go.toolsEnvVars": {
+        "GOOS": "js",
+        "GOARCH": "wasm"
+    }
+}

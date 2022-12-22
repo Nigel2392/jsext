@@ -4,9 +4,9 @@
 package loaders
 
 import (
-	"create_elems/jsext"
-	"create_elems/jsext/elements"
 	"fmt"
+	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/elements"
 	"syscall/js"
 )
 

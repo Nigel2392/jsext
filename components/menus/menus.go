@@ -1,11 +1,12 @@
 package menus
 
 import (
-	"create_elems/jsext/components"
-	"create_elems/jsext/elements"
-	"create_elems/jsext/helpers/csshelpers"
 	"strconv"
 	"strings"
+
+	"github.com/Nigel2392/jsext/components"
+	"github.com/Nigel2392/jsext/elements"
+	"github.com/Nigel2392/jsext/helpers/csshelpers"
 )
 
 // Provide a fullscreen menu with a curtain drop effect.

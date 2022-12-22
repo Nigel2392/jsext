@@ -1,8 +1,8 @@
 package loaders
 
 import (
-	"create_elems/jsext/elements"
-	"create_elems/jsext/helpers/csshelpers"
+	"github.com/Nigel2392/jsext/elements"
+	"github.com/Nigel2392/jsext/helpers/csshelpers"
 )
 
 var (

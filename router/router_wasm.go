@@ -4,7 +4,7 @@
 package router
 
 import (
-	"create_elems/jsext"
+	"github.com/Nigel2392/jsext"
 	"net/url"
 	"strings"
 )
