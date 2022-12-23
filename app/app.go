@@ -37,9 +37,9 @@ func App(id string, rt ...*router.Router) *Application {
 	// Get the application body
 	var elem jsext.Element
 	if id == "" {
-		elem = jsext.QuerySelector("#" + id)
-	} else {
 		elem = jsext.Body
+	} else {
+		elem = jsext.QuerySelector("#" + id)
 	}
 	// Get the application router
 	var r *router.Router
