@@ -42,32 +42,39 @@ var AnimationMap = map[int]func(e *Element, timeMS int){
 	FROMBOTTOM: fromBottom,
 }
 
-func (e *Element) FadeIn(timeMS int) {
+func (e *Element) FadeIn(timeMS int) *Element {
 	e.addAnim(FADEIN, timeMS)
+	return e
 }
 
-func (e *Element) FadeOut(timeMS int) {
+func (e *Element) FadeOut(timeMS int) *Element {
 	e.addAnim(FADEOUT, timeMS)
+	return e
 }
 
-func (e *Element) Bounce(timeMS int) {
+func (e *Element) Bounce(timeMS int) *Element {
 	e.addAnim(BOUNCE, timeMS)
+	return e
 }
 
-func (e *Element) FromTop(timeMS int) {
+func (e *Element) FromTop(timeMS int) *Element {
 	e.addAnim(FROMTOP, timeMS)
+	return e
 }
 
-func (e *Element) FromLeft(timeMS int) {
+func (e *Element) FromLeft(timeMS int) *Element {
 	e.addAnim(FROMLEFT, timeMS)
+	return e
 }
 
-func (e *Element) FromRight(timeMS int) {
+func (e *Element) FromRight(timeMS int) *Element {
 	e.addAnim(FROMRIGHT, timeMS)
+	return e
 }
 
-func (e *Element) FromBottom(timeMS int) {
+func (e *Element) FromBottom(timeMS int) *Element {
 	e.addAnim(FROMBOTTOM, timeMS)
+	return e
 }
 
 func (e *Element) animate() {
@@ -87,70 +94,70 @@ func (e *Element) addAnim(typ, duration int) {
 }
 
 func fadeIn(e *Element, timeMS int) {
-	e.Value().Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("opacity", "0")
-	e.Value().Get("classList").Call("add", FADEIN_CLASS)
+	e.value.Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("opacity", "0")
+	e.value.Get("classList").Call("add", FADEIN_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("opacity", "1")
+		e.value.Get("style").Set("opacity", "1")
 	})
 }
 
 func fadeOut(e *Element, timeMS int) {
-	e.Value().Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("opacity", "1")
-	e.Value().Get("classList").Call("add", FADEOUT_CLASS)
+	e.value.Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("opacity", "1")
+	e.value.Get("classList").Call("add", FADEOUT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("opacity", "0")
+		e.value.Get("style").Set("opacity", "0")
 	})
 }
 
 func fromTop(e *Element, timeMS int) {
-	var translate = e.Value().Get("style").Get("transform").String()
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("transform", "translateY(-100%)")
-	e.Value().Get("classList").Call("add", FROMTOP_CLASS)
+	var translate = e.value.Get("style").Get("transform").String()
+	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transform", "translateY(-100%)")
+	e.value.Get("classList").Call("add", FROMTOP_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("transform", translate)
+		e.value.Get("style").Set("transform", translate)
 	})
 }
 
 func fromLeft(e *Element, timeMS int) {
-	var translate = e.Value().Get("style").Get("transform").String()
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("transform", "translateX(-100%)")
-	e.Value().Get("classList").Call("add", FROMLEFT_CLASS)
+	var translate = e.value.Get("style").Get("transform").String()
+	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transform", "translateX(-100%)")
+	e.value.Get("classList").Call("add", FROMLEFT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("transform", translate)
+		e.value.Get("style").Set("transform", translate)
 	})
 }
 
 func fromRight(e *Element, timeMS int) {
-	var translate = e.Value().Get("style").Get("transform").String()
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("transform", "translateX(100%)")
-	e.Value().Get("classList").Call("add", FROMRIGHT_CLASS)
+	var translate = e.value.Get("style").Get("transform").String()
+	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transform", "translateX(100%)")
+	e.value.Get("classList").Call("add", FROMRIGHT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("transform", translate)
+		e.value.Get("style").Set("transform", translate)
 	})
 
 }
 
 func fromBottom(e *Element, timeMS int) {
-	var translate = e.Value().Get("style").Get("transform").String()
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("style").Set("transform", "translateY(100%)")
-	e.Value().Get("classList").Call("add", FROMBOTTOM_CLASS)
+	var translate = e.value.Get("style").Get("transform").String()
+	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transform", "translateY(100%)")
+	e.value.Get("classList").Call("add", FROMBOTTOM_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("transform", "translateY(0)")
-		e.Value().Get("style").Set("transform", translate)
+		e.value.Get("style").Set("transform", "translateY(0)")
+		e.value.Get("style").Set("transform", translate)
 	})
 }
 
 func bounce(e *Element, timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
-	e.Value().Get("classList").Call("add", BOUNCE_CLASS)
+	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("classList").Call("add", BOUNCE_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.Value().Get("style").Set("transform", "scale(1.1)")
+		e.value.Get("style").Set("transform", "scale(1.1)")
 	})
 }
 
@@ -167,9 +174,9 @@ func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
 
 func isInViewport(e *Element) bool {
 	var (
-		bounding   = e.Value().Call("getBoundingClientRect")
-		elemHeight = e.Value().Get("offsetHeight").Int()
-		elemWidth  = e.Value().Get("offsetWidth").Int()
+		bounding   = e.value.Call("getBoundingClientRect")
+		elemHeight = e.value.Get("offsetHeight").Int()
+		elemWidth  = e.value.Get("offsetWidth").Int()
 	)
 
 	if bounding.Get("top").Int() >= -elemHeight &&
@@ -180,24 +187,4 @@ func isInViewport(e *Element) bool {
 	}
 
 	return false
-}
-
-func (e *Element) EaseIn(timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms ease")
-}
-
-func (e *Element) EaseOut(timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms ease-out")
-}
-
-func (e *Element) EaseInOut(timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms ease-in-out")
-}
-
-func (e *Element) EaseInBack(timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms cubic-bezier(0.600, -0.280, 0.735, 0.045)")
-}
-
-func (e *Element) EaseOutBack(timeMS int) {
-	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms cubic-bezier(0.175, 0.885, 0.320, 1.275)")
 }
