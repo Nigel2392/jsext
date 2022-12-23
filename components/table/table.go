@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/Nigel2392/jsext"
-	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/elements"
+	"github.com/Nigel2392/jsext/helpers"
 )
 
 type NoStructAvailable int
@@ -84,7 +84,7 @@ func (t *Table[T]) create() *elements.Element {
 		}
 		var valueModel = reflect.TypeOf(model)
 		var i = 0
-		components.InlineLoopFields(valueModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
+		helpers.InlineLoopFields(valueModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
 			// Get the value of the field
 			var val = reflect.ValueOf(model).FieldByName(field.Name).Interface()
 			var width = rowNames[i].Width
@@ -105,7 +105,7 @@ type Rows struct {
 
 func GetStructFieldNames(reflModel reflect.Type) []Rows {
 	var rowNames []Rows
-	components.InlineLoopFields(reflModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
+	helpers.InlineLoopFields(reflModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
 		var tag = field.Tag.Get("table")
 		var widthTag = field.Tag.Get("width")
 		var width = "auto"

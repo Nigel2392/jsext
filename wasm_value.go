@@ -18,32 +18,39 @@ func (w Value) ToElement() Element {
 	return Element(w.Value())
 }
 
+// Returns false if value is null or undefined.
 func (w Value) Invalid() bool {
 	return w.IsUndefined() || w.IsNull()
 }
 
+// Returns true if the value is undefined.
 func (w Value) IsArray() bool {
 	var arr = Global.Get("Array")
 	var isArr = arr.Get("isArray")
 	return isArr.Invoke(w.Value()).Bool()
 }
 
+// Returns true if the value is an object.
 func (w Value) IsObject() bool {
 	return w.Value().Type() == js.TypeObject
 }
 
+// Returns true if the value is a string.
 func (w Value) IsString() bool {
 	return w.Value().Type() == js.TypeString
 }
 
+// Returns true if the value is a number.
 func (w Value) IsNumber() bool {
 	return w.Value().Type() == js.TypeNumber
 }
 
+// Returns true if the value is a boolean.
 func (w Value) IsBoolean() bool {
 	return w.Value().Type() == js.TypeBoolean
 }
 
+// Returns true if the value is a javascript function.
 func (w Value) IsFunction() bool {
 	return w.Value().Type() == js.TypeFunction
 }

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/Nigel2392/jsext"
-	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/elements"
+	"github.com/Nigel2392/jsext/helpers"
 )
 
 // Form delimiter for nested structs
@@ -217,8 +217,8 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 	var list [][]string
 	for i := 0; i < v.NumField(); i++ {
 		var label = v.Type().Field(i).Name
-		var value = components.ValueToString(v.Field(i))
-		var typ = ReflectInputType(components.GetValue(s, label))
+		var value = helpers.ValueToString(v.Field(i))
+		var typ = ReflectInputType(helpers.GetValue(s, label))
 		if prefix != "" {
 			label = prefix + Delimiter + label
 		}
@@ -234,7 +234,7 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 
 // Transform a form value to the correct type
 func TransformValue(s any, field string, val any) (any, error) {
-	mdl_val := components.GetValue(s, field)
+	mdl_val := helpers.GetValue(s, field)
 	switch mdl_val.(type) {
 	case int, int8, int16, int32, int64:
 		integer, err := strconv.Atoi(fmt.Sprint(val))
@@ -377,7 +377,7 @@ func FormatIfDateTime(val any) any {
 // Set a value on a struct
 func SetValue(s any, column string, value any) {
 	// Validate kind
-	kind := components.StructKind(s)
+	kind := helpers.StructKind(s)
 	// Loop through all fields in the struct
 	for i := 0; i < kind.NumField(); i++ {
 		f_kind := kind.Field(i)
