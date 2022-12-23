@@ -6,22 +6,24 @@ import (
 	"github.com/Nigel2392/jsext"
 )
 
+// Predefined element animations.
 const (
-	FADEIN_CLASS  = "jsext-fade-in"
-	FADEOUT_CLASS = "jsext-fade-out"
-	BOUNCE_CLASS  = "jsext-bounce"
-
+	FADEIN_CLASS     = "jsext-fade-in"
+	FADEOUT_CLASS    = "jsext-fade-out"
+	BOUNCE_CLASS     = "jsext-bounce"
 	FROMTOP_CLASS    = "jsext-from-top"
 	FROMLEFT_CLASS   = "jsext-from-left"
 	FROMRIGHT_CLASS  = "jsext-from-right"
 	FROMBOTTOM_CLASS = "jsext-from-bottom"
 )
 
+// Predefined element animations.
 type Animation struct {
 	Type     int
 	Duration int
 }
 
+// Predefined element animations.
 const (
 	FADEIN     = 0
 	FADEOUT    = 1
@@ -32,6 +34,7 @@ const (
 	FROMBOTTOM = 6
 )
 
+// Predefined element animations.
 var AnimationMap = map[int]func(e *Element, timeMS int){
 	FADEIN:     fadeIn,
 	FADEOUT:    fadeOut,
@@ -42,36 +45,43 @@ var AnimationMap = map[int]func(e *Element, timeMS int){
 	FROMBOTTOM: fromBottom,
 }
 
+// Fade the element in once it is visible on screen.
 func (e *Element) FadeIn(timeMS int) *Element {
 	e.addAnim(FADEIN, timeMS)
 	return e
 }
 
+// Fade the element out once it is visible on screen.
 func (e *Element) FadeOut(timeMS int) *Element {
 	e.addAnim(FADEOUT, timeMS)
 	return e
 }
 
+// Bounce the element once it is visible on screen.
 func (e *Element) Bounce(timeMS int) *Element {
 	e.addAnim(BOUNCE, timeMS)
 	return e
 }
 
+// Slide the element in from the top once it is visible on screen.
 func (e *Element) FromTop(timeMS int) *Element {
 	e.addAnim(FROMTOP, timeMS)
 	return e
 }
 
+// Slide the element in from the left once it is visible on screen.
 func (e *Element) FromLeft(timeMS int) *Element {
 	e.addAnim(FROMLEFT, timeMS)
 	return e
 }
 
+// Slide the element in from the right once it is visible on screen.
 func (e *Element) FromRight(timeMS int) *Element {
 	e.addAnim(FROMRIGHT, timeMS)
 	return e
 }
 
+// Slide the element in from the bottom once it is visible on screen.
 func (e *Element) FromBottom(timeMS int) *Element {
 	e.addAnim(FROMBOTTOM, timeMS)
 	return e
@@ -172,6 +182,7 @@ func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
 	})
 }
 
+// isInViewport checks if the element is in the viewport
 func isInViewport(e *Element) bool {
 	var (
 		bounding   = e.value.Call("getBoundingClientRect")

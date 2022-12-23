@@ -22,6 +22,7 @@ var htmlEscaper = strings.NewReplacer(
 
 type Elements []*Element
 
+// Element to be rendered in the DOM.
 type Element struct {
 	Tag                  string
 	Text                 string
@@ -42,6 +43,8 @@ func getText(t []string) string {
 	return ""
 }
 
+// NewElement creates a new element.
+// All normal HTML elements are predefined.
 func NewElement(tag string, text ...string) *Element {
 	return &Element{
 		Tag:                  tag,
@@ -55,18 +58,22 @@ func NewElement(tag string, text ...string) *Element {
 	}
 }
 
+// Return the js.Value of the element (if it has been rendered.)
 func (e *Element) JSValue() js.Value {
 	return e.value
 }
 
+// Return the jsext.Value of the element (if it has been rendered.)
 func (e *Element) Value() jsext.Value {
 	return jsext.Value(e.value)
 }
 
+// Return the jsext.Element of the element (if it has been rendered.)
 func (e *Element) JSExtElement() jsext.Element {
 	return jsext.Element(e.value)
 }
 
+// Set the text to be rendered after all children are.
 func (e *Element) TextAfter() *Element {
 	e.textAfter = true
 	return e

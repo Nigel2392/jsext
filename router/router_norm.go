@@ -5,12 +5,15 @@ package router
 
 import "net/url"
 
+// Router is the main router struct.
 type Router struct {
 	routes            []*Route
 	skipTrailingSlash bool
 	onErr             func(err error)
 }
 
+// Handle is the main router handler.
+// This function is called by the router to match and handle a route.
 func (r *Router) Handle(u *url.URL) { //bool
 	var rt, vars, ok = r.Match(u.Path)
 	if !ok {

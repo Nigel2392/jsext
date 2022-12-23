@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/elements"
 )
 
@@ -83,7 +84,7 @@ func (t *Table[T]) create() *elements.Element {
 		}
 		var valueModel = reflect.TypeOf(model)
 		var i = 0
-		InlineLoopFields(valueModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
+		components.InlineLoopFields(valueModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
 			// Get the value of the field
 			var val = reflect.ValueOf(model).FieldByName(field.Name).Interface()
 			var width = rowNames[i].Width
@@ -104,7 +105,7 @@ type Rows struct {
 
 func GetStructFieldNames(reflModel reflect.Type) []Rows {
 	var rowNames []Rows
-	InlineLoopFields(reflModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
+	components.InlineLoopFields(reflModel, func(field reflect.StructField, parent reflect.Type, value reflect.Value) {
 		var tag = field.Tag.Get("table")
 		var widthTag = field.Tag.Get("width")
 		var width = "auto"
@@ -123,30 +124,6 @@ func GetStructFieldNames(reflModel reflect.Type) []Rows {
 		})
 	})
 	return rowNames
-}
-
-func InlineLoopFields(reflModel reflect.Type, callback func(field reflect.StructField, parent reflect.Type, value reflect.Value)) {
-	for i := 0; i < reflModel.NumField(); i++ {
-		var field = reflModel.Field(i)
-		if !isValidField(field) {
-			continue
-		}
-		if field.Type.Kind() == reflect.Struct {
-			InlineLoopFields(field.Type, callback)
-		} else {
-			callback(field, reflModel, reflect.ValueOf(field))
-		}
-	}
-}
-
-func isValidField(field reflect.StructField) bool {
-	// Get the struct tags for the field
-	var tag = field.Tag.Get("table")
-	// Check if the field is ignored
-	if tag == "-" || tag == "" {
-		return false
-	}
-	return true
 }
 
 func (t *Table[T]) Run() *elements.Element {

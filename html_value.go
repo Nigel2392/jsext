@@ -9,6 +9,7 @@ import "syscall/js"
 // This is a wrapper around a slice of []Element(js.Value).
 type Elements []Element
 
+// Get the length of the slice.
 func (e Elements) Len() int {
 	return len(e)
 }

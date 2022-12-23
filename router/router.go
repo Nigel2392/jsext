@@ -6,20 +6,24 @@ import (
 	"strings"
 )
 
+// Initialize a new router.
 func NewRouter() *Router {
 	return &Router{routes: make([]*Route, 0)}
 }
 
+// SkipTrailingSlash will skip the trailing slash in the path.
 func (r *Router) SkipTrailingSlash() *Router {
 	r.skipTrailingSlash = true
 	return r
 }
 
+// Decide what to do on errors.
 func (r *Router) OnError(cb func(err error)) *Router {
 	r.onErr = cb
 	return r
 }
 
+// Throw an error in the router.
 func (r *Router) Error(code int, msg string) RouterError {
 	var err = NewError(code, msg)
 	if r.onErr == nil {
@@ -29,6 +33,7 @@ func (r *Router) Error(code int, msg string) RouterError {
 	return err
 }
 
+// Display nicely formatted URLs
 func (r *Router) String() string {
 	var sb strings.Builder
 	for _, route := range r.routes {
@@ -41,6 +46,7 @@ func (r *Router) String() string {
 	return sb.String()
 }
 
+// Match a raw path.
 func (r *Router) Match(path string) (*Route, Vars, bool) {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
@@ -56,6 +62,8 @@ func (r *Router) Match(path string) (*Route, Vars, bool) {
 	}, nil, false
 }
 
+// Get a route by name.
+// If it does not directly exist, it will search in the subroutes.
 func (r *Router) GetRoute(name string) *Route {
 	for _, route := range r.routes {
 		if route.Name == name {
@@ -71,6 +79,8 @@ func (r *Router) GetRoute(name string) *Route {
 	return nil
 }
 
+// Register a new route.
+// If the route name already exists, it will panic.
 func (r *Router) Register(name, path string, callable func(v Vars, u *url.URL)) *Route {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
@@ -85,6 +95,7 @@ func (r *Router) Register(name, path string, callable func(v Vars, u *url.URL)) 
 	return route
 }
 
+// Handle a path.
 func (r *Router) HandlePath(path string) {
 	var u, err = url.Parse(path)
 	if err != nil {
@@ -94,21 +105,21 @@ func (r *Router) HandlePath(path string) {
 	r.Handle(u)
 }
 
+// Handle a path in the form of a redirect. NYI.
 func (r *Router) Redirect(path string) {
 	r.HandlePath(path)
 }
 
+// Redirect to a route by name.
 func (r *Router) RedirectNamed(name string, vars Vars) {
 	var route = r.GetRoute(name)
 	if route == nil {
 		r.Error(404, "Route not found: "+name)
 		return
 	}
-
 	if vars == nil {
 		vars = make(Vars)
 	}
-
 	if route.Callable != nil {
 		route.Callable(vars, nil)
 	}

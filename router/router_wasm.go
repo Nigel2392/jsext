@@ -10,6 +10,7 @@ import (
 	"github.com/Nigel2392/jsext"
 )
 
+// Default router error to be displayed if one occurs.
 func DefaultRouterErrorDisplay(err error) {
 	var rtErr, ok = err.(RouterError)
 	if !ok {
@@ -50,6 +51,7 @@ func DefaultRouterErrorDisplay(err error) {
 	jsext.Body.AppendChild(overlay)
 }
 
+// Router is the main router struct.
 type Router struct {
 	routes            []*Route
 	skipTrailingSlash bool
@@ -57,10 +59,12 @@ type Router struct {
 	onErr             func(err error)
 }
 
+// Get a route by index.
 func (r *Router) GetIndex(i int) *Route {
 	return r.routes[i]
 }
 
+// Automatically convert the name of the route to the title of the page.
 func (r *Router) NameToTitle(b bool) *Router {
 	r.nameToTitle = b
 	return r
@@ -69,19 +73,17 @@ func (r *Router) NameToTitle(b bool) *Router {
 var RT_PREFIX = "router:"
 var RT_PREFIX_EXTERNAL = "external:"
 
+// Change the page to the given path.
 func (r *Router) changePage(this jsext.Value, event jsext.Event) {
 	// Get the object if it is valid.
 	if !event.Value().IsObject() {
 		return
 	}
 	var target = jsext.Element(event.Target())
-
 	if target.Value().IsUndefined() {
 		return
 	}
-
 	var path = target.Href()
-
 	// Only stop the default action if the link is an internal link
 	// Which means it starts with the RT_PREFIX and we need to handle it
 	if !strings.HasPrefix(path, RT_PREFIX) {
@@ -93,10 +95,11 @@ func (r *Router) changePage(this jsext.Value, event jsext.Event) {
 	}
 	event.PreventDefault()
 	path = strings.TrimPrefix(path, RT_PREFIX)
-
 	r.HandlePath(path)
 }
 
+// Run the router, catch all the events and handle them.
+// If a link is clicked, the router will handle it if it has the RT_PREFIX in front.
 func (r *Router) Run() {
 	jsext.Element(jsext.Document).AddEventListener("click", r.changePage)
 	var RouterExport = jsext.NewExport()
@@ -116,6 +119,8 @@ func (r *Router) Run() {
 	r.HandlePath(path)
 }
 
+// Handle is the main router handler.
+// This function is called by the router to match and handle a route.
 func (r *Router) Handle(u *url.URL) {
 	go func() {
 		var rt, vars, ok = r.Match(u.Path)

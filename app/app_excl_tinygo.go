@@ -10,6 +10,7 @@ import (
 	"github.com/Nigel2392/jsext/router"
 )
 
+// Main application, holds router and is the core of the
 type Application struct {
 	BaseElementID string
 	Router        *router.Router
@@ -21,6 +22,7 @@ type Application struct {
 	onErr         func(err error)
 }
 
+// Initialize a http client with a loader for a new request.
 func (a *Application) Client() *requester.APIClient {
 	a.client = requester.NewAPIClient()
 	a.client.Before(a.Loader.Show)

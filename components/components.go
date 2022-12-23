@@ -99,3 +99,26 @@ func GetValue(s any, column string) any {
 	}
 	return nil
 }
+
+func InlineLoopFields(reflModel reflect.Type, callback func(field reflect.StructField, parent reflect.Type, value reflect.Value), tags ...string) {
+	for i := 0; i < reflModel.NumField(); i++ {
+		var field = reflModel.Field(i)
+		if !isValidField(field, tags...) {
+			continue
+		}
+		if field.Type.Kind() == reflect.Struct {
+			InlineLoopFields(field.Type, callback)
+		} else {
+			callback(field, reflModel, reflect.ValueOf(field))
+		}
+	}
+}
+
+func isValidField(field reflect.StructField, tags ...string) bool {
+	for _, tag := range tags {
+		if field.Tag.Get(tag) == "-" {
+			return false
+		}
+	}
+	return true
+}

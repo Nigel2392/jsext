@@ -5,9 +5,10 @@ package loaders
 
 import (
 	"fmt"
+	"syscall/js"
+
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/elements"
-	"syscall/js"
 )
 
 const (
@@ -15,8 +16,10 @@ const (
 	ID_LOADER           = "jsext-main-loader"
 )
 
+// LoaderFunc is a function that returns a loader element.
 type LoaderFunc = func(idContainer, idLoader string) *elements.Element
 
+// Loader struct to be used for all loader elements.
 type Loader struct {
 	appendTo       string
 	Activated      bool
@@ -27,6 +30,7 @@ type Loader struct {
 	getLoaderElem  LoaderFunc
 }
 
+// Returns a new loader.
 func NewLoader(appendTo string, className string, deleteOnFinish bool, f ...LoaderFunc) *Loader {
 	var loadFunc = LoaderRing
 	if len(f) > 0 {
@@ -40,10 +44,12 @@ func NewLoader(appendTo string, className string, deleteOnFinish bool, f ...Load
 	}
 }
 
+// Stop the loader.
 func (l *Loader) Stop() {
-	l.Delete()
+	l.Finalize()
 }
 
+// Run the loader.
 func (l *Loader) Run(f func()) {
 	l.Show()
 	go func() {
@@ -52,6 +58,7 @@ func (l *Loader) Run(f func()) {
 	}()
 }
 
+// Show the loader
 func (l *Loader) Show() {
 	if !l.created {
 		l.create()
@@ -59,6 +66,7 @@ func (l *Loader) Show() {
 	l.activate()
 }
 
+// Delete or deactivate depending on the deleteOnFinish flag.
 func (l *Loader) Finalize() {
 	if l.deleteOnFinish {
 		l.Delete()
@@ -67,6 +75,7 @@ func (l *Loader) Finalize() {
 	}
 }
 
+// Create the loader element.
 func (l *Loader) create() jsext.Value {
 	var loader_container = l.getLoaderElem(ID_LOADER_CONTAINER, ID_LOADER)
 	var loader_val = loader_container.RenderTo(l.appendTo).Value()
@@ -77,6 +86,7 @@ func (l *Loader) create() jsext.Value {
 	return loader_val
 }
 
+// Activate the loader.
 func (l *Loader) activate() {
 	if !l.Activated {
 		l.Activated = true
@@ -84,6 +94,7 @@ func (l *Loader) activate() {
 	}
 }
 
+// Deactivate the loader.
 func (l *Loader) Deactivate() {
 	if l.Activated {
 		l.Activated = false
@@ -91,6 +102,7 @@ func (l *Loader) Deactivate() {
 	}
 }
 
+// Delete the loader.
 func (l *Loader) Delete() {
 	l.created = false
 	l.jsVal.Call("remove")

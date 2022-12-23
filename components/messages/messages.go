@@ -13,10 +13,14 @@ import (
 	"github.com/Nigel2392/jsext/helpers/csshelpers"
 )
 
+// Time to wait for garbage collection of messages.
 const tickerWaitMS = 100
 
+// Add to messages to this struct to display them.
+// Can be implemented in a custom way.
 var ActiveMessages = RunNewMessages(tickerWaitMS)
 
+// Message struct to be used for all messages.
 type Messages struct {
 	Active          []*Message
 	StopMessageLoop chan struct{}
@@ -24,11 +28,13 @@ type Messages struct {
 	mu              *sync.Mutex
 }
 
+// Initialize a new message queue.
 func NewMessages() *Messages {
 	var m = &Messages{StopMessageLoop: make(chan struct{}), mu: &sync.Mutex{}, Active: make([]*Message, 0)}
 	return m
 }
 
+// Add a new message to the queue, run it.
 func RunNewMessages(tickerTimeMS int) *Messages {
 	m := NewMessages()
 	m.ticker = time.NewTicker(time.Duration(tickerTimeMS) * time.Millisecond)
@@ -36,10 +42,12 @@ func RunNewMessages(tickerTimeMS int) *Messages {
 	return m
 }
 
+// Stop a message queue.
 func (m *Messages) Stop() {
 	m.StopMessageLoop <- struct{}{}
 }
 
+// Create a new message.
 func (m *Messages) New(t string, c string, expireMS int, widthPX int) *Message {
 	var id string = "gohtml-message-" + t + "-" + helpers.RandStringBytesMaskImprSrcUnsafe(10)
 
@@ -115,6 +123,7 @@ func (m *Messages) New(t string, c string, expireMS int, widthPX int) *Message {
 	return msg
 }
 
+// Delete message from the queue.
 func (m *Messages) collect() {
 	for {
 		select {
@@ -130,6 +139,7 @@ func (m *Messages) collect() {
 	}
 }
 
+// Delete message.
 func (m *Messages) Delete(msg *Message) {
 	msg.Remove()
 	for i, v := range m.Active {
@@ -147,22 +157,27 @@ func (m *Messages) Delete(msg *Message) {
 	}
 }
 
+// Create a new error message.
 func (m *Messages) NewError(c string, expire int, widthPX int) *Message {
 	return m.New("error", c, expire, widthPX)
 }
 
+// Create a new warning message.
 func (m *Messages) NewWarning(c string, expire int, widthPX int) *Message {
 	return m.New("warning", c, expire, widthPX)
 }
 
+// Create a new info message.
 func (m *Messages) NewInfo(c string, expire int, widthPX int) *Message {
 	return m.New("info", c, expire, widthPX)
 }
 
+// Create a new success message.
 func (m *Messages) NewSuccess(c string, expire int, widthPX int) *Message {
 	return m.New("success", c, expire, widthPX)
 }
 
+// Message struct.
 type Message struct {
 	Type    string
 	Content string
@@ -171,10 +186,12 @@ type Message struct {
 	Expire  time.Time
 }
 
+// Expired returns true if the message has expired.
 func (m *Message) Expired() bool {
 	return m.Expire.Before(time.Now()) && !m.Expire.IsZero()
 }
 
+// Remove the message from the DOM.
 func (m *Message) Remove() {
 	var elem = js.Global().Get("document").Call("getElementById", m.id)
 	if elem.IsUndefined() {

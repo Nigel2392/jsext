@@ -9,6 +9,7 @@ import (
 	"github.com/Nigel2392/jsext/router"
 )
 
+// Main application, holds router and is the core of the
 type Application struct {
 	BaseElementID string
 	Router        *router.Router

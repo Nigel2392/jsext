@@ -18,6 +18,7 @@ const (
 	ErrCodeServiceUnavailable = 503
 )
 
+// RouterError is a custom error type for the router.
 type RouterError struct {
 	Message string
 	Code    int

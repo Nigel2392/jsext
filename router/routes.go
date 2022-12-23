@@ -14,6 +14,7 @@ const (
 	RT_PATH_VAR_DELIM  = ":"
 )
 
+// Router regex types.
 const (
 	NameInt    = "int"
 	NameString = "string"
@@ -39,6 +40,7 @@ const (
 	RT_PATH_REGEX_ALPHANUMERIC = "[0-9a-zA-Z_-]+"
 )
 
+// Routes to be registered in the router
 type Route struct {
 	Name              string
 	Path              string
@@ -127,6 +129,7 @@ func (r *Route) Match(path string) (bool, *Route, Vars) {
 	return false, nil, nil
 }
 
+// Generate the regex path for the router to match.
 func (r *Route) regexr(path string) string {
 	if r.RegexUrl == "" {
 		var path = path + r.Path
@@ -161,6 +164,7 @@ func (r *Route) regexr(path string) string {
 }
 
 // Format the url based on the arguments given.
+// Panics if route accepts more arguments than are given.
 func (r *Route) URL(args ...any) string {
 	var path = r.Path
 
@@ -203,6 +207,7 @@ func (r *Route) URL(args ...any) string {
 	return path
 }
 
+// Convert a string to a regex string with a capture group.
 func toRegex(str string) string {
 	if !strings.HasPrefix(str, RT_PATH_VAR_PREFIX) || !strings.HasSuffix(str, RT_PATH_VAR_SUFFIX) {
 		return str
@@ -220,6 +225,7 @@ func toRegex(str string) string {
 	return "(?P<" + groupName + ">" + typToRegx(typ) + ")"
 }
 
+// Convert a type (string) to a regex for use in capture groups.
 func typToRegx(typ string) string {
 	// regex for raw is: raw(REGEX)
 	var hasRaw string = strings.ToLower(typ)

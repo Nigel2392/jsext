@@ -13,34 +13,42 @@ import (
 	"github.com/Nigel2392/jsext/elements"
 )
 
+// Form delimiter for nested structs
 const Delimiter = "___"
 
+// Form struct
 type Form struct {
 	Inner      *elements.Element
 	Validators map[string]func(string) error
 }
 
+// Get the form value from the form element
 func (f *Form) Value() jsext.Element {
 	return f.Inner.JSExtElement()
 }
 
+// Get the form value from the form element
 func (f *Form) Element() *elements.Element {
 	return f.Inner
 }
 
+// Render the form
 func (f *Form) Render() jsext.Element {
 	return f.Inner.Render()
 }
 
+// Set the form ID
 func (f *Form) AttrID(id string) *Form {
 	f.Inner.AttrID(id)
 	return f
 }
 
+// Add a validator to the form (NYI fully, works for now)
 func (f *Form) AddValidator(name string, fn func(string) error) {
 	f.Validators[name] = fn
 }
 
+// Eventlistener for when the form is submitted.
 func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element)) {
 	f.Inner.AddEventListener("submit", func(this jsext.Value, event jsext.Event) {
 		event.PreventDefault()
@@ -70,6 +78,7 @@ func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element
 	})
 }
 
+// Eventlistener for when the form is submitted, data is parsed into a struct
 func (f *Form) OnSubmitToStruct(strct any, fn func(strct any, elements []jsext.Element)) {
 	f.OnSubmit(func(data map[string]string, elements []jsext.Element) {
 		var err = FormDataToStruct(data, strct)
@@ -80,6 +89,7 @@ func (f *Form) OnSubmitToStruct(strct any, fn func(strct any, elements []jsext.E
 	})
 }
 
+// Render a struct into a form
 func StructToForm(s any, labelClass, inputClass, action, method string) *Form {
 	var form = elements.Form(action, method)
 	var v = reflect.ValueOf(s)
@@ -114,6 +124,7 @@ func StructToForm(s any, labelClass, inputClass, action, method string) *Form {
 	return &Form{Inner: form, Validators: make(map[string]func(string) error)}
 }
 
+// Parse form data to a struct.
 func FormDataToStruct(data map[string]string, s any) error {
 	// Parse the form data into the struct
 	v := reflect.ValueOf(s)
@@ -221,6 +232,7 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 	return list
 }
 
+// Transform a form value to the correct type
 func TransformValue(s any, field string, val any) (any, error) {
 	mdl_val := components.GetValue(s, field)
 	switch mdl_val.(type) {
@@ -294,12 +306,15 @@ func TransformValue(s any, field string, val any) (any, error) {
 	}
 }
 
+// Valid formtypes
 type FORMTYPES string
 
+// Check if two formtypes are equal
 func (ft FORMTYPES) Equals(other FORMTYPES) bool {
 	return strings.EqualFold(string(ft), string(other))
 }
 
+// Formtypes to use in forms
 const (
 	FORMTYP_TEXT     FORMTYPES = "text"
 	FORMTYP_CHECKBOX FORMTYPES = "checkbox"
@@ -311,6 +326,7 @@ const (
 	FORMTYP_INVALID FORMTYPES = "text"
 )
 
+// Reflect the form input type of a value
 func ReflectInputType(val any) FORMTYPES {
 	switch val.(type) {
 	case string:
@@ -348,6 +364,7 @@ func isValidTyp(typ FORMTYPES) bool {
 	}
 }
 
+// Format a value for display in a form
 func FormatIfDateTime(val any) any {
 	switch val := val.(type) {
 	case time.Time:
@@ -357,7 +374,7 @@ func FormatIfDateTime(val any) any {
 	}
 }
 
-// Set a value on a model struct
+// Set a value on a struct
 func SetValue(s any, column string, value any) {
 	// Validate kind
 	kind := components.StructKind(s)
@@ -374,6 +391,7 @@ func SetValue(s any, column string, value any) {
 	}
 }
 
+// Set a value on a struct, faster option.
 func SetValueStrict(s any, f reflect.StructField, v reflect.Value, column string, value any) {
 	newVal := reflect.ValueOf(value)
 	// Check if the field is a pointer
