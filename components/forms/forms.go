@@ -12,6 +12,8 @@ import (
 	"github.com/Nigel2392/jsext/elements"
 )
 
+const Delimiter = "___"
+
 type Form struct {
 	Inner      *elements.Element
 	Validators map[string]func(string) error
@@ -131,7 +133,7 @@ func formParse(data map[string]string, v reflect.Value, s any) error {
 			}
 			SetValueStrict(s, field, v, key, val)
 		} else {
-			var keys = strings.Split(key, "_")
+			var keys = strings.Split(key, Delimiter)
 			// Parse the inner struct recursively with another function
 			var err = recurseKeys(keys, value, v, s, s)
 			if err != nil {
@@ -205,7 +207,7 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 		var value = valueToString(v.Field(i))
 		var typ = ReflectInputType(GetValue(s, label))
 		if prefix != "" {
-			label = prefix + "_" + label
+			label = prefix + Delimiter + label
 		}
 		if v.Field(i).Kind() == reflect.Struct && !isValidTyp(typ) {
 			var subList = createListFromStruct(v.Field(i), s, label)
