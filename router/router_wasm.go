@@ -4,9 +4,10 @@
 package router
 
 import (
-	"github.com/Nigel2392/jsext"
 	"net/url"
 	"strings"
+
+	"github.com/Nigel2392/jsext"
 )
 
 func DefaultRouterErrorDisplay(err error) {
@@ -66,6 +67,7 @@ func (r *Router) NameToTitle(b bool) *Router {
 }
 
 var RT_PREFIX = "router:"
+var RT_PREFIX_EXTERNAL = "external:"
 
 func (r *Router) changePage(this jsext.Value, event jsext.Event) {
 	// Get the object if it is valid.
@@ -83,6 +85,10 @@ func (r *Router) changePage(this jsext.Value, event jsext.Event) {
 	// Only stop the default action if the link is an internal link
 	// Which means it starts with the RT_PREFIX and we need to handle it
 	if !strings.HasPrefix(path, RT_PREFIX) {
+		if strings.HasPrefix(path, RT_PREFIX_EXTERNAL) {
+			path = strings.TrimPrefix(path, RT_PREFIX_EXTERNAL)
+			jsext.Window.Get("location").Set("href", path)
+		}
 		return
 	}
 	event.PreventDefault()

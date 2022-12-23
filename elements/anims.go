@@ -94,7 +94,7 @@ func (e *Element) addAnim(typ, duration int) {
 }
 
 func fadeIn(e *Element, timeMS int) {
-	e.value.Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("opacity", "0")
 	e.value.Get("classList").Call("add", FADEIN_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -103,7 +103,7 @@ func fadeIn(e *Element, timeMS int) {
 }
 
 func fadeOut(e *Element, timeMS int) {
-	e.value.Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("opacity", "1")
 	e.value.Get("classList").Call("add", FADEOUT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -113,7 +113,7 @@ func fadeOut(e *Element, timeMS int) {
 
 func fromTop(e *Element, timeMS int) {
 	var translate = e.value.Get("style").Get("transform").String()
-	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("transform", "translateY(-100%)")
 	e.value.Get("classList").Call("add", FROMTOP_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -123,7 +123,7 @@ func fromTop(e *Element, timeMS int) {
 
 func fromLeft(e *Element, timeMS int) {
 	var translate = e.value.Get("style").Get("transform").String()
-	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("transform", "translateX(-100%)")
 	e.value.Get("classList").Call("add", FROMLEFT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -133,7 +133,7 @@ func fromLeft(e *Element, timeMS int) {
 
 func fromRight(e *Element, timeMS int) {
 	var translate = e.value.Get("style").Get("transform").String()
-	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("transform", "translateX(100%)")
 	e.value.Get("classList").Call("add", FROMRIGHT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -144,7 +144,7 @@ func fromRight(e *Element, timeMS int) {
 
 func fromBottom(e *Element, timeMS int) {
 	var translate = e.value.Get("style").Get("transform").String()
-	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("style").Set("transform", "translateY(100%)")
 	e.value.Get("classList").Call("add", FROMBOTTOM_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
@@ -154,7 +154,7 @@ func fromBottom(e *Element, timeMS int) {
 }
 
 func bounce(e *Element, timeMS int) {
-	e.value.Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
 	e.value.Get("classList").Call("add", BOUNCE_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", "scale(1.1)")
