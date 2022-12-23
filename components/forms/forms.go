@@ -107,7 +107,7 @@ func StructToForm(s any, labelClass, inputClass, action, method string) *Form {
 		}
 		form.Append(elemLabel, elemInput)
 	}
-	return &Form{Inner: form}
+	return &Form{Inner: form, Validators: make(map[string]func(string) error)}
 }
 
 func FormDataToStruct(data map[string]string, s any) error {
