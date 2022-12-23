@@ -1,5 +1,5 @@
-//go:build !tinygo
-// +build !tinygo
+//go:build !tinygo && js && wasm
+// +build !tinygo,js,wasm
 
 package app
 
