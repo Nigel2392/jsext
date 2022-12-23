@@ -13,7 +13,8 @@ import (
 )
 
 type Form struct {
-	Inner *elements.Element
+	Inner      *elements.Element
+	Validators map[string]func(string, string) error
 }
 
 func (f *Form) Value() jsext.Element {
@@ -33,6 +34,10 @@ func (f *Form) AttrID(id string) *Form {
 	return f
 }
 
+func (f *Form) AddValidator(name string, fn func(string, string) error) {
+	f.Validators[name] = fn
+}
+
 func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element)) {
 	f.Inner.AddEventListener("submit", func(this jsext.Value, event jsext.Event) {
 		event.PreventDefault()
@@ -47,6 +52,14 @@ func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element
 			if name == "" {
 				continue
 			}
+
+			if fn, ok := f.Validators[name]; ok {
+				var err = fn(name, value)
+				if err != nil {
+					return
+				}
+			}
+
 			data[name] = value
 			elemList[i] = element.ToElement()
 		}
