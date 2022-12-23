@@ -35,10 +35,12 @@ var WAITER = make(chan struct{})
 // Initialize a new application.
 func App(id string, rt ...*router.Router) *Application {
 	// Get the application body
+	var elem jsext.Element
 	if id == "" {
-		id = "app"
+		elem = jsext.QuerySelector("#" + id)
+	} else {
+		elem = jsext.Body
 	}
-	var elem = jsext.QuerySelector("#" + id)
 	// Get the application router
 	var r *router.Router
 	if len(rt) > 0 {
@@ -94,6 +96,11 @@ func (a *Application) SetStyle(style string) *Application {
 // Set classes on the base element.
 func (a *Application) SetClasses(class string) *Application {
 	a.Base.SetAttribute("class", class)
+	return a
+}
+
+func (a *Application) SetTitle(title string) *Application {
+	jsext.Document.Set("title", title)
 	return a
 }
 
