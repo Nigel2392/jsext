@@ -33,31 +33,59 @@ const (
 )
 
 func (e *Element) FadeIn(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FADEIN, Duration: timeMS})
+	e.addAnim(FADEIN, timeMS)
 }
 
 func (e *Element) FadeOut(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FADEOUT, Duration: timeMS})
+	e.addAnim(FADEOUT, timeMS)
 }
 
 func (e *Element) Bounce(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: BOUNCE, Duration: timeMS})
+	e.addAnim(BOUNCE, timeMS)
 }
 
 func (e *Element) FromTop(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FROMTOP, Duration: timeMS})
+	e.addAnim(FROMTOP, timeMS)
 }
 
 func (e *Element) FromLeft(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FROMLEFT, Duration: timeMS})
+	e.addAnim(FROMLEFT, timeMS)
 }
 
 func (e *Element) FromRight(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FROMRIGHT, Duration: timeMS})
+	e.addAnim(FROMRIGHT, timeMS)
 }
 
 func (e *Element) FromBottom(timeMS int) {
-	e.animations = append(e.animations, Animation{Type: FROMBOTTOM, Duration: timeMS})
+	e.addAnim(FROMBOTTOM, timeMS)
+}
+
+func (e *Element) animate() {
+	for _, anim := range e.animations {
+		switch anim.Type {
+		case FADEIN:
+			e.fadeIn(anim.Duration)
+		case FADEOUT:
+			e.fadeOut(anim.Duration)
+		case FROMTOP:
+			e.fromTop(anim.Duration)
+		case FROMBOTTOM:
+			e.fromBottom(anim.Duration)
+		case FROMLEFT:
+			e.fromLeft(anim.Duration)
+		case FROMRIGHT:
+			e.fromRight(anim.Duration)
+		case BOUNCE:
+			e.bounce(anim.Duration)
+		}
+	}
+}
+
+func (e *Element) addAnim(typ, duration int) {
+	e.animations = append(e.animations, Animation{Type: typ, Duration: duration})
+	if !e.value.IsUndefined() {
+		e.animate()
+	}
 }
 
 func (e *Element) fadeIn(timeMS int) {

@@ -415,24 +415,7 @@ func (e *Element) generate(parent js.Value) js.Value {
 		}
 	}
 
-	for _, anim := range e.animations {
-		switch anim.Type {
-		case FADEIN:
-			e.fadeIn(anim.Duration)
-		case FADEOUT:
-			e.fadeOut(anim.Duration)
-		case FROMTOP:
-			e.fromTop(anim.Duration)
-		case FROMBOTTOM:
-			e.fromBottom(anim.Duration)
-		case FROMLEFT:
-			e.fromLeft(anim.Duration)
-		case FROMRIGHT:
-			e.fromRight(anim.Duration)
-		case BOUNCE:
-			e.bounce(anim.Duration)
-		}
-	}
+	e.animate()
 
 	return e.value
 }
