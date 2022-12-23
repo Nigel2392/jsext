@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/elements"
 )
 
@@ -205,8 +206,8 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 	var list [][]string
 	for i := 0; i < v.NumField(); i++ {
 		var label = v.Type().Field(i).Name
-		var value = valueToString(v.Field(i))
-		var typ = ReflectInputType(GetValue(s, label))
+		var value = components.ValueToString(v.Field(i))
+		var typ = ReflectInputType(components.GetValue(s, label))
 		if prefix != "" {
 			label = prefix + Delimiter + label
 		}
@@ -220,48 +221,8 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 	return list
 }
 
-func valueToString(v reflect.Value) string {
-	switch v.Kind() {
-	case reflect.String:
-		return v.String()
-	case reflect.Bool:
-		return strconv.FormatBool(v.Bool())
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return strconv.FormatInt(v.Int(), 10)
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return strconv.FormatUint(v.Uint(), 10)
-	case reflect.Float32, reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'f', -1, 64)
-	case reflect.Complex64, reflect.Complex128:
-		return strconv.FormatComplex(v.Complex(), 'f', -1, 64)
-	default:
-		// Time
-		if v.Type().String() == "time.Time" {
-			return v.Interface().(time.Time).Format("2006-01-02T15:04")
-		}
-		return ""
-	}
-}
-
-func ReflectModelName(s any) string {
-	var structName string
-	kind := reflect.TypeOf(s).Elem().Kind()
-	if kind == reflect.Pointer {
-		structName = reflect.TypeOf(s).Elem().Elem().Name()
-	} else if kind == reflect.Struct {
-		structName = reflect.TypeOf(s).Elem().Name()
-	}
-	structName = toValidName(structName)
-	return structName
-}
-
-func toValidName(name string) string {
-	var s = strings.ReplaceAll(name, "_", "")
-	return s
-}
-
 func TransformValue(s any, field string, val any) (any, error) {
-	mdl_val := GetValue(s, field)
+	mdl_val := components.GetValue(s, field)
 	switch mdl_val.(type) {
 	case int, int8, int16, int32, int64:
 		integer, err := strconv.Atoi(fmt.Sprint(val))
@@ -396,32 +357,10 @@ func FormatIfDateTime(val any) any {
 	}
 }
 
-// Get a value from a model struct
-func GetValue(s any, column string) any {
-	// Validate kind
-	kind := structKind(s)
-	// Loop through all fields in the struct
-	for i := 0; i < kind.NumField(); i++ {
-		f_kind := kind.Field(i)
-		// Get the name of the struct field
-		if strings.EqualFold(f_kind.Name, column) {
-			var val any
-			// Get the value of the field
-			if f_kind.Type.Kind() == reflect.Ptr {
-				val = reflect.ValueOf(s).Elem().Field(i).Elem().Interface()
-			} else {
-				val = reflect.ValueOf(s).Elem().Field(i).Interface()
-			}
-			return val
-		}
-	}
-	return nil
-}
-
 // Set a value on a model struct
 func SetValue(s any, column string, value any) {
 	// Validate kind
-	kind := structKind(s)
+	kind := components.StructKind(s)
 	// Loop through all fields in the struct
 	for i := 0; i < kind.NumField(); i++ {
 		f_kind := kind.Field(i)
@@ -454,17 +393,4 @@ func SetValueStrict(s any, f reflect.StructField, v reflect.Value, column string
 		// Set the value
 		v.FieldByName(column).Set(newVal)
 	}
-}
-
-// Get the kind of the model (Reflect.TYPE)
-func structKind(s any) reflect.Type {
-	// Validate kind
-	kind := reflect.TypeOf(s)
-	if kind.Kind() == reflect.Ptr {
-		kind = kind.Elem()
-	}
-	if kind.Kind() != reflect.Struct {
-		panic("model must be a struct")
-	}
-	return kind
 }
