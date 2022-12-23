@@ -7,3 +7,6 @@ Easily install  with the following command:
 ```
 go get github.com/Nigel2392/jsext
 ```
+
+## Examples
+Examples can be found in the examples folder.

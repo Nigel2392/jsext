@@ -33,6 +33,7 @@ func init() {
 var WAITER = make(chan struct{})
 
 // Initialize a new application.
+// If id is empty, the application will be initialized on the body.
 func App(id string, rt ...*router.Router) *Application {
 	// Get the application body
 	var elem jsext.Element
@@ -99,6 +100,7 @@ func (a *Application) SetClasses(class string) *Application {
 	return a
 }
 
+// Set title on the document
 func (a *Application) SetTitle(title string) *Application {
 	jsext.Document.Set("title", title)
 	return a
@@ -118,7 +120,7 @@ func (a *Application) run() int {
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
 	// Get the preloader, remove it if it exists
-	if preloader := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); !preloader.Value().IsUndefined() {
+	if preloader := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); preloader.Value().Truthy() {
 		preloader.Remove()
 	}
 	<-WAITER
@@ -148,8 +150,17 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 }
 
 // Render a component to the application.
-func (a *Application) Render(e components.Component) {
-	a.InnerElement(e.Render())
+func (a *Application) Render(e ...components.Component) {
+	a.render(e...)
+}
+
+// Render a component to the application.
+func (a *Application) render(e ...components.Component) {
+	a.Base.InnerHTML("")
+	for _, el := range e {
+		a.Base.AppendChild(el.Render())
+	}
+	a.renderBases()
 }
 
 // InnerHTML sets the inner HTML of the element.
