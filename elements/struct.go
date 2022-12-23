@@ -32,6 +32,7 @@ type Element struct {
 	Children             []*Element
 	value                js.Value
 	eventListeners       map[string][]func(this jsext.Value, event jsext.Event)
+	animations           []Animation
 }
 
 func getText(t []string) string {
@@ -49,6 +50,7 @@ func NewElement(tag string, text ...string) *Element {
 		Attributes_Boolean:   make(map[string]bool),
 		Attributes_Semicolon: make(map[string][]string),
 		eventListeners:       make(map[string][]func(this jsext.Value, event jsext.Event)),
+		animations:           make([]Animation, 0),
 		Children:             make([]*Element, 0),
 	}
 }
@@ -410,6 +412,25 @@ func (e *Element) generate(parent js.Value) js.Value {
 		var elem = jsext.Element(e.value)
 		for _, listener := range listeners {
 			elem.AddEventListener(event, listener)
+		}
+	}
+
+	for _, anim := range e.animations {
+		switch anim.Type {
+		case FADEIN:
+			e.fadeIn(anim.Duration)
+		case FADEOUT:
+			e.fadeOut(anim.Duration)
+		case FROMTOP:
+			e.fromTop(anim.Duration)
+		case FROMBOTTOM:
+			e.fromBottom(anim.Duration)
+		case FROMLEFT:
+			e.fromLeft(anim.Duration)
+		case FROMRIGHT:
+			e.fromRight(anim.Duration)
+		case BOUNCE:
+			e.bounce(anim.Duration)
 		}
 	}
 

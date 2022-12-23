@@ -17,7 +17,50 @@ const (
 	FROMBOTTOM_CLASS = "jsext-from-bottom"
 )
 
+type Animation struct {
+	Type     int
+	Duration int
+}
+
+const (
+	FADEIN     = 0
+	FADEOUT    = 1
+	BOUNCE     = 2
+	FROMTOP    = 3
+	FROMLEFT   = 4
+	FROMRIGHT  = 5
+	FROMBOTTOM = 6
+)
+
 func (e *Element) FadeIn(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FADEIN, Duration: timeMS})
+}
+
+func (e *Element) FadeOut(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FADEOUT, Duration: timeMS})
+}
+
+func (e *Element) Bounce(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: BOUNCE, Duration: timeMS})
+}
+
+func (e *Element) FromTop(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FROMTOP, Duration: timeMS})
+}
+
+func (e *Element) FromLeft(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FROMLEFT, Duration: timeMS})
+}
+
+func (e *Element) FromRight(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FROMRIGHT, Duration: timeMS})
+}
+
+func (e *Element) FromBottom(timeMS int) {
+	e.animations = append(e.animations, Animation{Type: FROMBOTTOM, Duration: timeMS})
+}
+
+func (e *Element) fadeIn(timeMS int) {
 	e.Value().Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("opacity", "0")
 	e.Value().Get("classList").Call("add", FADEIN_CLASS)
@@ -26,7 +69,7 @@ func (e *Element) FadeIn(timeMS int) {
 	})
 }
 
-func (e *Element) FadeOut(timeMS int) {
+func (e *Element) fadeOut(timeMS int) {
 	e.Value().Get("style").Set("transition", "opacity "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("opacity", "1")
 	e.Value().Get("classList").Call("add", FADEOUT_CLASS)
@@ -35,7 +78,7 @@ func (e *Element) FadeOut(timeMS int) {
 	})
 }
 
-func (e *Element) FromTop(timeMS int) {
+func (e *Element) fromTop(timeMS int) {
 	var translate = e.Value().Get("style").Get("transform").String()
 	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("transform", "translateY(-100%)")
@@ -45,7 +88,7 @@ func (e *Element) FromTop(timeMS int) {
 	})
 }
 
-func (e *Element) FromLeft(timeMS int) {
+func (e *Element) fromLeft(timeMS int) {
 	var translate = e.Value().Get("style").Get("transform").String()
 	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("transform", "translateX(-100%)")
@@ -55,7 +98,7 @@ func (e *Element) FromLeft(timeMS int) {
 	})
 }
 
-func (e *Element) FromRight(timeMS int) {
+func (e *Element) fromRight(timeMS int) {
 	var translate = e.Value().Get("style").Get("transform").String()
 	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("transform", "translateX(100%)")
@@ -66,7 +109,7 @@ func (e *Element) FromRight(timeMS int) {
 
 }
 
-func (e *Element) FromBottom(timeMS int) {
+func (e *Element) fromBottom(timeMS int) {
 	var translate = e.Value().Get("style").Get("transform").String()
 	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("style").Set("transform", "translateY(100%)")
@@ -77,7 +120,7 @@ func (e *Element) FromBottom(timeMS int) {
 	})
 }
 
-func (e *Element) Bounce(timeMS int) {
+func (e *Element) bounce(timeMS int) {
 	e.Value().Get("style").Set("transition", "transform "+strconv.Itoa(timeMS)+"ms")
 	e.Value().Get("classList").Call("add", BOUNCE_CLASS)
 	e.InViewListener(func(this jsext.Value, event jsext.Event) {
