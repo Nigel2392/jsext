@@ -14,7 +14,7 @@ import (
 
 type Form struct {
 	Inner      *elements.Element
-	Validators map[string]func(string, string) error
+	Validators map[string]func(string) error
 }
 
 func (f *Form) Value() jsext.Element {
@@ -34,7 +34,7 @@ func (f *Form) AttrID(id string) *Form {
 	return f
 }
 
-func (f *Form) AddValidator(name string, fn func(string, string) error) {
+func (f *Form) AddValidator(name string, fn func(string) error) {
 	f.Validators[name] = fn
 }
 
@@ -54,7 +54,7 @@ func (f *Form) OnSubmit(cb func(data map[string]string, elements []jsext.Element
 			}
 
 			if fn, ok := f.Validators[name]; ok {
-				var err = fn(name, value)
+				var err = fn(value)
 				if err != nil {
 					return
 				}
