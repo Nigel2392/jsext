@@ -148,6 +148,7 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 			align-items: center;
 			transform: translateX(-100%);
 			transition: all 0.4s;
+			z-index: 1000;
 		}
 		#jsext-menu ul {
 			margin: 0;
