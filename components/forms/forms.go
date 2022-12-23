@@ -98,6 +98,7 @@ func StructToForm(s any, labelClass, inputClass, action, method string) *Form {
 		var name = label
 		var value = item[1]
 		var typ = item[2]
+		label = strings.ReplaceAll(label, Delimiter, " ")
 		label = strings.ReplaceAll(label, "_", " ")
 		var elemLabel = elements.Label(label, name)
 		var elemInput = elements.Input(typ, name, label).AttrValue(value)
