@@ -177,7 +177,7 @@ func (e *Element) Append(children ...*Element) *Element {
 		e.Children = append(e.Children, children...)
 	} else {
 		for _, child := range children {
-			e.value.Call("appendChild", child.Render().Value())
+			e.JSExtElement().AppendChild(child.Render())
 		}
 	}
 	return e
