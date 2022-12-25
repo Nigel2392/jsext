@@ -19,12 +19,17 @@ type Application struct {
 	Footer        components.Component
 	Loader        components.Loader
 	Base          jsext.Element
+	clientFunc    func() *requester.APIClient
 	onErr         func(err error)
 }
 
 // Initialize a http client with a loader for a new request.
 func (a *Application) Client() *requester.APIClient {
-	a.client = requester.NewAPIClient()
+	if a.clientFunc != nil {
+		a.client = requester.NewAPIClient()
+	} else {
+		a.client = a.clientFunc()
+	}
 	a.client.Before(a.Loader.Show)
 	a.client.After(func() {
 		a.Loader.Finalize()

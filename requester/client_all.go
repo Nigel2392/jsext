@@ -196,7 +196,7 @@ func (c *APIClient) WithQuery(query map[string]string) *APIClient {
 // Add headers to the request
 func (c *APIClient) WithHeaders(headers map[string][]string) *APIClient {
 	for k, v := range headers {
-		c.request.Header[k] = v
+		c.headers[k] = append(c.headers[k], v...)
 	}
 	return c
 }
