@@ -129,9 +129,15 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 	switch encoding {
 	case JSON:
 		c.request.Header.Set("Content-Type", "application/json")
-		buf := new(bytes.Buffer)
+		buf := &bytes.Buffer{}
 		var err = json.NewEncoder(buf).Encode(formData)
-		c.errorFunc(err)
+		if err != nil {
+			if c.errorFunc != nil {
+				c.errorFunc(err)
+			} else {
+				panic(errors.New("Error encoding JSON: " + err.Error()))
+			}
+		}
 		c.request.Body = io.NopCloser(buf)
 
 	case FORM_URL_ENCODED:
@@ -150,9 +156,21 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 		}
 		for _, f := range file {
 			part, err := writer.CreateFormFile(f.FieldName, f.FileName)
-			c.errorFunc(err)
+			if err != nil {
+				if c.errorFunc != nil {
+					c.errorFunc(err)
+				} else {
+					panic(errors.New("Error encoding JSON: " + err.Error()))
+				}
+			}
 			_, err = io.Copy(part, f.Reader)
-			c.errorFunc(err)
+			if err != nil {
+				if c.errorFunc != nil {
+					c.errorFunc(err)
+				} else {
+					panic(errors.New("Error encoding JSON: " + err.Error()))
+				}
+			}
 		}
 		c.request.Header.Set("Content-Type", writer.FormDataContentType())
 		c.request.Body = io.NopCloser(body)
