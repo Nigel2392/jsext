@@ -37,3 +37,9 @@ func (a *Application) Client() *requester.APIClient {
 	})
 	return a.client
 }
+
+// Set the client function.
+func (a *Application) SetClientFunc(f func() *requester.APIClient) *Application {
+	a.clientFunc = f
+	return a
+}
