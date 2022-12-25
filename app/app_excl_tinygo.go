@@ -26,9 +26,9 @@ type Application struct {
 // Initialize a http client with a loader for a new request.
 func (a *Application) Client() *requester.APIClient {
 	if a.clientFunc != nil {
-		a.client = requester.NewAPIClient()
-	} else {
 		a.client = a.clientFunc()
+	} else {
+		a.client = requester.NewAPIClient()
 	}
 	a.client.Before(a.Loader.Show)
 	a.client.After(func() {
