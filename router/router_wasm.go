@@ -147,7 +147,7 @@ func (r *Router) Handle(u *url.URL) {
 			}
 		}
 		if rt.Callable != nil {
-			rt.Callable(vars, u)
+			go rt.Callable(vars, u)
 		}
 		jsext.Window.Get("history").Call("pushState", nil, "", u.String())
 		if r.nameToTitle {

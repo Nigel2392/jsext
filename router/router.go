@@ -121,6 +121,6 @@ func (r *Router) RedirectNamed(name string, vars Vars) {
 		vars = make(Vars)
 	}
 	if route.Callable != nil {
-		route.Callable(vars, nil)
+		go route.Callable(vars, nil)
 	}
 }
