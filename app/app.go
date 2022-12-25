@@ -134,7 +134,11 @@ func (a *Application) Stop() {
 
 // Run the application loader for a time consuming function.
 func (a *Application) Load(f func()) {
-	a.Loader.Run(f)
+	a.Loader.Show()
+	go func() {
+		f()
+		a.Loader.Finalize()
+	}()
 }
 
 // Register routes to the application.
