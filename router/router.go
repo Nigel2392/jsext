@@ -57,7 +57,7 @@ func (r *Router) Match(path string) (*Route, Vars, bool) {
 		}
 	}
 	return &Route{
-		Name: "404",
+		name: "404",
 		Path: path,
 	}, nil, false
 }
@@ -66,7 +66,7 @@ func (r *Router) Match(path string) (*Route, Vars, bool) {
 // If it does not directly exist, it will search in the subroutes.
 func (r *Router) GetRoute(name string) *Route {
 	for _, route := range r.routes {
-		if route.Name == name {
+		if route.name == name {
 			return route
 		}
 	}
@@ -86,11 +86,11 @@ func (r *Router) Register(name, path string, callable func(v Vars, u *url.URL)) 
 		path = strings.TrimSuffix(path, "/")
 	}
 	for _, route := range r.routes {
-		if route.Name == name {
+		if route.name == name {
 			panic("Router [500] route name already exists: " + name)
 		}
 	}
-	var route = &Route{Name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
+	var route = &Route{Name: name, name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
 	r.routes = append(r.routes, route)
 	return route
 }

@@ -43,6 +43,7 @@ const (
 // Routes to be registered in the router
 type Route struct {
 	Name              string
+	name              string
 	Path              string
 	Callable          func(v Vars, u *url.URL)
 	RegexUrl          string
@@ -51,12 +52,12 @@ type Route struct {
 }
 
 func (r *Route) String() string {
-	return "Route: " + r.Name + " -> " + r.Path
+	return "Route: " + r.name + " -> " + r.Path
 }
 
 func (r *Route) getRoute(name string) *Route {
 	for _, route := range r.Children {
-		if route.Name == name {
+		if route.name == name {
 			return route
 		}
 	}
@@ -86,15 +87,18 @@ func (r *Route) Register(name, path string, callable func(v Vars, u *url.URL)) *
 		path = path[1:]
 	}
 	path = r.Path + path
-	name = r.Name + ":" + name
+	name = r.name + ":" + name
 
 	for _, route := range r.Children {
-		if route.Name == name {
+		if route.name == name {
 			panic("Route already exists: " + name)
 		}
 	}
 
-	var route = &Route{Name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
+	var showNameSlice = strings.Split(name, ":")
+	var showName = showNameSlice[len(showNameSlice)-1]
+
+	var route = &Route{Name: showName, name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
 	r.Children = append(r.Children, route)
 	return route
 }
@@ -188,7 +192,7 @@ func (r *Route) URL(args ...any) string {
 	for i, part := range parts {
 		if strings.HasPrefix(part, RT_PATH_VAR_PREFIX) && strings.HasSuffix(part, RT_PATH_VAR_SUFFIX) {
 			if len(args) == 0 {
-				panic("not enough arguments for URL: " + r.Name)
+				panic("not enough arguments for URL: " + r.name)
 			}
 			var arg = args[0]
 			args = args[1:]
