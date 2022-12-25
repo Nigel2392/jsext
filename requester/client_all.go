@@ -59,6 +59,7 @@ func NewAPIClient() *APIClient {
 	return &APIClient{
 		client:        &http.Client{},
 		alwaysRecover: true,
+		headers:       make(map[string][]string),
 	}
 }
 
@@ -127,14 +128,14 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 
 	switch encoding {
 	case JSON:
-		c.request.Header.Set("Content-Type", string(JSON))
+		c.request.Header.Set("Content-Type", "application/json")
 		buf := new(bytes.Buffer)
 		var err = json.NewEncoder(buf).Encode(formData)
 		c.errorFunc(err)
 		c.request.Body = io.NopCloser(buf)
 
 	case FORM_URL_ENCODED:
-		c.request.Header.Set("Content-Type", string(FORM_URL_ENCODED))
+		c.request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		var formValues = url.Values{}
 		for k, v := range formData {
 			formValues.Add(k, v)
@@ -175,12 +176,9 @@ func (c *APIClient) WithQuery(query map[string]string) *APIClient {
 }
 
 // Add headers to the request
-func (c *APIClient) WithHeaders(headers map[string]string) *APIClient {
-	if c.request == nil {
-		c.errorFunc(errors.New(ErrNoRequest))
-	}
+func (c *APIClient) WithHeaders(headers map[string][]string) *APIClient {
 	for k, v := range headers {
-		c.request.Header.Set(k, v)
+		c.request.Header[k] = v
 	}
 	return c
 }

@@ -17,6 +17,7 @@ type APIClient struct {
 	client *http.Client
 	// Request is the request that will be executed.
 	request *http.Request
+	headers map[string][]string
 	// Error func is used to handle errors that occur during the request.
 	// - Can be specified, but is not required.
 	// - If not set will panic.
@@ -81,6 +82,9 @@ func (c *APIClient) DoStruct(decodeTo interface{}, encoding Encoding, cb func(re
 
 // Execute the request
 func (c *APIClient) exec(cb func(resp *http.Response)) error {
+	for key, value := range c.headers {
+		c.request.Header[key] = value
+	}
 	var resp, err = c.client.Do(c.request)
 	if err != nil {
 		return err
