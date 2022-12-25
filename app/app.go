@@ -138,15 +138,17 @@ func (a *Application) Load(f func()) {
 }
 
 // Register routes to the application.
-func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL), linkEmpty ...bool) *Application {
+func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL), linkEmpty ...bool) *router.Route {
 	var ncall = func(v router.Vars, u *url.URL) {
-		callable(a, v, u)
+		if callable != nil {
+			callable(a, v, u)
+		}
 	}
 	if len(linkEmpty) > 0 && linkEmpty[0] {
 		ncall = nil
 	}
-	a.Router.Register(name, path, ncall)
-	return a
+	var route = a.Router.Register(name, path, ncall)
+	return route
 }
 
 // Render a component to the application.

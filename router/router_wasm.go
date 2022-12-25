@@ -109,6 +109,19 @@ func (r *Router) Run() {
 		r.HandlePath(path)
 		return nil
 	})
+	RouterExport.SetFuncWithArgs("String", func(this jsext.Value, args jsext.Args) interface{} {
+		return r.String()
+	})
+	RouterExport.SetFuncWithArgs("Routes", func(this jsext.Value, args jsext.Args) interface{} {
+		var b strings.Builder
+		for _, rt := range r.routes {
+			b.WriteString(rt.String())
+			b.WriteString(" ")
+			b.WriteString(rt.Path)
+			b.WriteString("\n")
+		}
+		return b.String()
+	})
 
 	jsext.Element(jsext.Window).AddEventListener("popstate", func(t jsext.Value, event jsext.Event) {
 		var path = jsext.Window.Get("location").Get("pathname").String()
