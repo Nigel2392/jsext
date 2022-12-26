@@ -219,6 +219,9 @@ func createListFromStruct(v reflect.Value, s any, prefix string) [][]string {
 		var label = v.Type().Field(i).Name
 		var value = helpers.ValueToString(v.Field(i))
 		var typ = ReflectInputType(helpers.GetValue(s, label))
+		if tag := v.Type().Field(i).Tag.Get("type"); tag != "" {
+			typ = FORMTYPES(tag)
+		}
 		if prefix != "" {
 			label = prefix + Delimiter + label
 		}

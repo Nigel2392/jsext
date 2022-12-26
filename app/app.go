@@ -162,6 +162,10 @@ func (a *Application) Render(e ...components.Component) {
 	a.render(e...)
 }
 
+func (a *Application) Redirect(url string) {
+	a.Router.Redirect(url)
+}
+
 // Render a component to the application.
 func (a *Application) render(e ...components.Component) {
 	a.Base.InnerHTML("")
