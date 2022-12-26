@@ -22,6 +22,14 @@ type Form struct {
 	Validators map[string]func(string) error
 }
 
+// Get a new form
+func NewForm(action string, method string) *Form {
+	return &Form{
+		Inner:      elements.Form(action, method),
+		Validators: make(map[string]func(string) error),
+	}
+}
+
 // Get the form value from the form element
 func (f *Form) Value() jsext.Element {
 	return f.Inner.JSExtElement()
@@ -43,7 +51,16 @@ func (f *Form) AttrID(id string) *Form {
 	return f
 }
 
-// Add a validator to the form (NYI fully, works for now)
+// Add a validator to the form.
+// The validator will be called when the form is submitted.
+// WATCH OUT!
+//
+//   - The form names could be transformed when you parse a struct into a form;
+//     Please use the same name as the struct field name, for embedded structs
+//     the delimiter is used:
+//
+//     "Field" for a normal field
+//     "Other___Field" for an embedded field
 func (f *Form) AddValidator(name string, fn func(string) error) {
 	f.Validators[name] = fn
 }
@@ -172,7 +189,7 @@ func formParse(data map[string]string, v reflect.Value, s any) error {
 //
 // Form data looks like this:
 //
-//	map[name:John age:20 sub_name:John sub_age:20]
+//	map[name:John age:20 sub___name:John sub___age:20]
 func recurseKeys(keys []string, value string, v reflect.Value, s any, parent any) error {
 	if len(keys) == 1 {
 		// We are at the end of the keys
