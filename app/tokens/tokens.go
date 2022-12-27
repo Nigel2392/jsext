@@ -3,7 +3,6 @@ package tokens
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 	"time"
@@ -78,7 +77,7 @@ func (t *Token) RefreshExpiredIn() time.Duration {
 func (t *Token) Update() error {
 	var client = requester.NewAPIClient()
 	var data = map[string]string{
-		"refresh": t.RefreshToken,
+		t.RefreshTokenVariable: t.RefreshToken,
 	}
 	client = client.Post(t.URLs.RefreshURL).WithData(data, requester.JSON)
 	var datamap map[string]string
@@ -114,7 +113,7 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 	client = client.Post(url)
 	client.OnError(func(err error) bool {
 		println(err.Error())
-		return false
+		return true
 	})
 	client.WithData(data, requester.JSON)
 	var datamap map[string]interface{}
@@ -133,7 +132,6 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 		t.RefreshToken = datamap[t.RefreshTokenVariable].(string)
 		delete(datamap, t.AccessTokenVariable)
 		delete(datamap, t.RefreshTokenVariable)
-		println(fmt.Sprintf("%v", datamap))
 		t.Data = datamap
 		t.LastUpdate = time.Now()
 		t.updateManager()
@@ -160,9 +158,9 @@ func (t *Token) Logout() error {
 	var errChan = make(chan error)
 	var respMap map[string]any
 	client.DoDecodeTo(&respMap, requester.JSON, func(r *http.Response, s any) {
-		var err, ok = respMap[t.errorMessageName].(string)
+		var err, ok = respMap[t.errorMessageName]
 		if ok {
-			errChan <- errors.New(err)
+			errChan <- errors.New(err.(string))
 			return
 		}
 		errChan <- nil
@@ -202,4 +200,16 @@ func (t *Token) Reset() *Token {
 	newt.SetURLs(urls)
 	reflect.ValueOf(t).Elem().Set(reflect.ValueOf(newt).Elem())
 	return t
+}
+
+func (t *Token) JWTDecode() (JWTToken, JWTToken, error) {
+	access, err := tokenDecode(t.AccessToken)
+	if err != nil {
+		return JWTToken{}, JWTToken{}, err
+	}
+	refresh, err := tokenDecode(t.RefreshToken)
+	if err != nil {
+		return JWTToken{}, JWTToken{}, err
+	}
+	return access, refresh, nil
 }
