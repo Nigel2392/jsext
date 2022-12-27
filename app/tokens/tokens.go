@@ -239,6 +239,7 @@ func (t *Token) Reset() *Token {
 	return t
 }
 
+// Decode the token into its parts
 func (t *Token) JWTDecode() (JWTToken, JWTToken, error) {
 	access, err := DecodeToken(t.AccessToken)
 	if err != nil {
