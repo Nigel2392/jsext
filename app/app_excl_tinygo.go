@@ -4,8 +4,6 @@
 package app
 
 import (
-	"net/url"
-
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/components"
 	"github.com/Nigel2392/jsext/requester"
@@ -16,7 +14,6 @@ import (
 type Application struct {
 	BaseElementID string
 	Router        *router.Router
-	LastURL       *url.URL
 	client        *requester.APIClient
 	Navbar        components.Component
 	Footer        components.Component
