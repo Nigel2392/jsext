@@ -4,7 +4,9 @@
 package jsext
 
 import (
+	"strings"
 	"syscall/js"
+	"time"
 )
 
 // Default syscall/js values, wrapped.
@@ -203,6 +205,24 @@ func NewArray() Value {
 // Returns a new date object.
 func NewDate() Value {
 	return Value(js.Global().Get("Date").New())
+}
+
+// Set a document cookie
+func SetCookie(name, value string, seconds time.Duration) {
+	var expires = time.Now().Add(seconds * time.Second).UTC().Format(time.RFC1123)
+	Document.Call("cookie", name+"="+value+"; expires="+expires+"; path=/")
+}
+
+// Get a document cookie
+func GetCookie(name string) string {
+	var cookies = strings.Split(Document.Call("cookie").String(), ";")
+	for _, cookie := range cookies {
+		var c = strings.Split(cookie, "=")
+		if c[0] == name {
+			return c[1]
+		}
+	}
+	return ""
 }
 
 //type JavaScript interface {
