@@ -112,6 +112,25 @@ func (a *Application) Run() int {
 	return a.run()
 }
 
+func (a *Application) OnLoad(f func()) *Application {
+	a.onLoad = f
+	return a
+}
+
+func (a *Application) OnRouterLoad(f func()) *Application {
+	a.Router.OnLoad(f)
+	return a
+}
+
+// Function to be ran before the page is rendered.
+func (a *Application) OnPageChange(f func(*Application, router.Vars, *url.URL)) *Application {
+	var newF = func(v router.Vars, u *url.URL) {
+		f(a, v, u)
+	}
+	a.Router.OnPageChange(newF)
+	return a
+}
+
 // Setup application to be ran.
 // Return 0 on exit.
 func (a *Application) run() int {
@@ -120,6 +139,9 @@ func (a *Application) run() int {
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
+	if a.onLoad != nil {
+		a.onLoad()
+	}
 	// Get the preloader, remove it if it exists
 	if preloader := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); preloader.Value().Truthy() {
 		preloader.Remove()

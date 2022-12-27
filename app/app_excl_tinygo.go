@@ -21,6 +21,7 @@ type Application struct {
 	Base          jsext.Element
 	clientFunc    func() *requester.APIClient
 	onErr         func(err error)
+	onLoad        func()
 	Data          map[string]interface{}
 }
 

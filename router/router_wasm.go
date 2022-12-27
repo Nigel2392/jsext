@@ -57,11 +57,25 @@ type Router struct {
 	skipTrailingSlash bool
 	nameToTitle       bool
 	onErr             func(err error)
+	onLoad            func()
+	onPageChange      func(Vars, *url.URL)
 }
 
 // Get a route by index.
 func (r *Router) GetIndex(i int) *Route {
 	return r.routes[i]
+}
+
+// Set on load function.
+func (r *Router) OnLoad(f func()) *Router {
+	r.onLoad = f
+	return r
+}
+
+// Set on page change function.
+func (r *Router) OnPageChange(f func(Vars, *url.URL)) *Router {
+	r.onPageChange = f
+	return r
 }
 
 // Automatically convert the name of the route to the title of the page.
@@ -127,7 +141,9 @@ func (r *Router) Run() {
 		var path = jsext.Window.Get("location").Get("pathname").String()
 		r.HandlePath(path)
 	})
-
+	if r.onLoad != nil {
+		r.onLoad()
+	}
 	var path = jsext.Window.Get("location").Get("pathname").String()
 	r.HandlePath(path)
 }
@@ -145,6 +161,9 @@ func (r *Router) Handle(u *url.URL) {
 				r.onErr(error(err))
 				return //false
 			}
+		}
+		if r.onPageChange != nil {
+			r.onPageChange(vars, u)
 		}
 		if rt.Callable != nil {
 			go rt.Callable(vars, u)
