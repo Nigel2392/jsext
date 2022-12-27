@@ -55,13 +55,13 @@ func (m *Messages) New(t string, c string, expireMS int, widthPX int) *Message {
 
 	switch t {
 	case "error":
-		messageColor = "#ff0000"
+		messageColor = "#aa0000"
 	case "warning":
-		messageColor = "#ff9900"
+		messageColor = "#aa7700"
 	case "info":
-		messageColor = "#0000ff"
+		messageColor = "#0000aa"
 	case "success":
-		messageColor = "#00ff00"
+		messageColor = "#00aa00"
 	default:
 		messageColor = "#000000"
 	}

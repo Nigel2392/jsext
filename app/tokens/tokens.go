@@ -240,11 +240,11 @@ func (t *Token) Reset() *Token {
 }
 
 func (t *Token) JWTDecode() (JWTToken, JWTToken, error) {
-	access, err := tokenDecode(t.AccessToken)
+	access, err := DecodeToken(t.AccessToken)
 	if err != nil {
 		return JWTToken{}, JWTToken{}, err
 	}
-	refresh, err := tokenDecode(t.RefreshToken)
+	refresh, err := DecodeToken(t.RefreshToken)
 	if err != nil {
 		return JWTToken{}, JWTToken{}, err
 	}

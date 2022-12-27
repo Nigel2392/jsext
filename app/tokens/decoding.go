@@ -39,7 +39,7 @@ func (p Payload) GetTime(key string) time.Time {
 
 type Signature string
 
-func tokenDecode(token string) (JWTToken, error) {
+func DecodeToken(token string) (JWTToken, error) {
 	var parts = strings.Split(token, ".")
 	if len(parts) != 3 {
 		return JWTToken{}, errors.New("invalid token")
