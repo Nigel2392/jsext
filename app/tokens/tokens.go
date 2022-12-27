@@ -189,9 +189,6 @@ func (t *Token) updateManager() {
 }
 
 func (t *Token) stopManager() {
-	for len(t.stopChan) > 0 {
-		<-t.stopChan
-	}
 	t.stopChan <- true
 	close(t.stopChan)
 }
