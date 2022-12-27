@@ -86,7 +86,9 @@ func (t *Token) OnUpdateError(f func(err error)) {
 
 // Needs update returns a channel which will send a bool when the token needs to be updated.
 func (t *Token) NeedsUpdate() <-chan bool {
-	t.needsUpdateChan = make(chan bool)
+	if t.needsUpdateChan == nil {
+		t.needsUpdateChan = make(chan bool)
+	}
 	go func() {
 		for {
 			// Check if the token needs to be updated.
