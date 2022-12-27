@@ -124,8 +124,8 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 			errChan <- err
 			return
 		}
-		if datamap[t.errorMessageName] != nil {
-			errChan <- errors.New(datamap["detail"].(string))
+		if err, ok := datamap[t.errorMessageName]; ok {
+			errChan <- errors.New(err.(string))
 			return
 		}
 		t.AccessToken = datamap[t.AccessTokenVariable].(string)
