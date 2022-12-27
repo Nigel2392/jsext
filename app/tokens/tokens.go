@@ -3,6 +3,7 @@ package tokens
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"time"
@@ -32,11 +33,11 @@ type Token struct {
 	RefreshTokenVariable string
 	errorMessageName     string
 	Data                 map[string]interface{}
-	ticker               *time.Ticker
 	onUpdate             func(t *Token)
 	onReset              func()
 	onInit               func(t *Token)
 	onUpdateErr          func(err error)
+	needsUpdateChan      chan bool
 }
 
 // Get a new token
@@ -88,7 +89,7 @@ func (t *Token) NeedsUpdate() <-chan bool {
 	c := make(chan bool)
 	go func() {
 		for {
-			if t.IsExpired() || t.ExpiredIn() < t.AccessTimeout/10 {
+			if t.ShouldUpdate() {
 				c <- true
 				return
 			}
@@ -99,10 +100,15 @@ func (t *Token) NeedsUpdate() <-chan bool {
 }
 
 func (t *Token) ShouldUpdate() bool {
-	if t.IsExpired() && !t.IsRefreshExpired() {
-		return true
-	} else if t.IsRefreshExpired() {
+	if t.AccessToken == "" ||
+		t.RefreshToken == "" ||
+		t.RefreshTimeout == 0 ||
+		t.AccessTimeout == 0 ||
+
+		t.IsRefreshExpired() {
 		return false
+	} else if t.IsExpired() {
+		return true
 	} else if t.LastUpdate.Add(t.AccessTimeout - time.Duration(t.AccessTimeout/10)).Before(time.Now()) {
 		return true
 	}
@@ -261,46 +267,15 @@ func (t *Token) Logout() error {
 // This will automatically update the token every AccessTimeout - 10%
 func (t *Token) RunManager() {
 	t.StopManager()
-	t.ticker = time.NewTicker(t.AccessTimeout - time.Duration(t.AccessTimeout/10))
-	// Takes a bool to update the token immediately.
-	// This might be nescessary if the token expires before the first update.
-	// Note: This will panic if the token update fails and no onUpdateErr handler is set.
-
-	//if update {
-	//	var err = t.Update()
-	//	if err != nil {
-	//		if t.onUpdateErr != nil {
-	//			t.onUpdateErr(err)
-	//		} else {
-	//			panic(err)
-	//		}
-	//	}
-	//}
 	go func() {
-		for {
-			select {
-			case <-t.ticker.C:
-				if t.AccessToken == "" || t.RefreshToken == "" {
-					continue
-				}
-				var err = t.Update()
-				if err != nil {
-					if t.onUpdateErr != nil {
-						t.onUpdateErr(err)
-					} else {
-						t.ticker.Stop()
-						panic(err)
-					}
-				}
-			case <-t.NeedsUpdate():
-				var err = t.Update()
-				if err != nil {
-					if t.onUpdateErr != nil {
-						t.onUpdateErr(err)
-					} else {
-						t.ticker.Stop()
-						panic(err)
-					}
+		for <-t.NeedsUpdate() {
+			fmt.Println("Needs update")
+			var err = t.Update()
+			if err != nil {
+				if t.onUpdateErr != nil {
+					t.onUpdateErr(err)
+				} else {
+					panic(err)
 				}
 			}
 		}
@@ -309,9 +284,8 @@ func (t *Token) RunManager() {
 
 // Stop the token update manager.
 func (t *Token) StopManager() {
-	if t.ticker != nil {
-		t.ticker.Stop()
-	}
+	close(t.needsUpdateChan)
+	t.needsUpdateChan = nil
 }
 
 // Reset the token.
