@@ -30,10 +30,11 @@ type Token struct {
 	RefreshTokenVariable string
 	errorMessageName     string
 	Data                 map[string]interface{}
-	stopChan             chan bool
+	ticker               *time.Ticker
 	onUpdate             func(t *Token)
 	onReset              func()
 	onInit               func(t *Token)
+	onUpdateErr          func(err error)
 }
 
 func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar, errorMessageName string) *Token {
@@ -49,8 +50,7 @@ func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar
 			LoginURL:    "http://127.0.0.1:8000/api/auth/login/",
 			RefreshURL:  "http://127.0.0.1:8000/api/auth/refresh/",
 		},
-		Data:     make(map[string]interface{}),
-		stopChan: make(chan bool),
+		Data: make(map[string]interface{}),
 	}
 	return t
 }
@@ -69,6 +69,10 @@ func (t *Token) OnReset(f func()) {
 
 func (t *Token) OnInit(f func(t *Token)) {
 	t.onInit = f
+}
+
+func (t *Token) OnUpdateError(f func(err error)) {
+	t.onUpdateErr = f
 }
 
 func (t *Token) IsExpired() bool {
@@ -199,19 +203,24 @@ func (t *Token) Logout() error {
 }
 
 func (t *Token) updateManager() {
+	t.ticker = time.NewTicker(time.Duration(float64(t.AccessTimeout) / 1.2))
 	go func() {
-		for {
-			select {
-			case <-time.After(t.ExpiredIn() - 3*time.Minute):
-				var tim = t.ExpiredIn()
-				if tim <= 3*time.Minute {
-					t.Update()
-				}
-			case <-t.stopChan:
-				return
+		for range t.ticker.C {
+			var err = t.Update()
+			if err != nil && t.onUpdateErr != nil {
+				t.onUpdateErr(err)
+			} else {
+				t.ticker.Stop()
+				panic(err)
 			}
 		}
 	}()
+}
+
+func (t *Token) stopManager() {
+	if t.ticker != nil {
+		t.ticker.Stop()
+	}
 }
 
 func (t *Token) Reset() *Token {
@@ -220,6 +229,7 @@ func (t *Token) Reset() *Token {
 		t.onReset()
 	}
 	DeleteTokenCookie()
+	t.stopManager()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
 	newt.OnInit(t.onInit)
 	newt.OnUpdate(t.onUpdate)
