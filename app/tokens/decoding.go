@@ -26,7 +26,15 @@ func (p Payload) Get(key string) interface{} {
 }
 
 func (p Payload) GetTime(key string) time.Time {
-	return time.Unix(int64(p.Get(key).(float64)), 0)
+	var t = p.Get(key)
+	if t == nil {
+		return time.Time{}
+	}
+	var tFloat, ok = t.(float64)
+	if !ok {
+		return time.Time{}
+	}
+	return time.Unix(int64(tFloat), 0)
 }
 
 type Signature string
