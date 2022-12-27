@@ -284,8 +284,10 @@ func (t *Token) RunManager() {
 
 // Stop the token update manager.
 func (t *Token) StopManager() {
-	close(t.needsUpdateChan)
-	t.needsUpdateChan = nil
+	if t.needsUpdateChan != nil {
+		close(t.needsUpdateChan)
+		t.needsUpdateChan = nil
+	}
 }
 
 // Reset the token.
