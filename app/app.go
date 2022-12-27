@@ -57,6 +57,7 @@ func App(id string, rt ...*router.Router) *Application {
 		Router:        r,
 		Base:          elem,
 		Loader:        loaders.NewLoader(id, loaders.ID_LOADER, true, loaders.LoaderRing),
+		Data:          make(map[string]interface{}),
 	}
 	return a
 }
