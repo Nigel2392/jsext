@@ -33,6 +33,7 @@ type Token struct {
 	stopChan             chan bool
 	onUpdate             func(t *Token)
 	onReset              func()
+	onInit               func(t *Token)
 }
 
 func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar, errorMessageName string) *Token {
@@ -60,6 +61,14 @@ func (t *Token) SetURLs(urls TokenURLs) {
 
 func (t *Token) OnUpdate(f func(t *Token)) {
 	t.onUpdate = f
+}
+
+func (t *Token) OnReset(f func()) {
+	t.onReset = f
+}
+
+func (t *Token) OnInit(f func(t *Token)) {
+	t.onInit = f
 }
 
 func (t *Token) IsExpired() bool {
@@ -148,6 +157,9 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 		t.Data = datamap
 		t.LastUpdate = time.Now()
 		t.updateManager()
+		if t.onInit != nil {
+			t.onInit(t)
+		}
 		errChan <- nil
 	})
 	return <-errChan
