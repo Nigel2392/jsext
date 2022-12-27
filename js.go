@@ -4,6 +4,8 @@
 package jsext
 
 import (
+	"errors"
+	"regexp"
 	"strings"
 	"syscall/js"
 	"time"
@@ -208,18 +210,22 @@ func NewDate() Value {
 }
 
 // Set a document cookie
-func SetCookie(name, value string, seconds time.Duration) {
+func SetCookie(name, value string, seconds time.Duration) error {
 	var expires = time.Now().Add(seconds * time.Second).UTC().Format(time.RFC1123)
+	if len(value) > 4096 {
+		return errors.New("cookie value length exceeds 4096 bytes")
+	}
 	Document.Set("cookie", name+"="+value+"; expires="+expires+"; path=/")
+	return nil
 }
 
 // Get a document cookie
 func GetCookie(name string) string {
 	var cookies = strings.Split(Document.Get("cookie").String(), ";")
+	var regex = regexp.MustCompile(`\s*` + name + `=([^;]+)`)
 	for _, cookie := range cookies {
-		var c = strings.Split(cookie, "=")
-		if c[0] == name {
-			return c[1]
+		if regex.MatchString(cookie) {
+			return regex.FindStringSubmatch(cookie)[1]
 		}
 	}
 	return ""
