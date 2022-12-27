@@ -161,11 +161,13 @@ func (t *Token) Register(registerData map[string]string) error {
 }
 
 func (t *Token) Logout() error {
-	var refresh = t.RefreshToken
+	if t.AccessToken == "" || t.RefreshToken == "" {
+		return nil
+	}
 	var client = t.Client()
 	client = client.Post(t.URLs.LogoutURL)
 	client.WithData(map[string]string{
-		t.RefreshTokenVariable: refresh,
+		t.RefreshTokenVariable: t.RefreshToken,
 	}, requester.JSON)
 	var errChan = make(chan error)
 	var respMap map[string]any
@@ -199,11 +201,7 @@ func (t *Token) updateManager() {
 }
 
 func (t *Token) stopManager() {
-	for len(t.stopChan) > 0 {
-		<-t.stopChan
-	}
 	t.stopChan <- true
-	close(t.stopChan)
 }
 
 func (t *Token) Reset() *Token {
