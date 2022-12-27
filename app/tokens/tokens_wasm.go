@@ -71,7 +71,7 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	tokenToSet.AccessToken = AccessToken
 	tokenToSet.RefreshToken = RefreshToken
 	tokenToSet.LastUpdate = LastUpdateParsed
-	tokenToSet.stopManager()
+	tokenToSet.stopChan <- true
 	tokenToSet.updateManager()
 	return tokenToSet, nil
 }

@@ -181,14 +181,15 @@ func (t *Token) updateManager() {
 				if tim <= 3*time.Minute {
 					t.Update()
 				}
-				tim = t.ExpiredIn()
-				time.Sleep(tim - 3*time.Minute)
 			}
 		}
 	}()
 }
 
 func (t *Token) stopManager() {
+	for len(t.stopChan) > 0 {
+		<-t.stopChan
+	}
 	t.stopChan <- true
 	close(t.stopChan)
 }
