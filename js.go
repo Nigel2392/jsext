@@ -215,7 +215,7 @@ func SetCookie(name, value string, seconds time.Duration) {
 
 // Get a document cookie
 func GetCookie(name string) string {
-	var cookies = strings.Split(Document.Call("cookie").String(), ";")
+	var cookies = strings.Split(Document.Get("cookie").String(), ";")
 	for _, cookie := range cookies {
 		var c = strings.Split(cookie, "=")
 		if c[0] == name {
