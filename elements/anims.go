@@ -2,6 +2,7 @@ package elements
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/Nigel2392/jsext"
 )
@@ -168,6 +169,10 @@ func bounce(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", BOUNCE_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", "scale(1.1)")
+		go func() {
+			time.Sleep(time.Duration(timeMS) * time.Millisecond / 2)
+			e.value.Get("style").Set("transform", "scale(1)")
+		}()
 	})
 }
 
