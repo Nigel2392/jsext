@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 )
 
 type JWTToken struct {
@@ -19,6 +20,14 @@ type Header struct {
 }
 
 type Payload map[string]interface{}
+
+func (p Payload) Get(key string) interface{} {
+	return p[key]
+}
+
+func (p Payload) GetTime(key string) time.Time {
+	return time.Unix(int64(p.Get(key).(float64)), 0)
+}
 
 type Signature string
 
