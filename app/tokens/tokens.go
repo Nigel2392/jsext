@@ -174,10 +174,10 @@ func (t *Token) Logout() error {
 func (t *Token) updateManager() {
 	go func() {
 		for {
-			switch {
+			select {
 			case <-t.stopChan:
 				return
-			default:
+			case <-time.After(t.ExpiredIn() - 3*time.Minute):
 				var tim = t.ExpiredIn()
 				if tim <= 3*time.Minute {
 					t.Update()
