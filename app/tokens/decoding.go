@@ -23,6 +23,9 @@ type Signature string
 
 func tokenDecode(token string) (JWTToken, error) {
 	var parts = strings.Split(token, ".")
+	if len(parts) != 3 {
+		panic("invalid token")
+	}
 	header, err := base64.URLEncoding.DecodeString(parts[0])
 	if err != nil {
 		return JWTToken{}, err
