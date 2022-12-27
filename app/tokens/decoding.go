@@ -23,15 +23,15 @@ type Signature string
 
 func tokenDecode(token string) (JWTToken, error) {
 	var parts = strings.Split(token, ".")
-	header, err := base64.StdEncoding.DecodeString(parts[0])
+	header, err := base64.URLEncoding.DecodeString(parts[0])
 	if err != nil {
 		return JWTToken{}, err
 	}
-	payload, err := base64.StdEncoding.DecodeString(parts[1])
+	payload, err := base64.URLEncoding.DecodeString(parts[1])
 	if err != nil {
 		return JWTToken{}, err
 	}
-	signature, err := base64.StdEncoding.DecodeString(parts[2])
+	signature, err := base64.URLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return JWTToken{}, err
 	}
