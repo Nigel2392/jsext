@@ -235,7 +235,7 @@ func (t *Token) Logout() error {
 // This will automatically update the token every AccessTimeout - 10%
 func (t *Token) RunManager() {
 	t.StopManager()
-	t.ticker = time.NewTicker(t.AccessTimeout - time.Duration(t.AccessTimeout.Nanoseconds()/10))
+	t.ticker = time.NewTicker(t.AccessTimeout - time.Duration(t.AccessTimeout/10))
 	go func() {
 		for range t.ticker.C {
 			if t.AccessToken == "" || t.RefreshToken == "" {
