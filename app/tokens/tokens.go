@@ -175,7 +175,8 @@ func (t *Token) Register(registerData map[string]string) error {
 
 func (t *Token) Logout() error {
 	if t.AccessToken == "" || t.RefreshToken == "" || t.URLs.LogoutURL == "" {
-		return nil
+		//lint:ignore ST1005 Error strings should not be capitalized
+		return errors.New("Already logged out")
 	}
 	var client = t.Client()
 	client = client.Post(t.URLs.LogoutURL)
@@ -201,29 +202,24 @@ func (t *Token) updateManager() {
 	go func() {
 		for {
 			select {
-			case <-t.stopChan:
-				return
 			case <-time.After(t.ExpiredIn() - 3*time.Minute):
 				var tim = t.ExpiredIn()
 				if tim <= 3*time.Minute {
 					t.Update()
 				}
+			case <-t.stopChan:
+				return
 			}
 		}
 	}()
 }
 
-func (t *Token) stopManager() {
-	t.stopChan <- true
-}
-
 func (t *Token) Reset() *Token {
 	var urls = t.URLs
-	DeleteTokenCookie()
 	if t.onReset != nil {
 		t.onReset()
 	}
-	t.stopManager()
+	DeleteTokenCookie()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
 	newt.OnInit(t.onInit)
 	newt.OnUpdate(t.onUpdate)
