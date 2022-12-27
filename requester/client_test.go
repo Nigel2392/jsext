@@ -6,9 +6,10 @@ package requester_test
 import (
 	"encoding/json"
 	"encoding/xml"
-	"github.com/Nigel2392/jsext/requester"
 	"net/http"
 	"testing"
+
+	"github.com/Nigel2392/jsext/requester"
 )
 
 const ADDRESS = "127.0.0.1:8080"
@@ -58,7 +59,7 @@ func TestGetJSON(t *testing.T) {
 	ch := make(chan struct{})
 	var c = requester.NewAPIClient()
 	var data = make(map[string]interface{})
-	c.Get("http://"+ADDRESS+"/json").DoStruct(&data, requester.JSON, func(resp *http.Response, strct interface{}) {
+	c.Get("http://"+ADDRESS+"/json").DoDecodeTo(&data, requester.JSON, func(resp *http.Response, strct interface{}) {
 		if resp.StatusCode != http.StatusOK {
 			t.Error("Status code is not 200")
 		}
@@ -77,7 +78,7 @@ func TestGetXML(t *testing.T) {
 	ch := make(chan struct{})
 	var c = requester.NewAPIClient()
 	var data = Data{}
-	c.Get("http://"+ADDRESS+"/xml").DoStruct(&data, requester.XML, func(resp *http.Response, strct interface{}) {
+	c.Get("http://"+ADDRESS+"/xml").DoDecodeTo(&data, requester.XML, func(resp *http.Response, strct interface{}) {
 		if resp.StatusCode != http.StatusOK {
 			t.Error("Status code is not 200")
 		}

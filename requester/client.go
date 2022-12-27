@@ -58,7 +58,7 @@ func (c *APIClient) Do(cb func(resp *http.Response)) {
 }
 
 // Make a request and return the response body decoded into the specified parameter. -> APIClient.Do  -> APIClient.exec
-func (c *APIClient) DoStruct(decodeTo interface{}, encoding Encoding, cb func(resp *http.Response, strct interface{})) {
+func (c *APIClient) DoDecodeTo(decodeTo interface{}, encoding Encoding, cb func(resp *http.Response, strct interface{})) {
 	var newCallback = func(resp *http.Response) {
 		switch encoding {
 		case JSON:

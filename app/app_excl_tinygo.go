@@ -21,6 +21,7 @@ type Application struct {
 	Base          jsext.Element
 	clientFunc    func() *requester.APIClient
 	onErr         func(err error)
+	Data          map[string]interface{}
 }
 
 // Initialize a http client with a loader for a new request.

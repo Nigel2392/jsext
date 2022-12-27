@@ -235,3 +235,83 @@ func Exit() {
 	WAITER <- struct{}{}
 	close(WAITER)
 }
+
+// Set data on the application.
+func (a *Application) Set(k string, v any) {
+	a.Data[k] = v
+}
+
+// Get data from the application.
+func (a *Application) Get(key string) interface{} {
+	return a.Data[key]
+}
+
+// Get data from the application in the form of an int.
+func (a *Application) GetInt(key string) int {
+	var data = a.Data[key]
+	switch data := data.(type) {
+	case int:
+		return data
+	case int8:
+		return int(data)
+	case int16:
+		return int(data)
+	case int32:
+		return int(data)
+	case int64:
+		return int(data)
+	}
+	return 0
+}
+
+// Get data from the application in the form of a uint.
+func (a *Application) GetUint(key string) uint {
+	var data = a.Data[key]
+	switch data := data.(type) {
+	case uint:
+		return data
+	case uint8:
+		return uint(data)
+	case uint16:
+		return uint(data)
+	case uint32:
+		return uint(data)
+	case uint64:
+		return uint(data)
+	}
+	return 0
+}
+
+// Get data from the application in the form of a string.
+func (a *Application) GetString(key string) string {
+	return a.Data[key].(string)
+}
+
+// Get data from the application in the form of a bool.
+func (a *Application) GetBool(key string) bool {
+	return a.Data[key].(bool)
+}
+
+// Get data from the application in the form of a float64.
+func (a *Application) GetFloat(key string) float64 {
+	var data = a.Data[key]
+	switch data := data.(type) {
+	case float64:
+		return data
+	case float32:
+		return float64(data)
+	}
+	return 0
+}
+
+// Get data from the application in the form of a complex128.
+func (a *Application) GetComplex(key string) complex128 {
+	var data = a.Data[key]
+	switch data := data.(type) {
+	case complex128:
+		return data
+	case complex64:
+		return complex128(data)
+	}
+	return 0
+}
