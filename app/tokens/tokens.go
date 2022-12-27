@@ -12,6 +12,7 @@ import (
 
 var AuthToken *Token
 
+// URLs for the token to request to.
 type TokenURLs struct {
 	LoginURL    string
 	RegisterURL string
@@ -19,6 +20,7 @@ type TokenURLs struct {
 	RefreshURL  string
 }
 
+// Authentication token struct
 type Token struct {
 	AccessToken          string
 	RefreshToken         string
@@ -37,6 +39,7 @@ type Token struct {
 	onUpdateErr          func(err error)
 }
 
+// Get a new token
 func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar, errorMessageName string) *Token {
 	var t = &Token{
 		RefreshTimeout:       RefreshTimeout,
@@ -55,44 +58,62 @@ func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar
 	return t
 }
 
+// Set the token URLs
 func (t *Token) SetURLs(urls TokenURLs) {
 	t.URLs = urls
 }
 
+// Callback for when the token gets updated.
 func (t *Token) OnUpdate(f func(t *Token)) {
 	t.onUpdate = f
 }
 
+// Callback for when the token gets reset.
 func (t *Token) OnReset(f func()) {
 	t.onReset = f
 }
 
+// Callback for when the token gets initialized.
 func (t *Token) OnInit(f func(t *Token)) {
 	t.onInit = f
 }
 
+// Callback when an error occurs updating the token.
 func (t *Token) OnUpdateError(f func(err error)) {
 	t.onUpdateErr = f
 }
 
+// Check if access token is expired
 func (t *Token) IsExpired() bool {
 	return time.Now().After(t.LastUpdate.Add(t.AccessTimeout))
 }
 
+// Check if refresh token is expired
 func (t *Token) IsRefreshExpired() bool {
 	return time.Now().After(t.LastUpdate.Add(t.RefreshTimeout))
 }
 
+// Get when the access token will expire
 func (t *Token) ExpiredIn() time.Duration {
 	timeout := t.LastUpdate.Add(t.AccessTimeout)
 	return time.Until(timeout)
 }
 
+// Get when the refresh token will expire
 func (t *Token) RefreshExpiredIn() time.Duration {
 	timeout := t.LastUpdate.Add(t.RefreshTimeout)
 	return time.Until(timeout)
 }
 
+// Short hand for getting the token data
+func (t *Token) setToken(access, refresh string, lastUpdate time.Time) {
+	t.AccessToken = access
+	t.RefreshToken = refresh
+	t.LastUpdate = lastUpdate
+	t.RunManager()
+}
+
+// Make an api call to the refresh URL, update both the access and refresh tokens.
 func (t *Token) Update() error {
 	var client = requester.NewAPIClient()
 	var data = map[string]string{
@@ -122,18 +143,23 @@ func (t *Token) Update() error {
 	return nil
 }
 
+// Token's client, when authenticated it will automatically set the Authorization header.
 func (t *Token) Client() *requester.APIClient {
 	var client = requester.NewAPIClient()
 	client.OnError(func(err error) bool {
 		println(err.Error())
 		return true
 	})
+	if t.AccessToken == "" {
+		return client
+	}
 	client = client.WithHeaders(map[string][]string{
 		"Authorization": {"Bearer " + t.AccessToken},
 	})
 	return client
 }
 
+// Send data to an API endpoint, get both access and refresh tokens.
 func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 	var client = requester.NewAPIClient()
 	client = client.Post(url)
@@ -154,13 +180,13 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 			errChan <- errors.New(err.(string))
 			return
 		}
-		t.AccessToken = datamap[t.AccessTokenVariable].(string)
-		t.RefreshToken = datamap[t.RefreshTokenVariable].(string)
+		var AccessToken = datamap[t.AccessTokenVariable].(string)
+		var RefreshToken = datamap[t.RefreshTokenVariable].(string)
+		var LastUpdate = time.Now()
 		delete(datamap, t.AccessTokenVariable)
 		delete(datamap, t.RefreshTokenVariable)
 		t.Data = datamap
-		t.LastUpdate = time.Now()
-		t.updateManager()
+		t.setToken(AccessToken, RefreshToken, LastUpdate)
 		if t.onInit != nil {
 			t.onInit(t)
 		}
@@ -169,14 +195,17 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 	return <-errChan
 }
 
+// Login with the appropriate data, get both access and refresh tokens.
 func (t *Token) Login(loginData map[string]string) error {
 	return t.sendDataGetToken(loginData, t.URLs.LoginURL)
 }
 
+// Register with the appropriate data, get both access and refresh tokens.
 func (t *Token) Register(registerData map[string]string) error {
 	return t.sendDataGetToken(registerData, t.URLs.RegisterURL)
 }
 
+// Logout with the refresh token.
 func (t *Token) Logout() error {
 	if t.AccessToken == "" || t.RefreshToken == "" || t.URLs.LogoutURL == "" {
 		//lint:ignore ST1005 Error strings should not be capitalized
@@ -202,34 +231,45 @@ func (t *Token) Logout() error {
 	return err
 }
 
-func (t *Token) updateManager() {
-	t.ticker = time.NewTicker(time.Duration(float64(t.AccessTimeout) / 1.2))
+// Run the token update manager.
+// This will automatically update the token every AccessTimeout - 10%
+func (t *Token) RunManager() {
+	t.StopManager()
+	t.ticker = time.NewTicker(t.AccessTimeout - time.Duration(t.AccessTimeout.Seconds()/10))
 	go func() {
 		for range t.ticker.C {
+			if t.AccessToken == "" || t.RefreshToken == "" {
+				continue
+			}
 			var err = t.Update()
-			if err != nil && t.onUpdateErr != nil {
-				t.onUpdateErr(err)
-			} else {
-				t.ticker.Stop()
-				panic(err)
+			if err != nil {
+				if t.onUpdateErr != nil {
+					t.onUpdateErr(err)
+				} else {
+					t.ticker.Stop()
+					panic(err)
+				}
 			}
 		}
 	}()
 }
 
-func (t *Token) stopManager() {
+// Stop the token update manager.
+func (t *Token) StopManager() {
 	if t.ticker != nil {
 		t.ticker.Stop()
 	}
 }
 
+// Reset the token.
+// Essentially creates a new token, transfers all nescessaary data and overwrites the old one.
 func (t *Token) Reset() *Token {
 	var urls = t.URLs
 	if t.onReset != nil {
 		t.onReset()
 	}
+	t.StopManager()
 	DeleteTokenCookie()
-	t.stopManager()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
 	newt.OnInit(t.onInit)
 	newt.OnUpdate(t.onUpdate)

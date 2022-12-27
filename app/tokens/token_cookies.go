@@ -10,6 +10,9 @@ import (
 	"github.com/Nigel2392/jsext"
 )
 
+const JSEXT_token = "JSEXT_token"
+
+// Set the token cookie from a token.
 func SetTokenCookie(token *Token) error {
 	var AccessToken = token.AccessToken
 	var RefreshToken = token.RefreshToken
@@ -28,11 +31,12 @@ func SetTokenCookie(token *Token) error {
 	// Encode to base64
 	var cookie = base64.RawURLEncoding.EncodeToString(b.Bytes())
 	// Set the cookie
-	return jsext.SetCookie("token", cookie, time.Second*3600*24)
+	return jsext.SetCookie(JSEXT_token, cookie, time.Second*3600*24)
 }
 
+// Get the token cookie
 func GetTokenCookie(tokenToSet *Token) (*Token, error) {
-	var cookie = jsext.GetCookie("token")
+	var cookie = jsext.GetCookie(JSEXT_token)
 	if cookie == "" {
 		//lint:ignore ST1005 Error strings should not be capitalized
 		return nil, errors.New("No token cookie")
@@ -71,9 +75,15 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	tokenToSet.AccessToken = AccessToken
 	tokenToSet.RefreshToken = RefreshToken
 	tokenToSet.LastUpdate = LastUpdateParsed
+	if tokenToSet.IsExpired() && !tokenToSet.IsRefreshExpired() {
+		tokenToSet.Update()
+	} else if tokenToSet.IsRefreshExpired() {
+		return nil, errors.New("Token cookie expired")
+	}
 	return tokenToSet, nil
 }
 
+// Delete the token cookie
 func DeleteTokenCookie() {
-	jsext.DeleteCookie("token")
+	jsext.DeleteCookie(JSEXT_token)
 }
