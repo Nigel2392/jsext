@@ -6,7 +6,6 @@ package jsext
 import (
 	"errors"
 	"regexp"
-	"strings"
 	"syscall/js"
 	"time"
 )
@@ -221,12 +220,10 @@ func SetCookie(name, value string, seconds time.Duration) error {
 
 // Get a document cookie
 func GetCookie(name string) string {
-	var cookies = strings.Split(Document.Get("cookie").String(), ";")
 	var regex = regexp.MustCompile(`\s*` + name + `=([^;]+)`)
-	for _, cookie := range cookies {
-		if regex.MatchString(cookie) {
-			return regex.FindStringSubmatch(cookie)[1]
-		}
+	var match = regex.FindStringSubmatch(Document.Get("cookie").String())
+	if len(match) > 1 {
+		return match[1]
 	}
 	return ""
 }
