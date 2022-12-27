@@ -7,6 +7,9 @@ import (
 	"github.com/Nigel2392/jsext"
 )
 
+// All animations get rendered in a separate goroutine.
+// This however does mean that there can be conflicts if multiple animations are added to the same element.
+
 // Predefined element animations.
 const (
 	FADEIN_CLASS     = "jsext-fade-in"
@@ -92,7 +95,7 @@ func (e *Element) animate() {
 	for _, anim := range e.animations {
 		var f, ok = AnimationMap[anim.Type]
 		if ok {
-			f(e, anim.Duration)
+			go f(e, anim.Duration)
 		}
 	}
 }
@@ -111,6 +114,7 @@ func fadeIn(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", FADEIN_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("opacity", "1")
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 }
@@ -122,6 +126,7 @@ func fadeOut(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", FADEOUT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("opacity", "0")
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 }
@@ -134,6 +139,7 @@ func fromTop(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", FROMTOP_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", transform)
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 }
@@ -146,6 +152,7 @@ func fromLeft(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", FROMLEFT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", transform)
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 }
@@ -158,6 +165,7 @@ func fromRight(e *Element, timeMS int) {
 	e.value.Get("classList").Call("add", FROMRIGHT_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", transform)
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 
@@ -172,6 +180,7 @@ func fromBottom(e *Element, timeMS int) {
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", "translateY(0)")
 		e.value.Get("style").Set("transform", transform)
+		time.Sleep(time.Duration(timeMS) * time.Millisecond)
 		e.value.Get("style").Set("transition", transition)
 	})
 }
@@ -186,6 +195,7 @@ func bounce(e *Element, timeMS int) {
 		go func() {
 			time.Sleep(time.Duration(timeMS) * time.Millisecond / 2)
 			e.value.Get("style").Set("transform", "scale(1)")
+			time.Sleep(time.Duration(timeMS) * time.Millisecond)
 			e.value.Get("style").Set("transition", transition)
 			e.value.Get("style").Set("transform", transform)
 		}()
