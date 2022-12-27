@@ -210,7 +210,7 @@ func NewDate() Value {
 // Set a document cookie
 func SetCookie(name, value string, seconds time.Duration) {
 	var expires = time.Now().Add(seconds * time.Second).UTC().Format(time.RFC1123)
-	Document.Call("cookie", name+"="+value+"; expires="+expires+"; path=/")
+	Document.Set("cookie", name+"="+value+"; expires="+expires+"; path=/")
 }
 
 // Get a document cookie
