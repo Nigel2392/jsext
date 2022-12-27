@@ -97,6 +97,17 @@ func (t *Token) NeedsUpdate() <-chan bool {
 	return c
 }
 
+func (t *Token) ShouldUpdate() bool {
+	if t.IsExpired() && !t.IsRefreshExpired() {
+		return true
+	} else if t.IsRefreshExpired() {
+		return false
+	} else if t.LastUpdate.Add(t.AccessTimeout - time.Duration(t.AccessTimeout/10)).Before(time.Now()) {
+		return true
+	}
+	return false
+}
+
 // Check if access token is expired
 func (t *Token) IsExpired() bool {
 	return time.Now().After(t.LastUpdate.Add(t.AccessTimeout))
@@ -124,7 +135,7 @@ func (t *Token) setToken(access, refresh string, lastUpdate time.Time) {
 	t.AccessToken = access
 	t.RefreshToken = refresh
 	t.LastUpdate = lastUpdate
-	t.RunManager(false)
+	t.RunManager()
 }
 
 // Make an api call to the refresh URL, update both the access and refresh tokens.
@@ -247,31 +258,48 @@ func (t *Token) Logout() error {
 
 // Run the token update manager.
 // This will automatically update the token every AccessTimeout - 10%
-func (t *Token) RunManager(update bool) {
+func (t *Token) RunManager() {
 	t.StopManager()
 	t.ticker = time.NewTicker(t.AccessTimeout - time.Duration(t.AccessTimeout/10))
-	if update {
-		var err = t.Update()
-		if err != nil {
-			if t.onUpdateErr != nil {
-				t.onUpdateErr(err)
-			} else {
-				panic(err)
-			}
-		}
-	}
+	// Takes a bool to update the token immediately.
+	// This might be nescessary if the token expires before the first update.
+	// Note: This will panic if the token update fails and no onUpdateErr handler is set.
+
+	//if update {
+	//	var err = t.Update()
+	//	if err != nil {
+	//		if t.onUpdateErr != nil {
+	//			t.onUpdateErr(err)
+	//		} else {
+	//			panic(err)
+	//		}
+	//	}
+	//}
 	go func() {
-		for range t.ticker.C {
-			if t.AccessToken == "" || t.RefreshToken == "" {
-				continue
-			}
-			var err = t.Update()
-			if err != nil {
-				if t.onUpdateErr != nil {
-					t.onUpdateErr(err)
-				} else {
-					t.ticker.Stop()
-					panic(err)
+		for {
+			select {
+			case <-t.ticker.C:
+				if t.AccessToken == "" || t.RefreshToken == "" {
+					continue
+				}
+				var err = t.Update()
+				if err != nil {
+					if t.onUpdateErr != nil {
+						t.onUpdateErr(err)
+					} else {
+						t.ticker.Stop()
+						panic(err)
+					}
+				}
+			case <-t.NeedsUpdate():
+				var err = t.Update()
+				if err != nil {
+					if t.onUpdateErr != nil {
+						t.onUpdateErr(err)
+					} else {
+						t.ticker.Stop()
+						panic(err)
+					}
 				}
 			}
 		}
