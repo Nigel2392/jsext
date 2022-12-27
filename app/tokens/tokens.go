@@ -147,7 +147,6 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 		t.Data = datamap
 		t.LastUpdate = time.Now()
 		t.updateManager()
-		SetTokenCookie(t)
 		errChan <- nil
 	})
 	return <-errChan

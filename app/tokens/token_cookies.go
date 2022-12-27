@@ -28,7 +28,7 @@ func SetTokenCookie(token *Token) error {
 	// Encode to base64
 	var cookie = base64.RawURLEncoding.EncodeToString(b.Bytes())
 	// Set the cookie
-	return jsext.SetCookie("token", cookie, 1*3600*24)
+	return jsext.SetCookie("token", cookie, time.Second*3600*24)
 }
 
 func GetTokenCookie(tokenToSet *Token) (*Token, error) {
@@ -71,10 +71,6 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	tokenToSet.AccessToken = AccessToken
 	tokenToSet.RefreshToken = RefreshToken
 	tokenToSet.LastUpdate = LastUpdateParsed
-	if err := tokenToSet.Update(); err != nil {
-		DeleteTokenCookie()
-		return nil, err
-	}
 	return tokenToSet, nil
 }
 
