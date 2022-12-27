@@ -79,7 +79,7 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 		tokenToSet.Update()
 	} else if tokenToSet.IsRefreshExpired() {
 		return nil, errors.New("Token cookie expired")
-	} else if tokenToSet.ExpiredIn() < tokenToSet.AccessTimeout-time.Duration(tokenToSet.AccessTimeout.Seconds()/10) {
+	} else if tokenToSet.LastUpdate.Add(tokenToSet.AccessTimeout).Before(time.Now()) {
 		tokenToSet.Update()
 	}
 	return tokenToSet, nil
