@@ -1,3 +1,6 @@
+//go:build js && wasm
+// +build js,wasm
+
 package tokens
 
 import (
@@ -96,7 +99,7 @@ func (t *Token) NeedsUpdate() <-chan bool {
 				t.needsUpdateChan <- true
 				return
 			}
-			time.Sleep(t.AccessTimeout / 20)
+			time.Sleep(t.ExpiredIn() - time.Duration(t.ExpiredIn()/10))
 		}
 	}()
 	return t.needsUpdateChan
