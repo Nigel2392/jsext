@@ -71,5 +71,13 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	tokenToSet.AccessToken = AccessToken
 	tokenToSet.RefreshToken = RefreshToken
 	tokenToSet.LastUpdate = LastUpdateParsed
+	if err := tokenToSet.Update(); err != nil {
+		DeleteTokenCookie()
+		return nil, err
+	}
 	return tokenToSet, nil
+}
+
+func DeleteTokenCookie() {
+	jsext.DeleteCookie("token")
 }

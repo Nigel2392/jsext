@@ -209,8 +209,8 @@ func NewDate() Value {
 }
 
 // Set a document cookie
-func SetCookie(name, value string, seconds time.Duration) error {
-	var expires = time.Now().Add(seconds * time.Second).UTC().Format(time.RFC1123)
+func SetCookie(name, value string, tim time.Duration) error {
+	var expires = time.Now().Add(tim).UTC().Format(time.RFC1123)
 	var cookie = name + "=" + value + "; expires=" + expires + "; path=/"
 	if len(cookie) > 4096 {
 		return errors.New("cookie length exceeds 4096 bytes")
@@ -230,6 +230,11 @@ func GetCookie(name string) string {
 		}
 	}
 	return ""
+}
+
+// Delete a document cookie
+func DeleteCookie(name string) {
+	SetCookie(name, "", -1)
 }
 
 //type JavaScript interface {

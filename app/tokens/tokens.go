@@ -208,6 +208,7 @@ func (t *Token) stopManager() {
 
 func (t *Token) Reset() *Token {
 	var urls = t.URLs
+	DeleteTokenCookie()
 	t.stopManager()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
 	newt.SetURLs(urls)
