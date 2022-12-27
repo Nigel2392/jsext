@@ -225,9 +225,9 @@ func (t *Token) Reset() *Token {
 	}
 	t.stopManager()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
-	newt.onInit = t.onInit
-	newt.onUpdate = t.onUpdate
-	newt.onReset = t.onReset
+	newt.OnInit(t.onInit)
+	newt.OnUpdate(t.onUpdate)
+	newt.OnReset(t.onReset)
 	newt.SetURLs(urls)
 	reflect.ValueOf(t).Elem().Set(reflect.ValueOf(newt).Elem())
 	return t
