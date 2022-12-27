@@ -32,6 +32,7 @@ type Token struct {
 	Data                 map[string]interface{}
 	stopChan             chan bool
 	onUpdate             func(t *Token)
+	onReset              func()
 }
 
 func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar, errorMessageName string) *Token {
@@ -161,7 +162,7 @@ func (t *Token) Register(registerData map[string]string) error {
 }
 
 func (t *Token) Logout() error {
-	if t.AccessToken == "" || t.RefreshToken == "" {
+	if t.AccessToken == "" || t.RefreshToken == "" || t.URLs.LogoutURL == "" {
 		return nil
 	}
 	var client = t.Client()
@@ -207,6 +208,9 @@ func (t *Token) stopManager() {
 func (t *Token) Reset() *Token {
 	var urls = t.URLs
 	DeleteTokenCookie()
+	if t.onReset != nil {
+		t.onReset()
+	}
 	t.stopManager()
 	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
 	newt.SetURLs(urls)
