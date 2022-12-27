@@ -3,7 +3,7 @@ package tokens
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -19,11 +19,12 @@ func SetTokenCookie(token *Token) error {
 	datamap["AccessToken"] = AccessToken
 	datamap["RefreshToken"] = RefreshToken
 	datamap["LastUpdate"] = LastUpdate
-
+	// Json the token
 	var b bytes.Buffer
-	// Gob the token
-	var enc = gob.NewEncoder(&b)
-	enc.Encode(datamap)
+	var err = json.NewEncoder(&b).Encode(datamap)
+	if err != nil {
+		return err
+	}
 	// Encode to base64
 	var cookie = base64.RawURLEncoding.EncodeToString(b.Bytes())
 	// Set the cookie
@@ -33,6 +34,7 @@ func SetTokenCookie(token *Token) error {
 func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	var cookie = jsext.GetCookie("token")
 	if cookie == "" {
+		//lint:ignore ST1005 Error strings should not be capitalized
 		return nil, errors.New("No token cookie")
 	}
 	// Decode from base64
@@ -40,17 +42,34 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Gob the token
-	var dec = gob.NewDecoder(bytes.NewBuffer(b))
+	// Json the token
 	var datamap map[string]interface{}
-	dec.Decode(&datamap)
+	err = json.NewDecoder(bytes.NewBuffer(b)).Decode(&datamap)
+	if err != nil {
+		return nil, err
+	}
 	// Get the data
-	var AccessToken = datamap["AccessToken"].(string)
-	var RefreshToken = datamap["RefreshToken"].(string)
-	var LastUpdate = datamap["LastUpdate"].(time.Time)
+	AccessToken, ok := datamap["AccessToken"].(string)
+	if !ok {
+		//lint:ignore ST1005 Error strings should not be capitalized
+		return nil, errors.New("No cookie access token")
+	}
+	RefreshToken, ok := datamap["RefreshToken"].(string)
+	if !ok {
+		//lint:ignore ST1005 Error strings should not be capitalized
+		return nil, errors.New("No cookie refresh token")
+	}
+	LastUpdate, ok := datamap["LastUpdate"].(string)
+	if !ok {
+		return nil, errors.New("Token cookie time could not be parsed")
+	}
+	LastUpdateParsed, err := time.Parse(time.RFC3339, LastUpdate)
+	if err != nil {
+		return nil, err
+	}
 	// Create the token
 	tokenToSet.AccessToken = AccessToken
 	tokenToSet.RefreshToken = RefreshToken
-	tokenToSet.LastUpdate = LastUpdate
+	tokenToSet.LastUpdate = LastUpdateParsed
 	return tokenToSet, nil
 }
