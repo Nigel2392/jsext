@@ -165,7 +165,7 @@ func fromBottom(e *Element, timeMS int) {
 }
 
 func bounce(e *Element, timeMS int) {
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
+	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS/2)+"ms")
 	e.value.Get("classList").Call("add", BOUNCE_CLASS)
 	InViewListener(e, func(this jsext.Value, event jsext.Event) {
 		e.value.Get("style").Set("transform", "scale(1.1)")
