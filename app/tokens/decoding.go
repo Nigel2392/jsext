@@ -27,15 +27,15 @@ func tokenDecode(token string) (JWTToken, error) {
 	if len(parts) != 3 {
 		return JWTToken{}, errors.New("invalid token")
 	}
-	header, err := base64.URLEncoding.DecodeString(parts[0])
+	header, err := base64.RawURLEncoding.DecodeString(parts[0])
 	if err != nil {
 		return JWTToken{}, err
 	}
-	payload, err := base64.URLEncoding.DecodeString(parts[1])
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
 		return JWTToken{}, err
 	}
-	signature, err := base64.URLEncoding.DecodeString(parts[2])
+	signature, err := base64.RawURLEncoding.DecodeString(parts[2])
 	if err != nil {
 		return JWTToken{}, err
 	}
