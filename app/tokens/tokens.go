@@ -6,7 +6,6 @@ package tokens
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 	"time"
@@ -275,7 +274,6 @@ func (t *Token) RunManager() {
 	t.StopManager()
 	go func() {
 		for <-t.NeedsUpdate() {
-			fmt.Println("Needs update")
 			var err = t.Update()
 			if err != nil {
 				if t.onUpdateErr != nil {
