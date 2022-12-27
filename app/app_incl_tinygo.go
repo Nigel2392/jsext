@@ -13,6 +13,7 @@ import (
 type Application struct {
 	BaseElementID string
 	Router        *router.Router
+	LastURL       *url.URL
 	Navbar        components.Component
 	Footer        components.Component
 	Loader        components.Loader

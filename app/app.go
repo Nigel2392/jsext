@@ -125,10 +125,16 @@ func (a *Application) OnRouterLoad(f func()) *Application {
 // Function to be ran before the page is rendered.
 func (a *Application) OnPageChange(f func(*Application, router.Vars, *url.URL)) *Application {
 	var newF = func(v router.Vars, u *url.URL) {
+		a.LastURL = u
 		f(a, v, u)
 	}
 	a.Router.OnPageChange(newF)
 	return a
+}
+
+// Go back to the last page.
+func (a *Application) Back() {
+	a.Router.Handle(a.LastURL)
 }
 
 // Setup application to be ran.
