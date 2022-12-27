@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/Nigel2392/jsext/requester"
@@ -197,7 +198,8 @@ func (t *Token) stopManager() {
 func (t *Token) Reset() *Token {
 	var urls = t.URLs
 	t.stopManager()
-	t = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
-	t.SetURLs(urls)
+	var newt = NewToken(t.RefreshTimeout, t.AccessTimeout, t.AccessTokenVariable, t.RefreshTokenVariable, t.errorMessageName)
+	newt.SetURLs(urls)
+	reflect.ValueOf(t).Elem().Set(reflect.ValueOf(newt).Elem())
 	return t
 }
