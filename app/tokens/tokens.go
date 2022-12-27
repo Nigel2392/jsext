@@ -92,6 +92,7 @@ func (t *Token) NeedsUpdate() <-chan bool {
 				c <- true
 				return
 			}
+			time.Sleep(t.AccessTimeout / 20)
 		}
 	}()
 	return c
