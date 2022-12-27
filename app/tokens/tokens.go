@@ -31,6 +31,7 @@ type Token struct {
 	errorMessageName     string
 	Data                 map[string]interface{}
 	stopChan             chan bool
+	onUpdate             func(t *Token)
 }
 
 func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar, errorMessageName string) *Token {
@@ -54,6 +55,10 @@ func NewToken(RefreshTimeout, AccessTimeout time.Duration, AccessVar, RefreshVar
 
 func (t *Token) SetURLs(urls TokenURLs) {
 	t.URLs = urls
+}
+
+func (t *Token) OnUpdate(f func(t *Token)) {
+	t.onUpdate = f
 }
 
 func (t *Token) IsExpired() bool {
@@ -93,7 +98,14 @@ func (t *Token) Update() error {
 		t.LastUpdate = time.Now()
 		errChan <- nil
 	})
-	return <-errChan
+	var err = <-errChan
+	if err != nil {
+		return err
+	}
+	if t.onUpdate != nil {
+		t.onUpdate(t)
+	}
+	return nil
 }
 
 func (t *Token) Client() *requester.APIClient {
