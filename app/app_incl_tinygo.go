@@ -13,10 +13,7 @@ import (
 type Application struct {
 	BaseElementID string
 	Router        *router.Router
-	Navbar        components.Component
-	Footer        components.Component
-	Loader        components.Loader
-	Base          jsext.Element
+	Base          AppBase
 	onErr         func(err error)
 	OnLoad        func()
 	Data          map[string]interface{}

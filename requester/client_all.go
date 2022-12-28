@@ -11,7 +11,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"reflect"
 	"runtime/debug"
+
+	"github.com/Nigel2392/jsext/helpers"
 )
 
 // Define methods and encodings type
@@ -143,6 +146,10 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 		c.request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		var formValues = url.Values{}
 		for k, v := range formData {
+			var val = reflect.ValueOf(v)
+			if val.Kind() == reflect.Ptr {
+				v = helpers.ValueToString(val)
+			}
 			formValues.Add(k, v)
 		}
 		c.request.Body = io.NopCloser(bytes.NewBufferString(formValues.Encode()))

@@ -129,3 +129,40 @@ func GetStructFieldNames(reflModel reflect.Type) []Rows {
 func (t *Table[T]) Run() *elements.Element {
 	return t.create()
 }
+
+type ListTable struct {
+	innerList [][]string
+	root      *elements.Element
+	width     string
+}
+
+func NewListTable(width string, list [][]string) *ListTable {
+	var t = ListTable{
+		root:      elements.Div().AttrClass("jsext-table-root").AttrStyle("width:" + width),
+		width:     width,
+		innerList: list,
+	}
+	return &t
+}
+
+func (t *ListTable) Render() jsext.Element {
+	return t.create().Render()
+}
+
+func (t *ListTable) create() *elements.Element {
+	var table = t.root.Table().AttrClass("jsext-table").AttrStyle("width:" + t.width)
+	var thead = table.Thead()
+	var tbody = table.Tbody()
+	var tr = thead.Tr()
+	for _, rowName := range t.innerList[0] {
+		tr.Th().AttrStyle("width:auto", "text-align:left").Span(fmt.Sprintf("%v", rowName))
+	}
+
+	for _, model := range t.innerList[1:] {
+		tr = tbody.Tr()
+		for _, val := range model {
+			tr.Td().AttrStyle("width:auto", "text-align:left").Span(fmt.Sprintf("%v", val))
+		}
+	}
+	return t.root
+}

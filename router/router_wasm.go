@@ -181,6 +181,15 @@ func (r *Router) Handlef(fmtPath string, args ...any) {
 	r.HandlePath(path)
 }
 
+func (r *Router) Throw(code int) {
+	var err = NewError(code, "error")
+	if r.onErr == nil {
+		panic(err)
+	} else {
+		r.onErr(error(err))
+	}
+}
+
 // Capitalize the first letter of the string.
 func simpleToTitle(s string) string {
 	var b = []byte(s)
