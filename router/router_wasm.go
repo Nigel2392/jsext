@@ -175,6 +175,7 @@ func (r *Router) Handle(u *url.URL) {
 	}()
 }
 
+// Capitalize the first letter of the string.
 func simpleToTitle(s string) string {
 	var b = []byte(s)
 	for i := 0; i < len(b); i++ {
