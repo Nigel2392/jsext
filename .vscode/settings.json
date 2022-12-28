@@ -3,5 +3,8 @@
     "go.toolsEnvVars": {
         "GOOS": "js",
         "GOARCH": "wasm"
-    }
+    }//,
+    //"go.buildFlags": [
+    //    "-tags=tinygo"
+    //]
 }
