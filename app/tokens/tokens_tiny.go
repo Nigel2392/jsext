@@ -4,8 +4,6 @@
 package tokens
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -21,12 +19,26 @@ func (t *Token) Update() error {
 		t.RefreshTokenVariable: t.RefreshToken,
 	}
 	client = client.Post(t.URLs.RefreshURL).WithData(data, requester.JSON)
-	var datamap map[string]string
 	var resp *fetch.Response = client.Do()
-	var err = json.NewDecoder(bytes.NewBuffer(resp.Body)).Decode(&datamap)
-	if err != nil {
-		return err
+	var datamap, ok = gjson.ParseBytes(resp.Body).Value().(map[string]interface{})
+	if !ok {
+		return errors.New("could not parse response")
 	}
+	if err, ok := datamap[t.errorMessageName]; ok {
+		return errors.New(err.(string))
+	}
+	AccessToken, ok := datamap[t.AccessTokenVariable].(string)
+	if !ok {
+		return errors.New("could not parse response")
+	}
+	RefreshToken, ok := datamap[t.RefreshTokenVariable].(string)
+	if !ok {
+		return errors.New("could not parse response")
+	}
+	var LastUpdate = time.Now()
+	t.AccessToken = AccessToken
+	t.RefreshToken = RefreshToken
+	t.LastUpdate = LastUpdate
 	if t.onUpdate != nil {
 		t.onUpdate(t)
 	}

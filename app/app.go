@@ -298,11 +298,17 @@ func Exit() {
 
 // Set data on the application.
 func (a *Application) Set(k string, v any) {
+	if a.Data == nil {
+		a.Data = make(map[string]any)
+	}
 	a.Data[k] = v
 }
 
 // Get data from the application.
 func (a *Application) Get(key string) interface{} {
+	if a.Data == nil {
+		a.Data = make(map[string]any)
+	}
 	return a.Data[key]
 }
 
