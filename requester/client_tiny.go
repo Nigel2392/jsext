@@ -12,11 +12,15 @@ import (
 // Or being too much of a hassle to implement.
 type APIClient struct {
 	Request *fetch.Request
+	before  func()
+	after   func()
 }
 
 func NewAPIClient() *APIClient {
 	return &APIClient{
-		Request: &fetch.Request{},
+		Request: &fetch.Request{
+			Headers: make(map[string]string),
+		},
 	}
 }
 
@@ -83,5 +87,22 @@ func (c *APIClient) WithData(formData map[string]interface{}, encoding Encoding,
 
 // Send the request
 func (c *APIClient) Do() *fetch.Response {
-	return fetch.Fetch(c.Request)
+	if c.before != nil {
+		c.before()
+	}
+	var resp = fetch.Fetch(c.Request)
+	if c.after != nil {
+		c.after()
+	}
+	return resp
+}
+
+// Function to execute before the request is executed
+func (c *APIClient) Before(cb func()) {
+	c.before = cb
+}
+
+// Function to execute after the request is executed
+func (c *APIClient) After(cb func()) {
+	c.after = cb
 }
