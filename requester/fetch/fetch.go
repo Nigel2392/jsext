@@ -71,9 +71,7 @@ func (f *Request) Object() js.Value {
 	if f.Referrer != "" {
 		jsRequest.Set("referrer", f.Referrer)
 	}
-
 	return jsRequest
-
 }
 
 type Response struct {
@@ -84,6 +82,10 @@ type Response struct {
 
 // TinyGO fetch request implementation.
 func Fetch(options *Request) *Response {
+	return <-fetch(*options)
+}
+
+func fetch(options Request) chan *Response {
 	if options.Method == "" {
 		options.Method = "GET"
 	}
@@ -125,7 +127,7 @@ func Fetch(options *Request) *Response {
 		}))
 		return nil
 	}))
-	return <-respChan
+	return respChan
 }
 
 func MarshalMap(data map[string]interface{}) []byte {
@@ -138,11 +140,9 @@ func MarshalMap(data map[string]interface{}) []byte {
 		switch value.(type) {
 		case string:
 			valueString = fmt.Sprintf("\"%v\"", value)
-		case bool:
-			valueString = fmt.Sprintf("%v", value)
-		case int:
-			valueString = fmt.Sprintf("%v", value)
-		case float64:
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+			valueString = fmt.Sprintf("%d", value)
+		case float64, float32, complex64, complex128, bool:
 			valueString = fmt.Sprintf("%v", value)
 		case []byte:
 			valueString = `"` + strings.ReplaceAll(string(value.([]byte)), `"`, `\"`) + `"`
