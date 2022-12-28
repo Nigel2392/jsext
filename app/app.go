@@ -22,9 +22,13 @@ type AppBase struct {
 }
 
 func (a *AppBase) Render() jsext.Element {
-	a.Root.Prepend(a.Header.Render())
+	if a.Header != nil {
+		a.Root.AppendChild(a.Header.Render())
+	}
 	a.Root.AppendChild(a.Base.Render())
-	a.Root.AppendChild(a.Footer.Render())
+	if a.Footer != nil {
+		a.Root.AppendChild(a.Footer.Render())
+	}
 	return a.Root
 }
 
