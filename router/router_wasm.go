@@ -4,6 +4,7 @@
 package router
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -173,6 +174,11 @@ func (r *Router) Handle(u *url.URL) {
 			jsext.Document.Set("title", simpleToTitle(rt.Name))
 		}
 	}()
+}
+
+func (r *Router) Handlef(fmtPath string, args ...any) {
+	var path = fmt.Sprintf(fmtPath, args...)
+	r.HandlePath(path)
 }
 
 // Capitalize the first letter of the string.
