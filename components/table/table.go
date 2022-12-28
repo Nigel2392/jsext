@@ -1,3 +1,6 @@
+//go:build js && wasm
+// +build js,wasm
+
 package table
 
 import (
@@ -130,6 +133,20 @@ func (t *Table[T]) Run() *elements.Element {
 	return t.create()
 }
 
+// # Example:
+//
+//	var resultList = make([][]string, len(results)+1)
+//	resultList[0] = []string{"Title", "Content", "Author", "Created", "Updated"}
+//
+//	for i, result := range results {
+//		var innerList = make([]string, 5)
+//		for j, v := range []string{result.Title, result.Body, result.Author.Username, result.CreatedAt().Format("2006-01-02 15:04:05"), result.UpdatedAt().Format("2006-01-02 15:04:05")} {
+//			innerList[j] = v
+//		}
+//		resultList[i+1] = innerList
+//	}
+//
+//	return table.NewListTable("100%", resultList)
 type ListTable struct {
 	innerList [][]string
 	root      *elements.Element

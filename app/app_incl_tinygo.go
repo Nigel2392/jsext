@@ -18,6 +18,6 @@ type Application struct {
 	Loader        components.Loader
 	Base          jsext.Element
 	onErr         func(err error)
-	OnLoad        func()
+	onLoad        func()
 	Data          map[string]interface{}
 }
