@@ -58,6 +58,9 @@ func (c *APIClient) Head(url string) *APIClient {
 
 // Add headers to the request
 func (c *APIClient) WithHeaders(headers map[string]string) *APIClient {
+	if c.Request.Headers == nil {
+		c.Request.Headers = make(map[string]string)
+	}
 	for k, v := range headers {
 		c.Request.Headers[k] = v
 	}
