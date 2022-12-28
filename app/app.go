@@ -13,29 +13,6 @@ import (
 	"github.com/Nigel2392/jsext/router"
 )
 
-type AppBase struct {
-	Root   jsext.Element
-	Header components.Component
-	Base   *elements.Element
-	Footer components.Component
-	Loader components.Loader
-}
-
-func (a *AppBase) Render() jsext.Element {
-	if a.Header != nil {
-		a.Root.AppendChild(a.Header.Render())
-	}
-	a.Root.AppendChild(a.Base.Render())
-	if a.Footer != nil {
-		a.Root.AppendChild(a.Footer.Render())
-	}
-	return a.Root
-}
-
-func (a *AppBase) Clear() {
-	a.Root.InnerHTML("")
-}
-
 // Preloader to be removed. This should happen automatically from the JS-script.
 const JSEXT_PRELOADER_ID = "jsext-preload-container"
 
@@ -78,13 +55,9 @@ func App(id string, rt ...*router.Router) *Application {
 	var a = &Application{
 		BaseElementID: id,
 		Router:        r,
-		Base: AppBase{
-			Root:   elem,
-			Header: nil,
-			Footer: nil,
-			Loader: loaders.NewLoader(id, loaders.ID_LOADER, true, loaders.LoaderRing),
-		},
-		Data: make(map[string]interface{}),
+		Base:          elem,
+		Loader:        loaders.NewLoader(id, loaders.ID_LOADER, true, loaders.LoaderRing),
+		Data:          make(map[string]interface{}),
 	}
 	return a
 }
@@ -93,38 +66,38 @@ func App(id string, rt ...*router.Router) *Application {
 func (a *Application) OnError(f func(err error)) {
 	var newF = func(err error) {
 		f(err)
-		a.Base.Render()
+		a.renderBases()
 	}
 	a.onErr = newF
 }
 
 // Set the base navbar.
 func (a *Application) SetNavbar(navbar components.Component) *Application {
-	a.Base.Header = navbar
+	a.Navbar = navbar
 	return a
 }
 
 // Set the base footer.
 func (a *Application) SetFooter(footer components.Component) *Application {
-	a.Base.Footer = footer
+	a.Footer = footer
 	return a
 }
 
 // Set the base loader.
 func (a *Application) SetLoader(loader components.Loader) *Application {
-	a.Base.Loader = loader
+	a.Loader = loader
 	return a
 }
 
 // Set the base style.
-func (a *Application) SetStyle(style ...string) *Application {
-	a.Base.Base.AttrStyle(style...)
+func (a *Application) SetStyle(style string) *Application {
+	a.Base.SetAttribute("style", style)
 	return a
 }
 
 // Set classes on the base element.
-func (a *Application) SetClasses(classes ...string) *Application {
-	a.Base.Base.AttrClass(classes...)
+func (a *Application) SetClasses(class string) *Application {
+	a.Base.SetAttribute("class", class)
 	return a
 }
 
@@ -184,10 +157,10 @@ func (a *Application) Stop() {
 
 // Run the application loader for a time consuming function.
 func (a *Application) Load(f func()) {
-	a.Base.Loader.Show()
+	a.Loader.Show()
 	go func() {
 		f()
-		a.Base.Loader.Finalize()
+		a.Loader.Finalize()
 	}()
 }
 
@@ -218,59 +191,66 @@ func (a *Application) Redirect(url string) {
 
 // Render a component to the application.
 func (a *Application) render(e ...components.Component) {
-	a.Base.Clear()
-	a.Base.Render()
+	a.Base.InnerHTML("")
 	for _, el := range e {
-		a.Base.Base.JSExtElement().AppendChild(el.Render())
+		a.Base.AppendChild(el.Render())
 	}
+	a.renderBases()
 }
 
 // InnerHTML sets the inner HTML of the element.
 func (a *Application) InnerHTML(html string) *Application {
-	a.Base.Clear()
-	a.Base.Base.InnerHTML(html)
-	a.Base.Render()
+	a.Base.InnerHTML(html)
+	a.renderBases()
 	return a
 }
 
 // InnerText sets the inner text of the element.
 func (a *Application) InnerText(text string) *Application {
-	a.Base.Clear()
-	a.Base.Base.InnerText(text)
-	a.Base.Render()
+	a.Base.InnerText(text)
+	a.renderBases()
 	return a
 }
 
 // SetInnerElement clears the inner HTML and appends the element.
 func (a *Application) InnerElement(el jsext.Element) *Application {
-	a.Base.Clear()
-	a.Base.Base.JSExtElement().AppendChild(el)
-	a.Base.Render()
+	a.Base.InnerHTML("")
+	a.Base.AppendChild(el)
+	a.renderBases()
 	return a
 }
 
 // InnerComponent clears the inner HTML and appends the component.
 func (a *Application) InnerComponent(c components.Component) *Application {
-	a.Base.Clear()
-	a.Base.Base.JSExtElement().AppendChild(c.Render())
-	a.Base.Render()
+	a.Base.InnerHTML("")
+	a.Base.AppendChild(c.Render())
+	a.renderBases()
 	return a
 }
 
 // AppendChild appends a child to the element.
-func (a *Application) AppendChild(e *elements.Element) *Application {
+func (a *Application) AppendChild(e components.Component) *Application {
 	// If footer is not nil, append before it
-	//if a.Base.Footer != nil {
-	//	var footer, ok = a.Base.Footer.(*elements.Element)
-	//	if !ok {
-	//		panic("footer is not an element, cannot append before it.")
-	//	}
-	//	a.Base.InsertBefore(e.Render(), footer.JSExtElement())
-	//} else {
-	//	a.Base.AppendChild(e.Render())
-	//}
-	a.Base.Base.JSExtElement().AppendChild(e.Render())
+	if a.Footer != nil {
+		var footer, ok = a.Footer.(*elements.Element)
+		if !ok {
+			panic("footer is not an element, cannot append before it.")
+		}
+		a.Base.InsertBefore(e.Render(), footer.JSExtElement())
+	} else {
+		a.Base.AppendChild(e.Render())
+	}
 	return a
+}
+
+// Render application header and footer if defined.
+func (a *Application) renderBases() {
+	if a.Navbar != nil {
+		a.Base.Prepend(a.Navbar.Render())
+	}
+	if a.Footer != nil {
+		a.Base.Append(a.Footer.Render())
+	}
 }
 
 // Exit the application.

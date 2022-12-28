@@ -356,6 +356,24 @@ func (e *Element) ClearInnerHTML() {
 	e.value.Set("innerHTML", "")
 }
 
+func (e *Element) ClearInnerText() {
+	if e.value.IsUndefined() {
+		return
+	}
+	e.value.Set("innerText", "")
+}
+
+func (e *Element) Clear() {
+	if e.value.IsUndefined() {
+		return
+	}
+	e.value.Set("innerHTML", "")
+	e.value.Set("innerText", "")
+	for _, child := range e.Children {
+		child.Remove()
+	}
+}
+
 func (e *Element) Render() jsext.Element {
 	if e.value.IsUndefined() {
 		e.generate(js.Undefined())
