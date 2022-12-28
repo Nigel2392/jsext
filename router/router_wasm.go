@@ -138,13 +138,13 @@ func (r *Router) Run() {
 	})
 
 	jsext.Element(jsext.Window).AddEventListener("popstate", func(t jsext.Value, event jsext.Event) {
-		var path = jsext.Window.Get("location").Get("pathname").String()
+		var path = jsext.Window.Get("location").Get("href").String()
 		r.HandlePath(path)
 	})
 	if r.onLoad != nil {
 		r.onLoad()
 	}
-	var path = jsext.Window.Get("location").Get("pathname").String()
+	var path = jsext.Window.Get("location").Get("href").String()
 	r.HandlePath(path)
 }
 

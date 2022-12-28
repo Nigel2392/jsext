@@ -208,6 +208,14 @@ func NewDate() Value {
 	return Value(js.Global().Get("Date").New())
 }
 
+func Undefined() Value {
+	return Value(js.Undefined())
+}
+
+func Null() Value {
+	return Value(js.Null())
+}
+
 // Set a document cookie
 func SetCookie(name, value string, tim time.Duration) error {
 	var expires = time.Now().Add(tim).UTC().Format(time.RFC1123)

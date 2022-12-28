@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -257,7 +256,7 @@ func PrintRecover() any {
 		println(string(debug.Stack()))
 		println("///////////////////////////////////////////")
 		println("///")
-		println(fmt.Sprintf("///	%v", r))
+		println(r.(error).Error())
 		println("///")
 		println("///////////////////////////////////////////")
 		return r
