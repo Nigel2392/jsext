@@ -1,14 +1,15 @@
-//go:build !tinygo && js && wasm
-// +build !tinygo,js,wasm
+//go:build js && wasm
+// +build js,wasm
 
 package tokens
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/tidwall/gjson"
 )
 
 type JWTToken struct {
@@ -64,13 +65,8 @@ func DecodeToken(token string) (JWTToken, error) {
 		Payload:   Payload{},
 		Signature: Signature(signature),
 	}
-	err = json.Unmarshal(header, &t.Header)
-	if err != nil {
-		return JWTToken{}, err
-	}
-	err = json.Unmarshal(payload, &t.Payload)
-	if err != nil {
-		return JWTToken{}, err
-	}
+	t.Header.Alg = gjson.Get(string(header), "alg").String()
+	t.Header.Typ = gjson.Get(string(header), "typ").String()
+	t.Payload = gjson.Parse(string(payload)).Value().(map[string]interface{})
 	return t, nil
 }
