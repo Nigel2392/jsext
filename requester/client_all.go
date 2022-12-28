@@ -123,7 +123,7 @@ func (c *APIClient) Trace(url string) *APIClient {
 }
 
 // Add form data to the request
-func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file ...File) *APIClient {
+func (c *APIClient) WithData(formData map[string]any, encoding Encoding, file ...File) *APIClient {
 	if c.request == nil {
 		c.errorFunc(errors.New(ErrNoRequest))
 	}
@@ -147,10 +147,12 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 		var formValues = url.Values{}
 		for k, v := range formData {
 			var val = reflect.ValueOf(v)
+			var retVal string
 			if val.Kind() == reflect.Ptr {
-				v = helpers.ValueToString(val)
+				val = val.Elem()
 			}
-			formValues.Add(k, v)
+			retVal = helpers.ValueToString(val)
+			formValues.Add(k, retVal)
 		}
 		c.request.Body = io.NopCloser(bytes.NewBufferString(formValues.Encode()))
 
@@ -158,7 +160,13 @@ func (c *APIClient) WithData(formData map[string]string, encoding Encoding, file
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		for k, v := range formData {
-			writer.WriteField(k, v)
+			var val = reflect.ValueOf(v)
+			var retVal string
+			if val.Kind() == reflect.Ptr {
+				val = val.Elem()
+			}
+			retVal = helpers.ValueToString(val)
+			writer.WriteField(k, retVal)
 		}
 		for _, f := range file {
 			part, err := writer.CreateFormFile(f.FieldName, f.FileName)

@@ -153,7 +153,7 @@ func (t *Token) setToken(access, refresh string, lastUpdate time.Time) {
 // Make an api call to the refresh URL, update both the access and refresh tokens.
 func (t *Token) Update() error {
 	var client = requester.NewAPIClient()
-	var data = map[string]string{
+	var data = map[string]any{
 		t.RefreshTokenVariable: t.RefreshToken,
 	}
 	client = client.Post(t.URLs.RefreshURL).WithData(data, requester.JSON)
@@ -197,7 +197,7 @@ func (t *Token) Client() *requester.APIClient {
 }
 
 // Send data to an API endpoint, get both access and refresh tokens.
-func (t *Token) sendDataGetToken(data map[string]string, url string) error {
+func (t *Token) sendDataGetToken(data map[string]any, url string) error {
 	var client = requester.NewAPIClient()
 	client = client.Post(url)
 	client.OnError(func(err error) bool {
@@ -234,12 +234,20 @@ func (t *Token) sendDataGetToken(data map[string]string, url string) error {
 
 // Login with the appropriate data, get both access and refresh tokens.
 func (t *Token) Login(loginData map[string]string) error {
-	return t.sendDataGetToken(loginData, t.URLs.LoginURL)
+	newMap := make(map[string]any, len(loginData))
+	for k, v := range loginData {
+		newMap[k] = v
+	}
+	return t.sendDataGetToken(newMap, t.URLs.LoginURL)
 }
 
 // Register with the appropriate data, get both access and refresh tokens.
 func (t *Token) Register(registerData map[string]string) error {
-	return t.sendDataGetToken(registerData, t.URLs.RegisterURL)
+	newMap := make(map[string]any, len(registerData))
+	for k, v := range registerData {
+		newMap[k] = v
+	}
+	return t.sendDataGetToken(newMap, t.URLs.RegisterURL)
 }
 
 // Logout with the refresh token.
@@ -250,7 +258,7 @@ func (t *Token) Logout() error {
 	}
 	var client = t.Client()
 	client = client.Post(t.URLs.LogoutURL)
-	client.WithData(map[string]string{
+	client.WithData(map[string]any{
 		t.RefreshTokenVariable: t.RefreshToken,
 	}, requester.JSON)
 	var errChan = make(chan error)
