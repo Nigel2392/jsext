@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Nigel2392/jsext/requester"
-	"github.com/Nigel2392/jsext/requester/fetch"
 	"github.com/tidwall/gjson"
 )
 
@@ -19,7 +18,10 @@ func (t *Token) Update() error {
 		t.RefreshTokenVariable: t.RefreshToken,
 	}
 	client = client.Post(t.URLs.RefreshURL).WithData(data, requester.JSON)
-	var resp *fetch.Response = client.Do()
+	var resp, err = client.Do()
+	if err != nil {
+		return err
+	}
 	var datamap, ok = gjson.ParseBytes(resp.Body).Value().(map[string]interface{})
 	if !ok {
 		return errors.New("could not parse response")
@@ -62,7 +64,10 @@ func (t *Token) sendDataGetToken(data map[string]any, url string) error {
 	var client = requester.NewAPIClient()
 	client = client.Post(url)
 	client.WithData(data, requester.JSON)
-	var resp *fetch.Response = client.Do()
+	var resp, err = client.Do()
+	if err != nil {
+		return err
+	}
 	var datamap, ok = gjson.ParseBytes(resp.Body).Value().(map[string]interface{})
 	if !ok {
 		return errors.New("could not parse response")
@@ -112,7 +117,10 @@ func (t *Token) Logout() error {
 	client.WithData(map[string]any{
 		t.RefreshTokenVariable: t.RefreshToken,
 	}, requester.JSON)
-	var resp *fetch.Response = client.Do()
+	var resp, err = client.Do()
+	if err != nil {
+		return err
+	}
 	var respMap, ok = gjson.ParseBytes(resp.Body).Value().(map[string]interface{})
 	if !ok {
 		return errors.New("could not parse response")

@@ -147,6 +147,7 @@ func (t *Token) setToken(access, refresh string, lastUpdate time.Time) {
 
 // Run the token update manager.
 // This will automatically update the token every AccessTimeout - 10%
+// Automatically stops the manager if an error occurs when updating the token.
 func (t *Token) RunManager() {
 	t.StopManager()
 	go func() {
@@ -155,6 +156,7 @@ func (t *Token) RunManager() {
 			if err != nil {
 				if t.onUpdateErr != nil {
 					t.onUpdateErr(err)
+					t.StopManager()
 				} else {
 					panic(err)
 				}

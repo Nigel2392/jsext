@@ -1,9 +1,7 @@
-//go:build js && wasm && tinygo
-// +build js,wasm,tinygo
-
 package fetch
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"syscall/js"
@@ -81,11 +79,11 @@ type Response struct {
 }
 
 // TinyGO fetch request implementation.
-func Fetch(options *Request) *Response {
-	return <-fetch(*options)
+func Fetch(options *Request) (*Response, error) {
+	return fetch(*options)
 }
 
-func fetch(options Request) chan *Response {
+func fetch(options Request) (*Response, error) {
 	if options.Method == "" {
 		options.Method = "GET"
 	}
@@ -104,7 +102,7 @@ func fetch(options Request) chan *Response {
 	}
 
 	var respChan = make(chan *Response)
-	fetch.Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	var then = fetch.Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		var response = args[0]
 		var headers = response.Get("headers")
 		var jsHeaders = make(map[string]string)
@@ -127,7 +125,23 @@ func fetch(options Request) chan *Response {
 		}))
 		return nil
 	}))
-	return respChan
+	if then.IsUndefined() {
+		panic("then is undefined")
+	}
+	var errChan = make(chan error)
+	then.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		var err = args[0]
+		var errString = err.Get("message").String()
+		errChan <- errors.New(errString)
+		return nil
+	}))
+	var resp *Response
+	var err error
+	select {
+	case resp = <-respChan:
+	case err = <-errChan:
+	}
+	return resp, err
 }
 
 func MarshalMap(data map[string]interface{}) []byte {

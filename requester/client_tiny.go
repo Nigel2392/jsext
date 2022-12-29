@@ -86,15 +86,18 @@ func (c *APIClient) WithData(formData map[string]interface{}, encoding Encoding,
 }
 
 // Send the request
-func (c *APIClient) Do() *fetch.Response {
+func (c *APIClient) Do() (*fetch.Response, error) {
 	if c.before != nil {
 		c.before()
 	}
-	var resp = fetch.Fetch(c.Request)
+	var resp, err = fetch.Fetch(c.Request)
+	if err != nil {
+		return nil, err
+	}
 	if c.after != nil {
 		c.after()
 	}
-	return resp
+	return resp, nil
 }
 
 // Function to execute before the request is executed
