@@ -1,5 +1,5 @@
-//go:build js && wasm
-// +build js,wasm
+//go:build js && wasm && !tinygo
+// +build js,wasm,!tinygo
 
 package forms_test
 
