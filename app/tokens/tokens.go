@@ -157,6 +157,7 @@ func (t *Token) RunManager() {
 				if t.onUpdateErr != nil {
 					t.onUpdateErr(err)
 					t.StopManager()
+					return
 				} else {
 					panic(err)
 				}

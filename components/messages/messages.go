@@ -1,5 +1,5 @@
-//go:build js && wasm
-// +build js,wasm
+//go:build js && wasm && !tinygo
+// +build js,wasm,!tinygo
 
 package messages
 
@@ -12,6 +12,10 @@ import (
 	"github.com/Nigel2392/jsext/helpers"
 	"github.com/Nigel2392/jsext/helpers/csshelpers"
 )
+
+// For some reason this package causes a nil pointer dereference in tinygo.
+// Thus, we exclude it from the build.
+// This unfortunately does mean that we cannot use the message framework at all.
 
 // Time to wait for garbage collection of messages.
 const tickerWaitMS = 100

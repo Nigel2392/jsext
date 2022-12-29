@@ -194,18 +194,23 @@ func (a *Application) Stop() {
 
 // Run the application loader for a time consuming function.
 func (a *Application) Load(f func()) {
-	a.Loader.Show()
-	go func() {
-		f()
-		a.Loader.Finalize()
-	}()
+	if a.Loader != nil && f != nil {
+		a.Loader.Show()
+		go func() {
+			f()
+			a.Loader.Finalize()
+		}()
+	}
 }
 
 // Register routes to the application.
 func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL), linkEmpty ...bool) *router.Route {
-	var ncall = a.WrapURL(callable)
-	if len(linkEmpty) > 0 && linkEmpty[0] {
-		ncall = nil
+	var ncall func(v router.Vars, u *url.URL)
+	if callable != nil {
+		ncall = a.WrapURL(callable)
+		if len(linkEmpty) > 0 && linkEmpty[0] {
+			ncall = nil
+		}
 	}
 	var route = a.Router.Register(name, path, ncall)
 	return route
@@ -213,7 +218,9 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 
 func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
 	return func(v router.Vars, u *url.URL) {
-		f(a, v, u)
+		if f != nil {
+			f(a, v, u)
+		}
 	}
 }
 
