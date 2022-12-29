@@ -208,10 +208,12 @@ func NewDate() Value {
 	return Value(js.Global().Get("Date").New())
 }
 
+// Returns a new undefined value.
 func Undefined() Value {
 	return Value(js.Undefined())
 }
 
+// Returns a new null value.
 func Null() Value {
 	return Value(js.Null())
 }

@@ -2,7 +2,6 @@ package fetch
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"syscall/js"
 )
@@ -126,7 +125,8 @@ func fetch(options Request) (*Response, error) {
 		return nil
 	}))
 	if then.IsUndefined() {
-		panic("then is undefined")
+		close(respChan)
+		return nil, errors.New("then is undefined")
 	}
 	var errChan = make(chan error)
 	then.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -141,43 +141,7 @@ func fetch(options Request) (*Response, error) {
 	case resp = <-respChan:
 	case err = <-errChan:
 	}
+	close(respChan)
+	close(errChan)
 	return resp, err
-}
-
-func MarshalMap(data map[string]interface{}) []byte {
-	var startString = "{"
-	var endString = "}"
-	var dataString = ""
-	for key, value := range data {
-		var valueString = ""
-		//lint:ignore S1034 because we need to use the type of the value
-		switch value.(type) {
-		case string:
-			valueString = fmt.Sprintf("\"%v\"", value)
-		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-			valueString = fmt.Sprintf("%d", value)
-		case float64, float32, complex64, complex128, bool:
-			valueString = fmt.Sprintf("%v", value)
-		case []byte:
-			valueString = `"` + strings.ReplaceAll(string(value.([]byte)), `"`, `\"`) + `"`
-		case map[string]interface{}:
-			valueString = string(MarshalMap(value.(map[string]interface{}))) //`"` +  + `"`
-		case map[string]string:
-			valueString = string(MarshalMap(StringMapToAnyMap(value.(map[string]string))))
-		default:
-			valueString = fmt.Sprintf("\"%v\"", value)
-		}
-		dataString += fmt.Sprintf("\"%v\":%v,", key, valueString)
-	}
-	dataString = strings.TrimSuffix(dataString, ",")
-	return []byte(startString + dataString + endString)
-
-}
-
-func StringMapToAnyMap(input map[string]string) map[string]interface{} {
-	var output = make(map[string]interface{}, len(input))
-	for key, value := range input {
-		output[key] = value
-	}
-	return output
 }
