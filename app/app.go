@@ -38,10 +38,9 @@ type Application struct {
 	BaseElemSelector string
 	Router           *router.Router
 	client           *requester.APIClient
-	Navbar           components.NavBar
+	Navbar           components.Component
 	Footer           components.Component
 	Loader           components.Loader
-	NavURLs          *components.URLs
 	Base             jsext.Element
 	clientFunc       func() *requester.APIClient
 	onErr            func(err error)
@@ -110,32 +109,9 @@ func (a *Application) OnError(f func(err error)) {
 }
 
 // Set the base navbar.
-func (a *Application) SetNavbar(navbar components.NavBar) *Application {
+func (a *Application) SetNavbar(navbar components.Component) *Application {
 	a.Navbar = navbar
 	return a
-}
-
-// Set all navbar urls.
-func (a *Application) SetNavURLs(urls *components.URLs) *Application {
-	a.NavURLs = urls
-	return a
-}
-
-// Set a single navbar url.
-func (a *Application) SetNavURL(name, url string, hidden bool) *Application {
-	if a.NavURLs == nil {
-		a.NavURLs = components.NewURLs()
-	}
-	a.NavURLs.Append(name, url, hidden)
-	return a
-}
-
-// Get a single navbar url.
-func (a *Application) GetNavURL(name string) *components.URL {
-	if a.NavURLs == nil {
-		return nil
-	}
-	return a.NavURLs.Get(name)
 }
 
 // Set the base footer.
@@ -238,11 +214,12 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 }
 
 func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
-	return func(v router.Vars, u *url.URL) {
-		if f != nil {
+	if f != nil {
+		return func(v router.Vars, u *url.URL) {
 			f(a, v, u)
 		}
 	}
+	return nil
 }
 
 // Render a component to the application.
@@ -311,7 +288,7 @@ func (a *Application) AppendChild(e components.Component) *Application {
 // Render application header and footer if defined.
 func (a *Application) renderBases() {
 	if a.Navbar != nil {
-		a.Base.Prepend(a.Navbar.Nav(a.NavURLs).Render())
+		a.Base.Prepend(a.Navbar.Render())
 	}
 	if a.Footer != nil {
 		a.Base.Append(a.Footer.Render())
