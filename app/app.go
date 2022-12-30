@@ -130,6 +130,14 @@ func (a *Application) SetNavURL(name, url string, hidden bool) *Application {
 	return a
 }
 
+// Get a single navbar url.
+func (a *Application) GetNavURL(name string) *components.URL {
+	if a.NavURLs == nil {
+		return nil
+	}
+	return a.NavURLs.Get(name)
+}
+
 // Set the base footer.
 func (a *Application) SetFooter(footer components.Component) *Application {
 	a.Footer = footer
@@ -230,12 +238,11 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 }
 
 func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
-	if f != nil {
-		return func(v router.Vars, u *url.URL) {
+	return func(v router.Vars, u *url.URL) {
+		if f != nil {
 			f(a, v, u)
 		}
 	}
-	return nil
 }
 
 // Render a component to the application.
