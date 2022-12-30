@@ -60,6 +60,7 @@ func (m *MenuCurtainDrop) Menu(urls *components.URLs, btnWidth int, curtainColor
 			if url.Hidden {
 				urlItem.AttrStyle("display: none")
 			}
+			url.Run()
 			url.Elem = urlItem
 		}
 	}

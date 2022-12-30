@@ -36,6 +36,8 @@ var AppURLs = &URLs{
 }
 
 type URL struct {
+	Hide   chan bool
+	Show   chan bool
 	Name   string
 	URL    string
 	Hidden bool
@@ -54,6 +56,8 @@ func NewURLs() *URLs {
 
 func (u *URLs) Register(name, url string, elem *elements.Element, hidden bool) *URL {
 	var URL = &URL{
+		Hide:   make(chan bool),
+		Show:   make(chan bool),
 		Name:   name,
 		URL:    url,
 		Hidden: hidden,
@@ -65,6 +69,8 @@ func (u *URLs) Register(name, url string, elem *elements.Element, hidden bool) *
 
 func (u *URLs) Append(name, url string, hidden bool) {
 	u.URLs = append(u.URLs, &URL{
+		Hide:   make(chan bool),
+		Show:   make(chan bool),
 		Name:   name,
 		URL:    url,
 		Hidden: hidden,
@@ -95,4 +101,27 @@ func (u *URL) HideURL() {
 
 func (u *URL) ShowURL() {
 	u.Elem.AttrStyle("display: block")
+}
+
+func (url *URL) Run() {
+	go func(url *URL) {
+		for {
+			select {
+			case <-url.Hide:
+				var jsUrl = jsext.GetElementById("URL-" + url.Name)
+				if jsUrl.Value().Truthy() {
+					jsUrl.Set("style", "display: none;")
+				} else {
+					url.Elem.AttrStyle("display: none")
+				}
+			case <-url.Show:
+				var jsUrl = jsext.GetElementById("URL-" + url.Name)
+				if jsUrl.Value().Truthy() {
+					jsUrl.Set("style", "display: block;")
+				} else {
+					url.Elem.AttrStyle("display: block")
+				}
+			}
+		}
+	}(url)
 }
