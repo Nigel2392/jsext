@@ -381,10 +381,10 @@ func (e *Element) Render() jsext.Element {
 	return e.JSExtElement()
 }
 
-func (e *Element) RenderTo(appendToID ...string) *Element {
+func (e *Element) RenderTo(appendToQuerySelector ...string) *Element {
 	// Create the element
-	if len(appendToID) > 0 {
-		var parent = js.Global().Get("document").Call("getElementById", appendToID[0])
+	if len(appendToQuerySelector) > 0 {
+		var parent = js.Global().Get("document").Call("querySelector", appendToQuerySelector[0])
 		if !parent.IsUndefined() && !parent.IsNull() {
 			e.generate(parent)
 			return e

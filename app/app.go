@@ -14,19 +14,38 @@ import (
 	"github.com/Nigel2392/jsext/router"
 )
 
+// Preloader to be removed. This should happen automatically from the JS-script.
+const JSEXT_PRELOADER_ID = "jsext-preload-container"
+
+// App export to be used for embedding other exports.
+var AppExport jsext.Export
+
+// Set application exports.
+// Available in javascript console under:
+//
+//	jsext.App.((defined_methods))
+func init() {
+	AppExport = jsext.NewExport()
+	AppExport.SetFunc("Exit", Exit)
+	AppExport.RegisterToExport("App", jsext.JSExt)
+}
+
+// Waiter to lock the main thread.
+var WAITER = make(chan struct{})
+
 // Main application, holds router and is the core of the
 type Application struct {
-	BaseElementID string
-	Router        *router.Router
-	client        *requester.APIClient
-	Navbar        components.Component
-	Footer        components.Component
-	Loader        components.Loader
-	Base          jsext.Element
-	clientFunc    func() *requester.APIClient
-	onErr         func(err error)
-	onLoad        func()
-	Data          map[string]interface{}
+	BaseElemSelector string
+	Router           *router.Router
+	client           *requester.APIClient
+	Navbar           components.Component
+	Footer           components.Component
+	Loader           components.Loader
+	Base             jsext.Element
+	clientFunc       func() *requester.APIClient
+	onErr            func(err error)
+	onLoad           func()
+	Data             DataMap
 }
 
 // Initialize a http client with a loader for a new request.
@@ -50,34 +69,15 @@ func (a *Application) SetClientFunc(f func() *requester.APIClient) *Application 
 	return a
 }
 
-// Preloader to be removed. This should happen automatically from the JS-script.
-const JSEXT_PRELOADER_ID = "jsext-preload-container"
-
-// App export to be used for embedding other exports.
-var AppExport jsext.Export
-
-// Set application exports.
-// Available in javascript console under:
-//
-//	jsext.App.((defined_methods))
-func init() {
-	AppExport = jsext.NewExport()
-	AppExport.SetFunc("Exit", Exit)
-	AppExport.RegisterToExport("App", jsext.JSExt)
-}
-
-// Waiter to lock the main thread.
-var WAITER = make(chan struct{})
-
 // Initialize a new application.
 // If id is empty, the application will be initialized on the body.
-func App(id string, rt ...*router.Router) *Application {
+func App(querySelector string, rt ...*router.Router) *Application {
 	// Get the application body
 	var elem jsext.Element
-	if id == "" {
+	if querySelector == "" {
 		elem = jsext.Body
 	} else {
-		elem = jsext.QuerySelector("#" + id)
+		elem = jsext.QuerySelector(querySelector)
 	}
 	// Get the application router
 	var r *router.Router
@@ -90,11 +90,11 @@ func App(id string, rt ...*router.Router) *Application {
 	}
 	// Return the application
 	var a = &Application{
-		BaseElementID: id,
-		Router:        r,
-		Base:          elem,
-		Loader:        loaders.NewLoader(id, loaders.ID_LOADER, true, loaders.LoaderRing),
-		Data:          make(map[string]interface{}),
+		BaseElemSelector: querySelector,
+		Router:           r,
+		Base:             elem,
+		Loader:           loaders.NewLoader(querySelector, loaders.ID_LOADER, true, loaders.LoaderRing),
+		Data:             make(map[string]interface{}),
 	}
 	return a
 }
@@ -204,24 +204,22 @@ func (a *Application) Load(f func()) {
 }
 
 // Register routes to the application.
-func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL), linkEmpty ...bool) *router.Route {
+func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL)) *router.Route {
 	var ncall func(v router.Vars, u *url.URL)
 	if callable != nil {
 		ncall = a.WrapURL(callable)
-		if len(linkEmpty) > 0 && linkEmpty[0] {
-			ncall = nil
-		}
 	}
 	var route = a.Router.Register(name, path, ncall)
 	return route
 }
 
 func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
-	return func(v router.Vars, u *url.URL) {
-		if f != nil {
+	if f != nil {
+		return func(v router.Vars, u *url.URL) {
 			f(a, v, u)
 		}
 	}
+	return nil
 }
 
 // Render a component to the application.
@@ -301,90 +299,4 @@ func (a *Application) renderBases() {
 func Exit() {
 	WAITER <- struct{}{}
 	close(WAITER)
-}
-
-// Set data on the application.
-func (a *Application) Set(k string, v any) {
-	if a.Data == nil {
-		a.Data = make(map[string]any)
-	}
-	a.Data[k] = v
-}
-
-// Get data from the application.
-func (a *Application) Get(key string) interface{} {
-	if a.Data == nil {
-		a.Data = make(map[string]any)
-	}
-	return a.Data[key]
-}
-
-// Get data from the application in the form of an int.
-func (a *Application) GetInt(key string) int {
-	var data = a.Data[key]
-	switch data := data.(type) {
-	case int:
-		return data
-	case int8:
-		return int(data)
-	case int16:
-		return int(data)
-	case int32:
-		return int(data)
-	case int64:
-		return int(data)
-	}
-	return 0
-}
-
-// Get data from the application in the form of a uint.
-func (a *Application) GetUint(key string) uint {
-	var data = a.Data[key]
-	switch data := data.(type) {
-	case uint:
-		return data
-	case uint8:
-		return uint(data)
-	case uint16:
-		return uint(data)
-	case uint32:
-		return uint(data)
-	case uint64:
-		return uint(data)
-	}
-	return 0
-}
-
-// Get data from the application in the form of a string.
-func (a *Application) GetString(key string) string {
-	return a.Data[key].(string)
-}
-
-// Get data from the application in the form of a bool.
-func (a *Application) GetBool(key string) bool {
-	return a.Data[key].(bool)
-}
-
-// Get data from the application in the form of a float64.
-func (a *Application) GetFloat(key string) float64 {
-	var data = a.Data[key]
-	switch data := data.(type) {
-	case float64:
-		return data
-	case float32:
-		return float64(data)
-	}
-	return 0
-}
-
-// Get data from the application in the form of a complex128.
-func (a *Application) GetComplex(key string) complex128 {
-	var data = a.Data[key]
-	switch data := data.(type) {
-	case complex128:
-		return data
-	case complex64:
-		return complex128(data)
-	}
-	return 0
 }
