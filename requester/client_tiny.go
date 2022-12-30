@@ -78,7 +78,8 @@ func (c *APIClient) WithData(formData map[string]interface{}, encoding Encoding,
 		c.Request.Headers["Content-Type"] = "application/json"
 		c.Request.Body = fetch.MarshalMap(formData)
 	case FORM_URL_ENCODED:
-		panic(FORM_URL_ENCODED + " is not supported yet!")
+		c.Request.Headers["Content-Type"] = "application/x-www-form-urlencoded"
+		c.Request.Body = fetch.ToURLValues(formData)
 	case MULTIPART_FORM:
 		panic(MULTIPART_FORM + " is not supported yet!")
 	}

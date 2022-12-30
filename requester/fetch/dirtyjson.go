@@ -21,8 +21,12 @@ func MarshalList(data []interface{}) []byte {
 	return b.Bytes()
 }
 
-func formatString(value interface{}) string {
+func formatStringSafe(value interface{}) string {
 	return "\"" + strings.ReplaceAll(value.(string), `"`, `\"`) + "\""
+}
+
+func formatString(value interface{}) string {
+	return value.(string)
 }
 
 func formatInt(value interface{}) string {
@@ -98,24 +102,12 @@ func marshalListToBuffer(data []interface{}, b *bytes.Buffer) {
 	for i, value := range data {
 		//lint:ignore S1034 this is a switch statement
 		switch value.(type) {
-		case string:
-			b.WriteString(formatString(value))
-		case int, int8, int16, int32, int64:
-			b.WriteString(formatInt(value))
-		case uint, uint8, uint16, uint32, uint64:
-			b.WriteString(formatUint(value))
-		case float64, float32:
-			b.WriteString(formatFloat(value))
-		case complex64, complex128:
-			b.WriteString(formatComplex(value))
-		case bool:
-			b.WriteString(formatBool(value))
+		case string, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float64, float32, complex64, complex128, bool, []byte, []rune:
+			b.WriteString(toString(value))
 		case map[string]interface{}:
 			marshalMapToBuffer(value.(map[string]interface{}), b)
 		case []interface{}:
 			marshalListToBuffer(value.([]interface{}), b)
-		case []byte:
-			b.WriteString(formatString(string(value.([]byte))))
 		case nil:
 			b.WriteString("null")
 		default:
@@ -136,47 +128,47 @@ func marshalMapToBuffer(data map[string]interface{}, b *bytes.Buffer) {
 		//lint:ignore S1034 this is a switch statement
 		switch value.(type) {
 		case string:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
-			b.WriteString(formatString(value))
+			b.WriteString(formatStringSafe(value))
 		case int, int8, int16, int32, int64:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString(formatInt(value))
 		case uint, uint8, uint16, uint32, uint64:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString(formatUint(value))
 		case float64, float32:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString(formatFloat(value))
 		case complex64, complex128:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString(formatComplex(value))
 		case bool:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString(formatBool(value))
 		case map[string]interface{}:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			marshalMapToBuffer(value.(map[string]interface{}), b)
 		case []interface{}:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			marshalListToBuffer(value.([]interface{}), b)
 		case []byte:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
-			b.WriteString(formatString(string(value.([]byte))))
+			b.WriteString(formatStringSafe(string(value.([]byte))))
 		case nil:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString("null")
 		default:
-			b.WriteString(formatString(key))
+			b.WriteString(formatStringSafe(key))
 			b.WriteString(":")
 			b.WriteString("null")
 		}
@@ -186,4 +178,28 @@ func marshalMapToBuffer(data map[string]interface{}, b *bytes.Buffer) {
 		i++
 	}
 	b.WriteString("}")
+}
+
+func toString(data interface{}) string {
+	// string, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float64, float32, complex64, complex128, bool
+	switch data := data.(type) {
+	case bool:
+		return formatBool(data)
+	case int, int8, int16, int32, int64:
+		return formatInt(data)
+	case uint, uint8, uint16, uint32, uint64:
+		return formatUint(data)
+	case float32, float64:
+		return formatFloat(data)
+	case complex128, complex64:
+		return formatComplex(data)
+	case string:
+		return formatString(data)
+	case []byte:
+		return formatString(string(data))
+	case []rune:
+		return formatString(string(data))
+	default:
+		return ""
+	}
 }

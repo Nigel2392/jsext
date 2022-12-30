@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Default syscall/js values, wrapped.
+// Default syscall/js values, some wrapped.
 var (
 	JSExt    Export
 	Global   js.Value
@@ -245,6 +245,70 @@ func GetCookie(name string) string {
 // Delete a document cookie
 func DeleteCookie(name string) {
 	SetCookie(name, "", -1)
+}
+
+func ObjectToMapString(obj js.Value) map[string]string {
+	var m = make(map[string]string)
+	var keys = obj.Call("keys")
+	for i := 0; i < keys.Length(); i++ {
+		var key = keys.Index(i).String()
+		m[key] = obj.Get(key).String()
+	}
+	return m
+}
+
+func ObjectToMap(obj js.Value) map[string]interface{} {
+	var m = make(map[string]interface{})
+	var keys = obj.Call("keys")
+	for i := 0; i < keys.Length(); i++ {
+		var key = keys.Index(i).String()
+		var v = obj.Get(key)
+		switch v.Type() {
+		case js.TypeObject:
+			m[key] = ObjectToMap(v)
+		case js.TypeNull:
+			m[key] = nil
+		case js.TypeBoolean:
+			m[key] = v.Bool()
+		case js.TypeNumber:
+			m[key] = v.Float()
+		case js.TypeString:
+			m[key] = v.String()
+		default:
+			if v.InstanceOf(js.Global().Get("Array")) {
+				m[key] = ArrayToSlice(v)
+			} else {
+				m[key] = v
+			}
+		}
+	}
+	return m
+}
+
+func ArrayToSlice(arr js.Value) []interface{} {
+	var s = make([]interface{}, arr.Length())
+	for i := 0; i < arr.Length(); i++ {
+		var v = arr.Index(i)
+		switch v.Type() {
+		case js.TypeObject:
+			s[i] = ObjectToMap(v)
+		case js.TypeNull:
+			s[i] = nil
+		case js.TypeBoolean:
+			s[i] = v.Bool()
+		case js.TypeNumber:
+			s[i] = v.Float()
+		case js.TypeString:
+			s[i] = v.String()
+		default:
+			if v.InstanceOf(js.Global().Get("Array")) {
+				s[i] = ArrayToSlice(v)
+			} else {
+				s[i] = v
+			}
+		}
+	}
+	return s
 }
 
 //type JavaScript interface {

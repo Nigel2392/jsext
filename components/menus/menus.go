@@ -20,7 +20,17 @@ import (
 //	"#jsext-menu-open-btn"
 //	"#jsext-menu"
 //	"#jsext-menu-close-btn"
-func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, compColor ...string) *elements.Element {
+type MenuCurtainDrop struct {
+	BtnWidth     int
+	CurtainColor string
+	CompColor    string
+}
+
+func (m *MenuCurtainDrop) Nav(urls *components.URLs) *elements.Element {
+	return m.Menu(urls, m.BtnWidth, m.CurtainColor, m.CompColor)
+}
+
+func (m *MenuCurtainDrop) Menu(urls *components.URLs, btnWidth int, curtainColor string, compColor ...string) *elements.Element {
 	// Menu container
 	var menu_container = elements.Div().AttrClass("jsext-menu-container")
 	// Open button
@@ -32,24 +42,25 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 	closeBtn.Span()
 	closeBtn.Span()
 	// Urls for the navigation menu
-	// var urlItems = make(elements.Elements, len(urls))
-	if len(urls) > 0 {
-		// var i int
+	if len(urls.URLs) > 0 {
 		var ul = menu.Ul()
-		for _, url := range urls {
+		for _, url := range urls.URLs {
 			var urlItem *elements.Element
-			if strings.HasPrefix(url.Url, "external:") {
-				urlItem = ul.Li().A(strings.TrimPrefix(url.Url, "external:"), url.Name)
+			if strings.HasPrefix(url.URL, "external:") {
+				urlItem = ul.Li().A(strings.TrimPrefix(url.URL, "external:"), url.Name)
 			} else {
-				urlItem = ul.Li().A("router:"+url.Url, url.Name)
+				urlItem = ul.Li().A("router:"+url.URL, url.Name)
 			}
+			urlItem.AttrID("URL-" + url.Name)
 			urlItem.Span()
 			urlItem.Span()
 			urlItem.Span()
 			urlItem.Span()
-			// ul.Li().Append(urlItem)
-			// urlItems[i] = urlItem
-			// i++
+
+			if url.Hidden {
+				urlItem.AttrStyle("display: none")
+			}
+			url.Elem = urlItem
 		}
 	}
 	// Get the main color
@@ -251,5 +262,5 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 		}
 	`)
 	// Return the menu container and the urlItems
-	return menu_container //, urlItems
+	return menu_container
 }

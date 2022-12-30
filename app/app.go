@@ -38,9 +38,10 @@ type Application struct {
 	BaseElemSelector string
 	Router           *router.Router
 	client           *requester.APIClient
-	Navbar           components.Component
+	Navbar           components.NavBar
 	Footer           components.Component
 	Loader           components.Loader
+	NavURLs          *components.URLs
 	Base             jsext.Element
 	clientFunc       func() *requester.APIClient
 	onErr            func(err error)
@@ -109,8 +110,23 @@ func (a *Application) OnError(f func(err error)) {
 }
 
 // Set the base navbar.
-func (a *Application) SetNavbar(navbar components.Component) *Application {
+func (a *Application) SetNavbar(navbar components.NavBar) *Application {
 	a.Navbar = navbar
+	return a
+}
+
+// Set all navbar urls.
+func (a *Application) SetNavURLs(urls *components.URLs) *Application {
+	a.NavURLs = urls
+	return a
+}
+
+// Set a single navbar url.
+func (a *Application) SetNavURL(name, url string, hidden bool) *Application {
+	if a.NavURLs == nil {
+		a.NavURLs = components.NewURLs()
+	}
+	a.NavURLs.Append(name, url, hidden)
 	return a
 }
 
@@ -288,7 +304,7 @@ func (a *Application) AppendChild(e components.Component) *Application {
 // Render application header and footer if defined.
 func (a *Application) renderBases() {
 	if a.Navbar != nil {
-		a.Base.Prepend(a.Navbar.Render())
+		a.Base.Prepend(a.Navbar.Nav(a.NavURLs).Render())
 	}
 	if a.Footer != nil {
 		a.Base.Append(a.Footer.Render())
