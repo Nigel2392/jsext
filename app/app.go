@@ -168,11 +168,20 @@ func (a *Application) OnPageChange(f func(*Application, router.Vars, *url.URL)) 
 	return a
 }
 
+// Function to be ran after the page is rendered.
+func (a *Application) AfterPageChange(f func(*Application, router.Vars, *url.URL)) *Application {
+	var newF = func(v router.Vars, u *url.URL) {
+		f(a, v, u)
+	}
+	a.Router.AfterPageChange(newF)
+	return a
+}
+
 // Setup application to be ran.
 // Return 0 on exit.
 func (a *Application) run() int {
 	if a.onErr == nil {
-		a.OnError(router.DefaultRouterErrorDisplay)
+		a.onErr = router.DefaultRouterErrorDisplay
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
@@ -214,12 +223,11 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 }
 
 func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
-	if f != nil {
-		return func(v router.Vars, u *url.URL) {
+	return func(v router.Vars, u *url.URL) {
+		if f != nil {
 			f(a, v, u)
 		}
 	}
-	return nil
 }
 
 // Render a component to the application.

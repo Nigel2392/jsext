@@ -52,7 +52,24 @@ type Route struct {
 }
 
 func (r *Route) String() string {
-	return "Route: " + r.name + " -> " + r.Path
+	var sb = &strings.Builder{}
+	var level = 0
+	r.stringIndent(sb, level)
+	for _, child := range r.Children {
+		child.stringIndent(sb, level+1)
+	}
+	return sb.String()
+}
+
+func (r *Route) stringIndent(sb *strings.Builder, level int) {
+	var indent = strings.Repeat("  ", level)
+	sb.WriteString(fmt.Sprintf("%sRoute: %s\n", indent, r.Name))
+	sb.WriteString(fmt.Sprintf("%sPath: %s\n", indent, r.Path))
+	sb.WriteString(fmt.Sprintf("%sRegex: %s\n", indent, r.RegexUrl))
+	sb.WriteString(fmt.Sprintf("%sChildren: %d\n", indent, len(r.Children)))
+	for _, child := range r.Children {
+		child.stringIndent(sb, level+1)
+	}
 }
 
 func (r *Route) getRoute(name string) *Route {

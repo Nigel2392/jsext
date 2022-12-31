@@ -199,7 +199,6 @@ func GetType[T any](d DataMap, key string) T {
 		if s, ok := d.(T); ok {
 			return s
 		}
-		panic("variable is not of this type!")
 	}
 	return *new(T)
 }

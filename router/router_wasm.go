@@ -60,6 +60,7 @@ type Router struct {
 	onErr             func(err error)
 	onLoad            func()
 	onPageChange      func(Vars, *url.URL)
+	afterPageChange   func(Vars, *url.URL)
 }
 
 // Get a route by index.
@@ -76,6 +77,12 @@ func (r *Router) OnLoad(f func()) *Router {
 // Set on page change function.
 func (r *Router) OnPageChange(f func(Vars, *url.URL)) *Router {
 	r.onPageChange = f
+	return r
+}
+
+// Set after page change function.
+func (r *Router) AfterPageChange(f func(Vars, *url.URL)) *Router {
+	r.afterPageChange = f
 	return r
 }
 
@@ -167,7 +174,12 @@ func (r *Router) Handle(u *url.URL) {
 			r.onPageChange(vars, u)
 		}
 		if rt.Callable != nil {
-			go rt.Callable(vars, u)
+			go func() {
+				rt.Callable(vars, u)
+				if r.afterPageChange != nil {
+					r.afterPageChange(vars, u)
+				}
+			}()
 		}
 		jsext.Window.Get("history").Call("pushState", nil, "", u.String())
 		if r.nameToTitle {
@@ -181,15 +193,6 @@ func (r *Router) Handlef(fmtPath string, args ...any) {
 	r.HandlePath(path)
 }
 
-func (r *Router) Throw(code int) {
-	var err = NewError(code, "error")
-	if r.onErr == nil {
-		panic(err)
-	} else {
-		r.onErr(error(err))
-	}
-}
-
 // Capitalize the first letter of the string.
 func simpleToTitle(s string) string {
 	var b = []byte(s)
@@ -200,4 +203,26 @@ func simpleToTitle(s string) string {
 		}
 	}
 	return string(b)
+}
+
+// Back to the previous page.
+func (r *Router) Back() {
+	jsext.Window.Get("history").Call("back")
+}
+
+// Forward to the next page.
+func (r *Router) Forward() {
+	jsext.Window.Get("history").Call("forward")
+}
+
+// Current route.
+// Returns the route, the variables passed to the route, and if the route was found.
+func (r *Router) Current() (*Route, bool) {
+	var path = jsext.Window.Get("location").Get("href").String()
+	var url, err = url.Parse(path)
+	if err != nil {
+		return nil, false
+	}
+	var rt, _, ok = r.Match(url.Path)
+	return rt, ok
 }

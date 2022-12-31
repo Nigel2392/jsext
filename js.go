@@ -311,6 +311,31 @@ func ArrayToSlice(arr js.Value) []interface{} {
 	return s
 }
 
+// Get a value from the global scope.
+func Get(key string) Value {
+	return Value(Global.Get(key))
+}
+
+// Set a value in the global scope.
+func Set(key string, value any) {
+	Global.Set(key, value)
+}
+
+// Call a function in the global scope.
+func Call(key string, args ...any) Value {
+	return Value(Global.Call(key, args...))
+}
+
+// New a value in the global scope.
+func New(key string, args ...any) Value {
+	return Value(Global.Get(key).New(args...))
+}
+
+// Delete a value in the global scope.
+func Delete(key string) {
+	Global.Delete(key)
+}
+
 //type JavaScript interface {
 //	JSValue() js.Value
 //	Value() Value

@@ -23,7 +23,7 @@ func (r *Router) OnError(cb func(err error)) *Router {
 	return r
 }
 
-// Throw an error in the router.
+// Throw an error in the router with a message.
 func (r *Router) Error(code int, msg string) RouterError {
 	var err = NewError(code, msg)
 	if r.onErr == nil {
@@ -33,16 +33,25 @@ func (r *Router) Error(code int, msg string) RouterError {
 	return err
 }
 
+// Throw an error in the router with predefined error code messages.
+func (r *Router) Throw(code int) {
+	var err = NewError(code)
+	if r.onErr == nil {
+		panic(err)
+	} else {
+		r.onErr(error(err))
+	}
+}
+
 // Display nicely formatted URLs
 func (r *Router) String() string {
-	var sb strings.Builder
-	for _, route := range r.routes {
-		sb.WriteString(route.String())
-		sb.WriteString("\n")
-	}
+	var sb = &strings.Builder{}
 	sb.WriteString("Errorfunc defined: " + strconv.FormatBool(r.onErr != nil) + "\n")
 	sb.WriteString("Skip trailing slash: " + strconv.FormatBool(r.skipTrailingSlash) + "\n")
-
+	var level = 0
+	for _, route := range r.routes {
+		route.stringIndent(sb, level)
+	}
 	return sb.String()
 }
 

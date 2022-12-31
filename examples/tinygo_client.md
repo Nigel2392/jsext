@@ -15,8 +15,10 @@ The client is essentially just a wrapper around the javascript fetch API.
 
 	var client = requester.NewAPIClient().Post("https://httpbin.org/post")
 	client.WithData(dataMap, requester.JSON)
-	var f = client.Do()
-
+	var f, err = client.Do()
+	if err != nil {
+		panic(err)
+	}
 	println(string(f.Body))
 	for key, value := range f.Headers {
 		println(fmt.Sprintf("%v: %v", key, value))

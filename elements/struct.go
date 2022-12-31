@@ -110,6 +110,16 @@ func (e *Element) SetSemicolon(p string, v ...string) *Element {
 	return e
 }
 
+func (e *Element) Delete(p string) *Element {
+	delete(e.Attributes_Normal, p)
+	delete(e.Attributes_Boolean, p)
+	delete(e.Attributes_Semicolon, p)
+	if !e.value.IsUndefined() {
+		e.value.Call("removeAttribute", p)
+	}
+	return e
+}
+
 func (e *Element) Add(p string, v ...string) *Element {
 	if e.value.IsUndefined() {
 		var attrs = e.Attributes_Normal[p]
