@@ -3,10 +3,19 @@
 
 package console
 
-import "syscall/js"
+import (
+	"syscall/js"
+)
 
 // MISSING:
 // console.table()
+//
+// Most functions call js.Call() with a variadic argument list.
+// Thus, the arguments get mapped to JavaScript values according to the ValueOf function.
+
+type Stringer interface {
+	String() string
+}
 
 // Javascript Console.assert() method
 func Assert(condition bool, args ...interface{}) {
@@ -33,6 +42,7 @@ func CountReset(label string) {
 
 // Javascript Console.debug() method
 func Debug(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("debug", args...)
 }
 
@@ -48,16 +58,19 @@ func DirXML(item interface{}) {
 
 // Javascript Console.error() method
 func Error(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("error", args...)
 }
 
 // Javascript Console.exception() method
 func Group(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("group", args...)
 }
 
 // Javascript Console.groupCollapsed() method
 func GroupCollapsed(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("groupCollapsed", args...)
 }
 
@@ -68,11 +81,13 @@ func GroupEnd() {
 
 // Javascript Console.info() method
 func Info(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("info", args...)
 }
 
 // Javascript Console.log() method
 func Log(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("log", args...)
 }
 
@@ -93,10 +108,25 @@ func TimeLog(label string, args ...interface{}) {
 
 // Javascript Console.trace() method
 func Trace(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("trace", args...)
 }
 
 // Javascript Console.warn() method
 func Warn(args ...interface{}) {
+	args = replaceArgs(args)
 	js.Global().Get("console").Call("warn", args...)
+}
+
+func replaceArgs(args []interface{}) []interface{} {
+	if len(args) > 0 {
+		for i, arg := range args {
+			if err, ok := arg.(error); ok {
+				args[i] = err.Error()
+			} else if err, ok := arg.(Stringer); ok {
+				args[i] = err.String()
+			}
+		}
+	}
+	return args
 }

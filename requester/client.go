@@ -93,7 +93,3 @@ func (c *APIClient) exec(cb func(resp *http.Response)) error {
 	cb(resp)
 	return nil
 }
-
-// This function only exists to fill a gap when compiling with TinyGo
-func OnError(cb func(err error) bool) {
-}
