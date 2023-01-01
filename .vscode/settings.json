@@ -5,6 +5,6 @@
         "GOARCH": "wasm"
     },
     "go.buildFlags": [
-        "-tags=tinygo"
+        "-tags=!tinygo"
     ]
 }
