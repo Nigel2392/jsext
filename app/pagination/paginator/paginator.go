@@ -104,7 +104,7 @@ func (p *Paginator[T]) fetchResults(url string) ([]T, error) {
 		p.Next = newP.Next
 		p.CurrentPage = newP.CurrentPage
 		p.Previous = newP.Previous
-		p.Results = append(p.Results, newP.Results...)
+		p.Results = newP.Results
 		waiter <- newP
 	})
 	return (<-waiter).Results, nil

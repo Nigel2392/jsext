@@ -148,7 +148,7 @@ func (p *FormatPaginator[T]) fetchResults(url string) ([]T, error) {
 		p.CurrentPage = newP.CurrentPage
 		p.HasPrevious = newP.HasPrevious
 		p.TotalPages = newP.TotalPages
-		p.Results = append(p.Results, newP.Results...)
+		p.Results = newP.Results
 		waiter <- newP
 	})
 	return (<-waiter).Results, nil
