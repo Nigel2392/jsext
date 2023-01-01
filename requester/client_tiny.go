@@ -101,6 +101,23 @@ func (c *APIClient) Do() (*fetch.Response, error) {
 	return resp, nil
 }
 
+func (c *APIClient) DoDecode(encType Encoding) (map[string]interface{}, *fetch.Response, error) {
+	var resp, err = c.Do()
+	if err != nil {
+		return nil, nil, err
+	}
+	var data map[string]interface{}
+	switch encType {
+	case JSON:
+		data = resp.JSON()
+	case FORM_URL_ENCODED:
+		panic("Form url encoded is not supported yet!")
+	case MULTIPART_FORM:
+		panic("Multipart form is not supported yet!")
+	}
+	return data, resp, nil
+}
+
 // Function to execute before the request is executed
 func (c *APIClient) Before(cb func()) {
 	c.before = cb

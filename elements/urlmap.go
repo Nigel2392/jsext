@@ -1,9 +1,10 @@
 package elements
 
 import (
-	"github.com/Nigel2392/jsext/router"
 	"strings"
 	"sync"
+
+	"github.com/Nigel2392/jsext/router"
 )
 
 // A url map element
@@ -50,14 +51,17 @@ func (u *URLs) Set(key string, value *Element, external ...bool) {
 	u.mu.Unlock()
 }
 
-// Delete a url element from the map
+// Delete a url element from the map, and remove it from the DOM
 func (u *URLs) Delete(key string) {
+	var ok bool
+	var element *Element
 	key = strings.ToUpper(key)
-	if _, ok := u.urls[key]; !ok {
+	if element, ok = u.urls[key]; !ok {
 		panic("URL does not exist: " + key)
 	}
 	u.mu.Lock()
 	delete(u.urls, key)
+	element.Remove()
 	for i, v := range u.order {
 		if v == key {
 			u.order = append(u.order[:i], u.order[i+1:]...)
@@ -98,7 +102,6 @@ func (u *URLs) Show(display string, urlname ...string) {
 		if url != nil {
 			url.AttrStyle("display:" + display)
 		}
-
 	}
 }
 

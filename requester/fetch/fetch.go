@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"syscall/js"
+
+	"github.com/tidwall/gjson"
 )
 
 type Request struct {
@@ -144,4 +146,8 @@ func fetch(options Request) (*Response, error) {
 	close(respChan)
 	close(errChan)
 	return resp, err
+}
+
+func (r *Response) JSON() map[string]interface{} {
+	return gjson.ParseBytes(r.Body).Value().(map[string]interface{})
 }
