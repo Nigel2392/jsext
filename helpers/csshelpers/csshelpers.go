@@ -105,15 +105,18 @@ func (col Color) RGB255() (r, g, b uint8) {
 	return
 }
 
+// Convert RGB values to a Color struct.
 func RGB255(r, g, b uint8) Color {
 	return Color{float64(r) / 255.0, float64(g) / 255.0, float64(b) / 255.0}
 }
 
+// Get the complementary color struct.
 func (col *Color) Complementary() Color {
 	var col2 = HueOffset(*col, 180)
 	return col2
 }
 
+// Get the complementary color of a string.
 func Complementary(col string) (string, error) {
 	c, err := Hex(col)
 	if err != nil {
@@ -177,7 +180,7 @@ func HueOffset(col Color, degrees int) Color {
 	return Hsv(h, s, v)
 }
 
-func ConvertColor(col Color) string {
+func SeenColor(col Color) string {
 	if r, g, b := col.RGB255(); r == 0 && g == 0 && b == 0 {
 		return "#FFFFFF"
 	} else {

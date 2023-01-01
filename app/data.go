@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Application datamap to store and retrieve data.
 type DataMap map[string]any
 
 // Set data on the data map.
@@ -194,11 +195,12 @@ func formatString(data interface{}) string {
 // Get any type from the datamap.
 // Panics if the type is not correct.
 // Returns a new instance of the type if the key is not found.
-func GetType[T any](d DataMap, key string) T {
+func GetType[T any](d DataMap, key string) (T, bool) {
 	if d, ok := d[key]; ok {
 		if s, ok := d.(T); ok {
-			return s
+			return s, true
 		}
+		panic("cannot convert to type")
 	}
-	return *new(T)
+	return *new(T), false // return a new instance of the type
 }

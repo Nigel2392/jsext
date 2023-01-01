@@ -111,11 +111,9 @@ func (e Event) Get(p string) js.Value {
 func (e Event) Call(m string, args ...interface{}) js.Value {
 	return e.JSValue().Call(m, args...)
 }
-
 func (e Event) Delete(p string) {
 	e.JSValue().Delete(p)
 }
-
 func (e Event) Equal(other js.Value) bool {
 	return e.JSValue().Equal(other)
 }

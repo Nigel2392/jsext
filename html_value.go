@@ -185,7 +185,7 @@ func (e Element) GetClassList() Value {
 	return Value(e.JSValue().Get("classList"))
 }
 
-// S
+// Set multiple classes on the element.
 func (e Element) ClassList(c ...string) Value {
 	var cList = e.Get("classList")
 	if len(c) == 0 {

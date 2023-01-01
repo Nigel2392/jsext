@@ -32,17 +32,6 @@ func SetTokenCookie(token *Token) error {
 		LastUpdate:   LastUpdate,
 	}
 
-	//datamap := make(map[string]interface{})
-	//datamap["AccessToken"] = AccessToken
-	//datamap["RefreshToken"] = RefreshToken
-	//datamap["LastUpdate"] = LastUpdate
-	//// Json the token
-	//var b bytes.Buffer
-	//var err = json.NewEncoder(&b).Encode(datamap)
-	//if err != nil {
-	//	return err
-	//}
-
 	var msgBytes, err = saveToken.MarshalMsg(nil)
 	if err != nil {
 		return err
@@ -80,40 +69,6 @@ func GetTokenCookie(tokenToSet *Token) (*Token, error) {
 	tokenToSet.RefreshToken = saveToken.RefreshToken
 	tokenToSet.LastUpdate = saveToken.LastUpdate
 
-	//// Decode from base64
-	//var b, err = base64.RawURLEncoding.DecodeString(cookie)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//// Json the token
-	//var datamap map[string]interface{}
-	//err = json.NewDecoder(bytes.NewBuffer(b)).Decode(&datamap)
-	//if err != nil {
-	//	return nil, err
-	//}
-	// Get the data
-	//AccessToken, ok := datamap["AccessToken"].(string)
-	//if !ok {
-	//	//lint:ignore ST1005 Error strings should not be capitalized
-	//	return nil, errors.New("No cookie access token")
-	//}
-	//RefreshToken, ok := datamap["RefreshToken"].(string)
-	//if !ok {
-	//	//lint:ignore ST1005 Error strings should not be capitalized
-	//	return nil, errors.New("No cookie refresh token")
-	//}
-	//LastUpdate, ok := datamap["LastUpdate"].(string)
-	//if !ok {
-	//	return nil, errors.New("Token cookie time could not be parsed")
-	//}
-	//LastUpdateParsed, err := time.Parse(time.RFC3339, LastUpdate)
-	//if err != nil {
-	//	return nil, err
-	//}
-	// Create the token
-	//tokenToSet.AccessToken = AccessToken
-	//tokenToSet.RefreshToken = RefreshToken
-	//tokenToSet.LastUpdate = LastUpdateParsed
 	return tokenToSet, nil
 }
 

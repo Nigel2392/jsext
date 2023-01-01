@@ -19,6 +19,11 @@ func (e Export) Value() js.Value {
 	return js.Value(e)
 }
 
+// Return the jsext.Value of the export.
+func (e Export) JSExt() Value {
+	return Value(e.Value())
+}
+
 // Set a value on the export's js.Value.
 func (e Export) Set(name string, value interface{}) {
 	js.Value(e).Set(name, value)

@@ -149,11 +149,13 @@ func (a *Application) Run() int {
 	return a.run()
 }
 
+// Function to be while the application is loading.
 func (a *Application) OnLoad(f func()) *Application {
 	a.onLoad = f
 	return a
 }
 
+// Function to be ran before the router is loaded.
 func (a *Application) OnRouterLoad(f func()) *Application {
 	a.Router.OnLoad(f)
 	return a
@@ -235,6 +237,7 @@ func (a *Application) Render(e ...components.Component) {
 	a.render(e...)
 }
 
+// Redirect to a url.
 func (a *Application) Redirect(url string) {
 	a.Router.Redirect(url)
 }

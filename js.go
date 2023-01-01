@@ -30,6 +30,28 @@ func init() {
 	// Initialize jsext export object.
 	JSExt = NewExport()
 	JSExt.Register("jsext")
+	// Register runtime eventlisteners.
+	Runtime.RegisterTo("runtime", JSExt.JSExt())
+	Runtime.SetFuncWithArgs("eventEmit", func(this Value, args Args) interface{} {
+		eventName := args[0].String()
+		eventArgs := args[1:]
+		EventEmit(eventName, eventArgs.Slice()...)
+		return nil
+	})
+	Runtime.SetFuncWithArgs("eventOn", func(this Value, args Args) interface{} {
+		eventName := args[0].String()
+		EventOn(eventName, func(a ...interface{}) {
+			for _, arg := range args {
+				if arg.Type() == js.TypeFunction {
+					var Event = js.Global().Get("Event").New(eventName)
+					Event.Set("args", a)
+					arg.Invoke(Event)
+				}
+			}
+		})
+		return nil
+	})
+
 }
 
 // Default functions, wrapped.
@@ -72,6 +94,32 @@ func (a Args) Event() Event {
 // Value returns the arguments as a slice of js.Value.
 func (a Args) Value() []js.Value {
 	return []js.Value(a)
+}
+
+// Return a slice of any.
+func (a Args) Slice() []interface{} {
+	var s = make([]interface{}, 0)
+	for _, v := range a {
+		switch v.Type() {
+		case js.TypeObject:
+			s = append(s, ObjectToMap(v))
+		case js.TypeNull:
+			s = append(s, nil)
+		case js.TypeBoolean:
+			s = append(s, v.Bool())
+		case js.TypeNumber:
+			s = append(s, v.Float())
+		case js.TypeString:
+			s = append(s, v.String())
+		default:
+			if v.InstanceOf(js.Global().Get("Array")) {
+				s = append(s, ArrayToSlice(v))
+			} else {
+				s = append(s, v)
+			}
+		}
+	}
+	return s
 }
 
 // Register a function to the global window.
@@ -247,6 +295,7 @@ func DeleteCookie(name string) {
 	SetCookie(name, "", -1)
 }
 
+// Convert a js.Value to a map[string]string.
 func ObjectToMapString(obj js.Value) map[string]string {
 	var m = make(map[string]string)
 	var keys = obj.Call("keys")
@@ -257,6 +306,7 @@ func ObjectToMapString(obj js.Value) map[string]string {
 	return m
 }
 
+// Convert a js.Value to a map[string]interface{}.
 func ObjectToMap(obj js.Value) map[string]interface{} {
 	var m = make(map[string]interface{})
 	var keys = obj.Call("keys")
@@ -285,6 +335,7 @@ func ObjectToMap(obj js.Value) map[string]interface{} {
 	return m
 }
 
+// Convert a js.Value array to a []interface{}.
 func ArrayToSlice(arr js.Value) []interface{} {
 	var s = make([]interface{}, arr.Length())
 	for i := 0; i < arr.Length(); i++ {

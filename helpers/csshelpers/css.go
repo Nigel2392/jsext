@@ -44,18 +44,27 @@ const (
 	COLOR_SILVER     = "#c0c0c0" // Silver
 )
 
+// Convert an interger to the appropriate CSS PX value.
 func ToPX(px int) string {
 	return strconv.Itoa(px) + "px"
 }
 
+// Convert an interger to the appropriate CSS EM value.
 func ToPercent(percent int) string {
 	return strconv.Itoa(percent) + "%"
 }
 
+// Convert an interger to the appropriate CSS REM value.
 func ToRem(rem int) string {
 	return strconv.Itoa(rem) + "rem"
 }
 
+// Convert an interger to the appropriate CSS VW value.
 func ToVW(vw int) string {
 	return strconv.Itoa(vw) + "vw"
+}
+
+// Convert an interger to the appropriate CSS VH value.
+func ToVH(vh int) string {
+	return strconv.Itoa(vh) + "vh"
 }
