@@ -63,4 +63,3 @@ If you do suffer binary size issues, you can try to use the `-ldflags="-s -w"` f
 When compiling with TinyGO, you can try to use the `-no-debug` flag, which will remove debug information from the binary.
 There are also some great optimization tools for WebAssembly, such as WasmOpt, which can be used to optimize the binary size, or speed.
 You can find more information about ***wasm-opt** [here](https://github.com/WebAssembly/binaryen)*.
-wasm-opt .\static\main.wasm -o=".\static\main.wasm" -Oz --shrink-level=3 --optimize-level=3
