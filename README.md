@@ -8,6 +8,10 @@ Easily install  with the following command:
 go get github.com/Nigel2392/jsext
 ```
 
+## Examples
+Examples can be found in the examples folder.
+There are only a few examples for now, but we will add more in the future.
+
 ## TinyGO support
 JSExt is fully supported by TinyGO, and can be used with the TinyGO compiler.
 Some features may however work differently with the TinyGO compiler, and the regular go compiler.
@@ -29,9 +33,6 @@ These functions mostly have to do with encoding.
 We can encode certain items, such as slices and maps. 
 This is done using our custom encoder located at `github.com/Nigel2392/jsext/requester/fetch/dirtyjson.go`.
 *This encoder however is not fully tested, and may very well break on certain inputs.*
-
-## Examples
-Examples can be found in the examples folder.
 
 ## Creating a project
 To easily create projects, it is best to install the jsext cli tool:
