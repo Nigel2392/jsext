@@ -100,10 +100,9 @@ func App(querySelector string, rt ...*router.Router) *Application {
 }
 
 // Decide what happens on errors.
-func (a *Application) OnError(f func(err error)) {
+func (a *Application) OnError(f func(*Application, error)) {
 	var newF = func(err error) {
-		f(err)
-		a.renderBases()
+		f(a, err)
 	}
 	a.onErr = newF
 }
