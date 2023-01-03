@@ -65,6 +65,7 @@ func New[T any](token *tokens.Token, formatURL string, fetchFunc func([]any) ([]
 		querySize:   PaginatorInvalid,
 		limit:       PaginatorInvalid,
 		CurrentPage: 0,
+		fetchFunc:   fetchFunc,
 	}
 	return p
 }
@@ -79,6 +80,10 @@ func (p *FormatPaginator[T]) fetchResults(url string) ([]T, error) {
 	jsonData := resp.JSONMap()
 	if jsonData == nil {
 		return nil, fmt.Errorf("invalid json data")
+	}
+	detail, ok := jsonData["detail"]
+	if ok {
+		return nil, fmt.Errorf("detail: %s", detail)
 	}
 	count, ok := jsonData["count"]
 	if !ok {
@@ -102,14 +107,41 @@ func (p *FormatPaginator[T]) fetchResults(url string) ([]T, error) {
 	}
 	results, ok := jsonData["results"]
 	if !ok {
-		results = nil
+		results = []any{}
 	}
-	p.Count = count.(int)
-	p.HasNext = hasNext.(bool)
-	p.CurrentPage = currentPage.(int)
-	p.HasPrevious = hasPrevious.(bool)
-	p.TotalPages = totalPages.(int)
-	normalized_results, err := p.fetchFunc(results.([]any))
+	normalizedCount, ok := count.(float64)
+	if !ok {
+		normalizedCount = 0
+	}
+	normalizedHasNext, ok := hasNext.(bool)
+	if !ok {
+		normalizedHasNext = false
+	}
+	normalizedCurrentPage, ok := currentPage.(float64)
+	if !ok {
+		normalizedCurrentPage = 0
+	}
+	normalizedHasPrevious, ok := hasPrevious.(bool)
+	if !ok {
+		normalizedHasPrevious = false
+	}
+	normalizedTotalPages, ok := totalPages.(float64)
+	if !ok {
+		normalizedTotalPages = 0
+	}
+	normalizedResults, ok := results.([]any)
+	if !ok || normalizedResults == nil {
+		return nil, fmt.Errorf("results is not a []any")
+	}
+	p.Count = int(normalizedCount)
+	p.HasNext = normalizedHasNext
+	p.CurrentPage = int(normalizedCurrentPage)
+	p.HasPrevious = normalizedHasPrevious
+	p.TotalPages = int(normalizedTotalPages)
+	if p.fetchFunc == nil {
+		return nil, fmt.Errorf("fetchFunc is nil")
+	}
+	normalized_results, err := p.fetchFunc(normalizedResults)
 	if err != nil {
 		return nil, err
 	}

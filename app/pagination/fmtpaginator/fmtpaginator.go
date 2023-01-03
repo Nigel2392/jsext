@@ -4,7 +4,6 @@
 package fmtpaginator
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Nigel2392/jsext/app/tokens"

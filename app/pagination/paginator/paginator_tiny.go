@@ -3,7 +3,11 @@
 
 package paginator
 
-import "github.com/Nigel2392/jsext/app/tokens"
+import (
+	"fmt"
+
+	"github.com/Nigel2392/jsext/app/tokens"
+)
 
 // Paginator does not work with TinyGo.
 //
@@ -57,6 +61,10 @@ func (p *Paginator[T]) fetchResults(url string) ([]T, error) {
 		return nil, err
 	}
 	jsonData := resp.JSONMap()
+	detail, ok := jsonData["detail"]
+	if ok {
+		return nil, fmt.Errorf("detail: %s", detail)
+	}
 	count, ok := jsonData["count"]
 	if !ok {
 		count = 0
@@ -73,11 +81,27 @@ func (p *Paginator[T]) fetchResults(url string) ([]T, error) {
 	if !ok {
 		results = []any{}
 	}
-	p.Count = count.(int)
-	p.Next = next.(string)
-	p.Previous = previous.(string)
+	normalizedCount, ok := count.(float64)
+	if !ok {
+		normalizedCount = 0
+	}
+	normalizedNext, ok := next.(string)
+	if !ok {
+		normalizedNext = ""
+	}
+	normalizedPrevious, ok := previous.(string)
+	if !ok {
+		normalizedPrevious = ""
+	}
+	normalizedResults, ok := results.([]any)
+	if !ok || normalizedResults == nil {
+		return nil, fmt.Errorf("results is not a []any")
+	}
+	p.Count = int(normalizedCount)
+	p.Next = normalizedNext
+	p.Previous = normalizedPrevious
 	p.CurrentPage = url
-	normalized, err := p.fetchFunc(results.([]any))
+	normalized, err := p.fetchFunc(normalizedResults)
 	if err != nil {
 		return nil, err
 	}
