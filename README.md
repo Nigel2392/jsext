@@ -48,7 +48,7 @@ There is also an option to create a plain project, this will create a project wi
 $ jsexttool -plain -n <project name> (optional: -vscode for auto creation of vscode config.)
 ```
 ### Note:
-Both of the jsexttool provide a some powershell build scripts, which can be used to quickly build the project with tinygo, or the regular go compiler.
+Both of the jsexttool options provide a some powershell build scripts, which can be used to quickly build the project with tinygo, or the regular go compiler.
 If the chosen compiler is the normal go compiler, you will need to edit the index.html file to import go's default wasm_exec.js file, instead of the tinygo one.
 The jsexttool automatically uses the tinygo compiler on setup.
 
