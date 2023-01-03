@@ -182,7 +182,10 @@ func (a *Application) AfterPageChange(f func(*Application, router.Vars, *url.URL
 // Return 0 on exit.
 func (a *Application) run() int {
 	if a.onErr == nil {
-		a.onErr = router.DefaultRouterErrorDisplay
+		a.onErr = func(err error) {
+			router.DefaultRouterErrorDisplay(err)
+			a.renderBases()
+		}
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
