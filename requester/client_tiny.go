@@ -109,7 +109,7 @@ func (c *APIClient) DoDecode(encType Encoding) (map[string]interface{}, *fetch.R
 	var data map[string]interface{}
 	switch encType {
 	case JSON:
-		data = resp.JSON()
+		data = resp.JSONMap()
 	case FORM_URL_ENCODED:
 		panic("Form url encoded is not supported yet!")
 	case MULTIPART_FORM:

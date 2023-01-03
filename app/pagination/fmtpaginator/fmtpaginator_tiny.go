@@ -1,14 +1,12 @@
-//go:build js && wasm && !tinygo
-// +build js,wasm,!tinygo
+//go:build js && wasm && tinygo
+// +build js,wasm,tinygo
 
 package fmtpaginator
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/Nigel2392/jsext/app/tokens"
-	"github.com/Nigel2392/jsext/requester"
 )
 
 // Paginator does not work with TinyGo.
@@ -44,10 +42,10 @@ type FormatPaginator[T any] struct {
 	// Token is used to authenticate the request if it is not nil.
 	Token *tokens.Token `json:"-"`
 	// If querysize and limit are set, the url will be formatted with the page number, querysize and limit
-	querySize int `json:"-"`
-	limit     int `json:"-"`
-
-	fmtFetchURL string `json:"-"`
+	querySize   int                      `json:"-"`
+	limit       int                      `json:"-"`
+	fmtFetchURL string                   `json:"-"`
+	fetchFunc   func([]any) ([]T, error) `json:"-"`
 }
 
 // New returns a new FormatPaginator.
@@ -60,7 +58,7 @@ type FormatPaginator[T any] struct {
 //	New(nil, "http://127.0.0.1:8000/api/users/?page=%d&querysize=%d")
 //	New(nil, "http://127.0.0.1:8000/api/users/?page=%d&limit=%d")
 //	New(nil, "http://127.0.0.1:8000/api/users/?page=%d")
-func New[T any](token *tokens.Token, formatURL string) *FormatPaginator[T] {
+func New[T any](token *tokens.Token, formatURL string, fetchFunc func([]any) ([]T, error)) *FormatPaginator[T] {
 	var p = &FormatPaginator[T]{
 		Token:       token,
 		fmtFetchURL: formatURL,
@@ -74,16 +72,47 @@ func New[T any](token *tokens.Token, formatURL string) *FormatPaginator[T] {
 // Return the fetched results.
 func (p *FormatPaginator[T]) fetchResults(url string) ([]T, error) {
 	var cli = p.client().Get(url)
-	var newP = &FormatPaginator[T]{}
-	var waiter = make(chan *FormatPaginator[T])
-	cli.DoDecodeTo(newP, requester.JSON, func(resp *http.Response, strct interface{}) {
-		p.Count = newP.Count
-		p.HasNext = newP.HasNext
-		p.CurrentPage = newP.CurrentPage
-		p.HasPrevious = newP.HasPrevious
-		p.TotalPages = newP.TotalPages
-		p.Results = newP.Results
-		waiter <- newP
-	})
-	return (<-waiter).Results, nil
+	resp, err := cli.Do()
+	if err != nil {
+		return nil, err
+	}
+	jsonData := resp.JSONMap()
+	if jsonData == nil {
+		return nil, fmt.Errorf("invalid json data")
+	}
+	count, ok := jsonData["count"]
+	if !ok {
+		count = 0
+	}
+	hasNext, ok := jsonData["has_next"]
+	if !ok {
+		hasNext = false
+	}
+	currentPage, ok := jsonData["current"]
+	if !ok {
+		currentPage = 0
+	}
+	hasPrevious, ok := jsonData["has_previous"]
+	if !ok {
+		hasPrevious = false
+	}
+	totalPages, ok := jsonData["total_pages"]
+	if !ok {
+		totalPages = 0
+	}
+	results, ok := jsonData["results"]
+	if !ok {
+		results = nil
+	}
+	p.Count = count.(int)
+	p.HasNext = hasNext.(bool)
+	p.CurrentPage = currentPage.(int)
+	p.HasPrevious = hasPrevious.(bool)
+	p.TotalPages = totalPages.(int)
+	normalized_results, err := p.fetchFunc(results.([]any))
+	if err != nil {
+		return nil, err
+	}
+	p.Results = normalized_results
+	return p.Results, nil
 }
