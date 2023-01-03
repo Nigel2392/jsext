@@ -58,7 +58,7 @@ There is also a server.go file when initializing the project with the `-init` fl
 
 ## Binary sizes
 When compiling with the regular go compiler, the binary sizes can get pretty big. We do implement a page loader, but this may not be your way to go.
-This is why we recomment starting out with TinyGO, as the binary sizes are much smaller, but even that could get up to 2MB without any optimizations.
+This is why we recomment starting out with TinyGO, as the binary sizes are much smaller, but even that could get up to 2MB+ without any optimizations.
 If you do suffer binary size issues, you can try to use the `-ldflags="-s -w"` flag when compiling with the regular go compiler.
 When compiling with TinyGO, you can try to use the `-no-debug` flag, which will remove debug information from the binary.
 There are also some great optimization tools for WebAssembly, such as WasmOpt, which can be used to optimize the binary size, or speed.
