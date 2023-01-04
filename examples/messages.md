@@ -10,7 +10,10 @@ We do provide a wrapper for this message api, to make it easier to use, but we p
 
 Here is how to listen for events on Javascript:
 ```js
-jsext.runtime.eventOn("jsextMessages", function(e){console.log("JSEvent, Type:", e.args[0], " Message:", e.args[1])})
+// Wait for wasm module to be initialized.
+window.jsextLoaded.On(function(){
+	jsext.runtime.eventOn("jsextMessages", function(e){console.log("JSEvent, Type:", e.args[0], " Message:", e.args[1])})
+})
 ``` 
 
 And the equivalent in GO:
@@ -24,9 +27,48 @@ jsext.EventOn("jsextMessages", func(args ...interface{}) {
 
 To emit events, messages in this case, we can use the following code in javascript.
 ```js
-jsext.runtime.eventEmit("jsextMessages", "error", "My custom error message!")
+// Wait for wasm module to be initialized.
+window.jsextLoaded.On(function(){
+	jsext.runtime.eventEmit("jsextMessages", "error", "My custom error message!")
+})
 ```
 And in GO:
 ```go
 jsext.EventEmit("jsextMessages", "error", "My custom error message!")
+```
+
+Now that we know how to listen for events, and how to emit events, we can use the message api to make it easier to use.
+As stated before, this is just a wrapper around the events api to abstract away some of the complexity.
+
+First, again, we will show you how to send messages.
+To use the message api from javascript, we can use the following code:
+```js
+// Wait for wasm module to be initialized.
+window.jsextLoaded.On(function(){
+	jsext.runtime.sendMessage("error","My custom error message!")
+})
+```
+
+And in GO:
+```go
+messages.SendMessage(messages.Error, "My custom error message!")
+// Optionally, use: messages.SendError("My custom error message!")
+```
+
+To receive messages, we can use the following code:
+```js
+// Wait for wasm module to be initialized.
+window.jsextLoaded.On(function(){
+    // Define what happens when messages are sent from the WASM module.
+    // Function needs to be set on the window object and take two arguments.
+    jsext.runtime.onMessage(function(typ, message) {
+		console.log("JSEvent, Type:", typ, " Message:", message)
+    });
+})
+```
+And in GO:
+```go
+messages.Listen(func(typ string, message string) {
+		println("WASMEvent, Type:", typ, " Message:", message)
+})
 ```
