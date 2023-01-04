@@ -45,6 +45,7 @@ type Application struct {
 	clientFunc       func() *requester.APIClient
 	onErr            func(err error)
 	onLoad           func()
+	beforeLoad       func()
 	Data             DataMap
 }
 
@@ -154,6 +155,12 @@ func (a *Application) OnLoad(f func()) *Application {
 	return a
 }
 
+// Function to be ran before the application is loaded.
+func (a *Application) BeforeLoad(f func()) *Application {
+	a.beforeLoad = f
+	return a
+}
+
 // Function to be ran before the router is loaded.
 func (a *Application) OnRouterLoad(f func()) *Application {
 	a.Router.OnLoad(f)
@@ -186,6 +193,9 @@ func (a *Application) run() int {
 			router.DefaultRouterErrorDisplay(err)
 			a.renderBases()
 		}
+	}
+	if a.beforeLoad != nil {
+		a.beforeLoad()
 	}
 	a.Router.OnError(a.onErr)
 	a.Router.Run()
