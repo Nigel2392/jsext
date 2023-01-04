@@ -11,7 +11,7 @@ import (
 // console.table()
 //
 // Most functions call js.Call() with a variadic argument list.
-// Thus, the arguments get mapped to JavaScript values according to the ValueOf function.
+// Thus, the arguments get mapped to JavaScript values according to the js.ValueOf function.
 
 type Stringer interface {
 	String() string

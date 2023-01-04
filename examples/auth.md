@@ -81,8 +81,8 @@ func init() {
 
 // Define a login form struct, which will be used to validate the form.
 type LoginForm struct {
-	Email    string `type:"email"`
-	Password string `type:"password"`
+	Email    string 
+	Password string 
 }
 
 func (l *LoginForm) Validate() error {
@@ -103,13 +103,13 @@ func (l *LoginForm) Validate() error {
 
 // Define a register form struct, which will be used to validate the form.
 type RegisterForm struct {
-	Email            string `json:"email" type:"email"`
-	Phone_Number     string `json:"phone_number" type:"tel"`
-	Username         string `json:"username"`
-	First_Name       string `json:"first_name"`
-	Last_Name        string `json:"last_name"`
-	Password         string `json:"password" type:"password"`
-	Password_Confirm string `json:"password_confirm" type:"password"`
+	Email            string 
+	Phone_Number     string 
+	Username         string 
+	First_Name       string 
+	Last_Name        string 
+	Password         string 
+	Password_Confirm string 
 }
 
 func (r *RegisterForm) Validate() error {
