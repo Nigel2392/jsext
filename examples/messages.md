@@ -8,6 +8,8 @@ We The arguments passed to the eventListener, are passed on to the `event.args` 
 We will show this using our embedded message api as an example.
 We do provide a wrapper for this message api, to make it easier to use, but we provide the full information on how this wrapper is made to give an insight on how the message api works.
 
+**Warning:** The Javascript examples only works using the jsexttool, without the tool, the function `window.jsextLoaded.On()` is not available. The tool provides an initialization script to simplify loading, and do some setup for the application.
+
 Here is how to listen for events on Javascript:
 ```js
 // Wait for wasm module to be initialized.
