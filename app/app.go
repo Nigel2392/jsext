@@ -5,6 +5,7 @@ package app
 
 import (
 	"net/url"
+	"syscall/js"
 
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/components"
@@ -265,31 +266,32 @@ func (a *Application) render(e ...components.Component) {
 }
 
 // InnerHTML sets the inner HTML of the element.
-func (a *Application) InnerHTML(html string) *Application {
+func (a *Application) RenderHTML(html string) *Application {
+	a.Base.InnerHTML("")
 	a.Base.InnerHTML(html)
 	a.renderBases()
 	return a
 }
 
 // InnerText sets the inner text of the element.
-func (a *Application) InnerText(text string) *Application {
+func (a *Application) RenderText(text string) *Application {
+	a.Base.InnerHTML("")
 	a.Base.InnerText(text)
 	a.renderBases()
 	return a
 }
 
 // SetInnerElement clears the inner HTML and appends the element.
-func (a *Application) InnerElement(el jsext.Element) *Application {
+func (a *Application) RenderElement(el jsext.Element) *Application {
 	a.Base.InnerHTML("")
 	a.Base.AppendChild(el)
 	a.renderBases()
 	return a
 }
 
-// InnerComponent clears the inner HTML and appends the component.
-func (a *Application) InnerComponent(c components.Component) *Application {
+func (a *Application) RenderValue(v js.Value) *Application {
 	a.Base.InnerHTML("")
-	a.Base.AppendChild(c.Render())
+	a.Base.AppendChild(jsext.Element(v))
 	a.renderBases()
 	return a
 }
