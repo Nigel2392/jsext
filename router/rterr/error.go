@@ -1,4 +1,4 @@
-package router
+package rterr
 
 import "fmt"
 
@@ -17,6 +17,11 @@ const (
 	ErrCodeBadGateway         = 502 // Bad gateway interface
 	ErrCodeServiceUnavailable = 503 // Service unavailable
 )
+
+type ErrorThrower interface {
+	Error(code int, message string) RouterError
+	Throw(code int)
+}
 
 // RouterError is a custom error type for the router.
 type RouterError struct {

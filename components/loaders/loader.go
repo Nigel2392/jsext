@@ -4,7 +4,6 @@
 package loaders
 
 import (
-	"fmt"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext"
@@ -81,8 +80,6 @@ func (l *Loader) create() jsext.Value {
 	var loader_val = loader_container.RenderTo(l.appendTo).Value()
 	l.jsVal = js.Value(loader_val)
 	l.created = true
-	println("Loader created")
-	println(fmt.Sprintf("Loader value: %v", l.jsVal))
 	return loader_val
 }
 

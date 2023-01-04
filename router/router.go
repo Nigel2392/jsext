@@ -4,7 +4,22 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/Nigel2392/jsext/router/rterr"
+	"github.com/Nigel2392/jsext/router/vars"
 )
+
+// Router is the main router struct.
+type Router struct {
+	routes            []*Route
+	skipTrailingSlash bool
+	nameToTitle       bool
+	onErr             func(err error)
+	onLoad            func()
+	onPageChange      func(vars.Vars, *url.URL)
+	afterPageChange   func(vars.Vars, *url.URL)
+	middlewares       []func(vars.Vars, *url.URL, rterr.ErrorThrower) bool
+}
 
 // Initialize a new router.
 func NewRouter() *Router {
@@ -17,6 +32,12 @@ func (r *Router) SkipTrailingSlash() *Router {
 	return r
 }
 
+// Add a middleware to the router.
+func (r *Router) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) *Router {
+	r.middlewares = append(r.middlewares, middleware)
+	return r
+}
+
 // Decide what to do on errors.
 func (r *Router) OnError(cb func(err error)) *Router {
 	r.onErr = cb
@@ -24,8 +45,8 @@ func (r *Router) OnError(cb func(err error)) *Router {
 }
 
 // Throw an error in the router with a message.
-func (r *Router) Error(code int, msg string) RouterError {
-	var err = NewError(code, msg)
+func (r *Router) Error(code int, msg string) rterr.RouterError {
+	var err = rterr.NewError(code, msg)
 	if r.onErr == nil {
 		panic(err)
 	}
@@ -35,7 +56,7 @@ func (r *Router) Error(code int, msg string) RouterError {
 
 // Throw an error in the router with predefined error code messages.
 func (r *Router) Throw(code int) {
-	var err = NewError(code)
+	var err = rterr.NewError(code)
 	if r.onErr == nil {
 		panic(err)
 	} else {
@@ -56,7 +77,7 @@ func (r *Router) String() string {
 }
 
 // Match a raw path.
-func (r *Router) Match(path string) (*Route, Vars, bool) {
+func (r *Router) Match(path string) (*Route, vars.Vars, bool) {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
@@ -90,7 +111,7 @@ func (r *Router) GetRoute(name string) *Route {
 
 // Register a new route.
 // If the route name already exists, it will panic.
-func (r *Router) Register(name, path string, callable func(v Vars, u *url.URL)) *Route {
+func (r *Router) Register(name, path string, callable func(v vars.Vars, u *url.URL)) *Route {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
@@ -120,16 +141,16 @@ func (r *Router) Redirect(path string) {
 }
 
 // Redirect to a route by name.
-func (r *Router) RedirectNamed(name string, vars Vars) {
+func (r *Router) RedirectNamed(name string, varMap vars.Vars) {
 	var route = r.GetRoute(name)
 	if route == nil {
 		r.Error(404, "Route not found: "+name)
 		return
 	}
-	if vars == nil {
-		vars = make(Vars)
+	if varMap == nil {
+		varMap = make(vars.Vars)
 	}
 	if route.Callable != nil {
-		go route.Callable(vars, nil)
+		go route.Callable(varMap, nil)
 	}
 }

@@ -1,4 +1,4 @@
-package router
+package vars
 
 import "strconv"
 

@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/Nigel2392/jsext/router/vars"
 )
 
 // Router regex delimiters
@@ -45,7 +47,7 @@ type Route struct {
 	Name              string
 	name              string
 	Path              string
-	Callable          func(v Vars, u *url.URL)
+	Callable          func(v vars.Vars, u *url.URL)
 	RegexUrl          string
 	skipTrailingSlash bool
 	Children          []*Route
@@ -94,7 +96,7 @@ func (r *Route) getRoute(name string) *Route {
 //	-> Route{Path: "/api", Children: []*Route{Path: "posts/"}}
 //
 // Will result in the path "/api/posts"
-func (r *Route) Register(name, path string, callable func(v Vars, u *url.URL)) *Route {
+func (r *Route) Register(name, path string, callable func(v vars.Vars, u *url.URL)) *Route {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
@@ -122,13 +124,13 @@ func (r *Route) Register(name, path string, callable func(v Vars, u *url.URL)) *
 
 // If the path matches the route, return true and the named capture groups
 // If capture group is not named, returns $1, $2, etc.
-func (r *Route) Match(path string) (bool, *Route, Vars) {
+func (r *Route) Match(path string) (bool, *Route, vars.Vars) {
 	var rpath = r.regexr("")
 	var rex = regexp.MustCompile(rpath)
 	var m = rex.FindStringSubmatch(path)
 
 	// Get named capture groups
-	var vars = make(Vars, len(m))
+	var vars = make(vars.Vars, len(m))
 	var subNames = rex.SubexpNames()
 	if len(subNames) != len(m) {
 		return false, nil, nil

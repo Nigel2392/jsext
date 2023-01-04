@@ -9,11 +9,13 @@ import (
 	"strings"
 
 	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/router/rterr"
+	"github.com/Nigel2392/jsext/router/vars"
 )
 
 // Default router error to be displayed if one occurs.
 func DefaultRouterErrorDisplay(err error) {
-	var rtErr, ok = err.(RouterError)
+	var rtErr, ok = err.(rterr.RouterError)
 	if !ok {
 		panic(rtErr)
 	}
@@ -52,17 +54,6 @@ func DefaultRouterErrorDisplay(err error) {
 	jsext.Body.AppendChild(overlay)
 }
 
-// Router is the main router struct.
-type Router struct {
-	routes            []*Route
-	skipTrailingSlash bool
-	nameToTitle       bool
-	onErr             func(err error)
-	onLoad            func()
-	onPageChange      func(Vars, *url.URL)
-	afterPageChange   func(Vars, *url.URL)
-}
-
 // Get a route by index.
 func (r *Router) GetIndex(i int) *Route {
 	return r.routes[i]
@@ -75,13 +66,13 @@ func (r *Router) OnLoad(f func()) *Router {
 }
 
 // Set on page change function.
-func (r *Router) OnPageChange(f func(Vars, *url.URL)) *Router {
+func (r *Router) OnPageChange(f func(vars.Vars, *url.URL)) *Router {
 	r.onPageChange = f
 	return r
 }
 
 // Set after page change function.
-func (r *Router) AfterPageChange(f func(Vars, *url.URL)) *Router {
+func (r *Router) AfterPageChange(f func(vars.Vars, *url.URL)) *Router {
 	r.afterPageChange = f
 	return r
 }
@@ -162,7 +153,7 @@ func (r *Router) Handle(u *url.URL) {
 	go func() {
 		var rt, vars, ok = r.Match(u.Path)
 		if !ok {
-			var err = NewError(404, "no route found for path: "+u.Path)
+			var err = rterr.NewError(404, "no route found for path: "+u.Path)
 			if r.onErr == nil {
 				panic(err)
 			} else {
@@ -175,6 +166,11 @@ func (r *Router) Handle(u *url.URL) {
 		}
 		if rt.Callable != nil {
 			go func() {
+				for _, m := range r.middlewares {
+					if !m(vars, u, r) {
+						return
+					}
+				}
 				rt.Callable(vars, u)
 				if r.afterPageChange != nil {
 					r.afterPageChange(vars, u)

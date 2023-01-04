@@ -5,27 +5,28 @@ import (
 	"testing"
 
 	"github.com/Nigel2392/jsext/router"
+	"github.com/Nigel2392/jsext/router/vars"
 )
 
 func TestRouter(t *testing.T) {
 	var rt = router.NewRouter().SkipTrailingSlash()
 
-	var homeRoute = rt.Register("home", "/", func(vars router.Vars, u *url.URL) {
+	var homeRoute = rt.Register("home", "/", func(vars vars.Vars, u *url.URL) {
 		t.Log("Index")
 	})
-	var innerHome = homeRoute.Register("innerhome", "home/", func(vars router.Vars, u *url.URL) {
+	var innerHome = homeRoute.Register("innerhome", "home/", func(vars vars.Vars, u *url.URL) {
 		t.Log("Home")
 	})
-	innerHome.Register("innerinnerhome", "home/", func(vars router.Vars, u *url.URL) {
+	innerHome.Register("innerinnerhome", "home/", func(vars vars.Vars, u *url.URL) {
 		t.Log("Home")
 	})
-	rt.Register("about", "/about/", func(vars router.Vars, u *url.URL) {
+	rt.Register("about", "/about/", func(vars vars.Vars, u *url.URL) {
 		t.Log("About")
 	})
-	rt.Register("post", "/post/<<post:int>>/<<name:string>>/", func(vars router.Vars, u *url.URL) {
+	rt.Register("post", "/post/<<post:int>>/<<name:string>>/", func(vars vars.Vars, u *url.URL) {
 		t.Log(vars.Get("post"))
 	})
-	rt.Register("postraw", "/post/<<post:raw([0-9]+)>>/", func(vars router.Vars, u *url.URL) {
+	rt.Register("postraw", "/post/<<post:raw([0-9]+)>>/", func(vars vars.Vars, u *url.URL) {
 		t.Log(vars.Get("post"))
 	})
 
