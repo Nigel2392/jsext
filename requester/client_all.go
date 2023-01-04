@@ -1,17 +1,10 @@
 package requester
 
-import "io"
+import "github.com/Nigel2392/jsext/requester/encoders"
 
 // Define methods and encodings type
 type Methods string
 type Encoding string
-
-// Define a type for multipart files
-type File struct {
-	FileName  string    // Name of the file
-	FieldName string    // Name of the field
-	Reader    io.Reader // Reader of the file
-}
 
 // Define standard error messages
 var (
@@ -57,7 +50,7 @@ type Client interface {
 	// Initialize a HEAD request
 	Head(url string) Client
 	// Add form data to the request
-	WithData(formData map[string]interface{}, encoding Encoding, file ...File) Client
+	WithData(formData map[string]interface{}, encoding Encoding, file ...encoders.File) Client
 	// Add a header to the request
 	WithHeader(header map[string]string) Client
 	// Add a query to the request

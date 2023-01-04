@@ -15,6 +15,7 @@ import (
 	"runtime/debug"
 
 	"github.com/Nigel2392/jsext/helpers"
+	"github.com/Nigel2392/jsext/requester/encoders"
 )
 
 // APIClient is a client that can be used to make requests to a server.
@@ -84,7 +85,7 @@ func (c *APIClient) Trace(url string) *APIClient {
 }
 
 // Add form data to the request
-func (c *APIClient) WithData(formData map[string]any, encoding Encoding, file ...File) *APIClient {
+func (c *APIClient) WithData(formData map[string]any, encoding Encoding, file ...encoders.File) *APIClient {
 	if c.request == nil {
 		c.errorFunc(errors.New(ErrNoRequest))
 	}

@@ -4,6 +4,7 @@
 package requester
 
 import (
+	"github.com/Nigel2392/jsext/requester/encoders"
 	"github.com/Nigel2392/jsext/requester/fetch"
 )
 
@@ -72,16 +73,17 @@ func (c *APIClient) WithHeaders(headers map[string]string) *APIClient {
 }
 
 // Add data to the request
-func (c *APIClient) WithData(formData map[string]interface{}, encoding Encoding, file ...File) *APIClient {
+func (c *APIClient) WithData(formData map[string]interface{}, encoding Encoding, file ...encoders.File) *APIClient {
 	switch encoding {
 	case JSON:
 		c.Request.Headers["Content-Type"] = "application/json"
-		c.Request.Body = fetch.MarshalMap(formData)
+		c.Request.Body = encoders.MarshalMap(formData)
 	case FORM_URL_ENCODED:
 		c.Request.Headers["Content-Type"] = "application/x-www-form-urlencoded"
-		c.Request.Body = fetch.ToURLValues(formData)
+		c.Request.Body = encoders.ToURLValues(formData)
 	case MULTIPART_FORM:
-		panic(MULTIPART_FORM + " is not supported yet!")
+		c.Request.Headers["Content-Type"] = "multipart/form-data"
+		c.Request.Body = encoders.ToMultipart(formData, file...)
 	}
 	return c
 }
