@@ -60,7 +60,10 @@ func (p *Paginator[T]) fetchResults(url string) ([]T, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsonData := resp.JSONMap()
+	jsonData, ok := resp.JSONMap()
+	if jsonData == nil || !ok {
+		return nil, fmt.Errorf("jsonData is not a map[string]interface{}")
+	}
 	detail, ok := jsonData["detail"]
 	if ok {
 		return nil, fmt.Errorf("detail: %s", detail)

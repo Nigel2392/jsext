@@ -148,10 +148,12 @@ func fetch(options Request) (*Response, error) {
 	return resp, err
 }
 
-func (r *Response) JSONMap() map[string]interface{} {
-	return gjson.ParseBytes(r.Body).Value().(map[string]interface{})
+func (r *Response) JSONMap() (map[string]interface{}, bool) {
+	data, ok := gjson.ParseBytes(r.Body).Value().(map[string]interface{})
+	return data, ok
 }
 
-func (r *Response) JSONList() []interface{} {
-	return gjson.ParseBytes(r.Body).Value().([]interface{})
+func (r *Response) JSONList() ([]interface{}, bool) {
+	data, ok := gjson.ParseBytes(r.Body).Value().([]interface{})
+	return data, ok
 }

@@ -77,8 +77,8 @@ func (p *FormatPaginator[T]) fetchResults(url string) ([]T, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsonData := resp.JSONMap()
-	if jsonData == nil {
+	jsonData, ok := resp.JSONMap()
+	if jsonData == nil || !ok {
 		return nil, fmt.Errorf("invalid json data")
 	}
 	detail, ok := jsonData["detail"]
