@@ -12,6 +12,7 @@ import (
 	"github.com/Nigel2392/jsext/elements"
 	"github.com/Nigel2392/jsext/requester"
 	"github.com/Nigel2392/jsext/router"
+	"github.com/Nigel2392/jsext/router/vars"
 )
 
 // Preloader to be removed. This should happen automatically from the JS-script.
@@ -168,8 +169,8 @@ func (a *Application) OnRouterLoad(f func()) *Application {
 }
 
 // Function to be ran before the page is rendered.
-func (a *Application) OnPageChange(f func(*Application, router.Vars, *url.URL)) *Application {
-	var newF = func(v router.Vars, u *url.URL) {
+func (a *Application) OnPageChange(f func(*Application, vars.Vars, *url.URL)) *Application {
+	var newF = func(v vars.Vars, u *url.URL) {
 		f(a, v, u)
 	}
 	a.Router.OnPageChange(newF)
@@ -177,8 +178,8 @@ func (a *Application) OnPageChange(f func(*Application, router.Vars, *url.URL)) 
 }
 
 // Function to be ran after the page is rendered.
-func (a *Application) AfterPageChange(f func(*Application, router.Vars, *url.URL)) *Application {
-	var newF = func(v router.Vars, u *url.URL) {
+func (a *Application) AfterPageChange(f func(*Application, vars.Vars, *url.URL)) *Application {
+	var newF = func(v vars.Vars, u *url.URL) {
 		f(a, v, u)
 	}
 	a.Router.AfterPageChange(newF)
@@ -227,8 +228,8 @@ func (a *Application) Load(f func()) {
 }
 
 // Register routes to the application.
-func (a *Application) Register(name string, path string, callable func(a *Application, v router.Vars, u *url.URL)) *router.Route {
-	var ncall func(v router.Vars, u *url.URL)
+func (a *Application) Register(name string, path string, callable func(a *Application, v vars.Vars, u *url.URL)) *router.Route {
+	var ncall func(v vars.Vars, u *url.URL)
 	if callable != nil {
 		ncall = a.WrapURL(callable)
 	}
@@ -236,8 +237,8 @@ func (a *Application) Register(name string, path string, callable func(a *Applic
 	return route
 }
 
-func (a *Application) WrapURL(f func(a *Application, v router.Vars, u *url.URL)) func(v router.Vars, u *url.URL) {
-	return func(v router.Vars, u *url.URL) {
+func (a *Application) WrapURL(f func(a *Application, v vars.Vars, u *url.URL)) func(v vars.Vars, u *url.URL) {
+	return func(v vars.Vars, u *url.URL) {
 		if f != nil {
 			f(a, v, u)
 		}
