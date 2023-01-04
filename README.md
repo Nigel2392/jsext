@@ -5,8 +5,10 @@ Golang Wasm extension for easy JS interop.
 ## Installation
 Easily install  with the following command:
 ```
-go get github.com/Nigel2392/jsext
+go get github.com/Nigel2392/jsext@vX.X.X.X
 ```
+
+Please check the tags for the latest version, we use an unconventional versioning system, which pkg.go.dev does not like.
 
 ## Features
 JSExt provides a few features to make it easier to interact with Javascript.
