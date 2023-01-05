@@ -150,8 +150,8 @@ func (e Element) InnerElement(el Element) Element {
 }
 
 // Get the style of the element.
-func (e Element) Style() Value {
-	return e.Get("style")
+func (e Element) Style() Style {
+	return Style(e.Get("style"))
 }
 
 // Set the style of an element property.

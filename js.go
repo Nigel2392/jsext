@@ -362,6 +362,51 @@ func ArrayToSlice(arr js.Value) []interface{} {
 	return s
 }
 
+// Convert a slice to a js.Value array.
+func SliceToArray(s []any) Value {
+	var arr = NewArray()
+	for i, v := range s {
+		//lint:ignore S1034 Need the switch statement as is.
+		switch v.(type) {
+		case map[string]interface{}:
+			arr.SetIndex(i, MapToObject(v.(map[string]interface{})).Value())
+		case []interface{}:
+			arr.SetIndex(i, SliceToArray(v.([]interface{})).Value())
+		case []byte:
+			arr.SetIndex(i, BytesToArray(v.([]byte)).Value())
+		default:
+			arr.SetIndex(i, ValueOf(v).Value())
+		}
+	}
+	return arr
+}
+
+// Convert a map to a js.Value object.
+func MapToObject(m map[string]interface{}) Value {
+	var obj = NewObject()
+	for k, v := range m {
+		//lint:ignore S1034 Need the switch statement as is.
+		switch v.(type) {
+		case map[string]interface{}:
+			obj.Set(k, MapToObject(v.(map[string]interface{})).Value())
+		case []interface{}:
+			obj.Set(k, SliceToArray(v.([]interface{})).Value())
+		case []byte:
+			obj.Set(k, BytesToArray(v.([]byte)).Value())
+		default:
+			obj.Set(k, ValueOf(v).Value())
+		}
+	}
+	return obj
+}
+
+// Convert a byte slice to a js.Value array.
+func BytesToArray(b []byte) Value {
+	var buffer js.Value = js.Global().Get("ArrayBuffer").New(len(b))
+	js.CopyBytesToJS(buffer, b)
+	return Value(buffer)
+}
+
 // Get a value from the global scope.
 func Get(key string) Value {
 	return Value(Global.Get(key))
