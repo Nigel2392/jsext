@@ -136,11 +136,10 @@ func (c WebGLRenderingContext) BufferSubData(target int, dstByteOffset int, src 
 
 func (c WebGLRenderingContext) BufferSubDataWebGL2(target int, dstByteOffset int, rest ...any) {
 	for i, r := range rest {
-		//lint:ignore S1034 assigning the result of this type assertion to a variable (switch r := r.(type)) could eliminate type assertions in switch cases
-		switch r.(type) {
+		switch r := r.(type) {
 		case []byte:
-			var buffer js.Value = js.Global().Get("ArrayBuffer").New(len(r.([]byte)))
-			js.CopyBytesToJS(buffer, r.([]byte))
+			var buffer js.Value = js.Global().Get("ArrayBuffer").New(len(r))
+			js.CopyBytesToJS(buffer, r)
 			rest[i] = buffer
 		}
 	}
