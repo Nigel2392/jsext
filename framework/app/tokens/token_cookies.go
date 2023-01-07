@@ -40,7 +40,7 @@ func SetTokenCookie(token *Token) error {
 	// Encode to base64
 	var cookie = base64.RawURLEncoding.EncodeToString(msgBytes)
 	// Set the cookie
-	return jsext.SetCookie(JSEXT_token, cookie, time.Second*3600*24)
+	return jsext.SetCookie(JSEXT_token, cookie, token.RefreshExpiredIn())
 }
 
 // Get the token cookie
