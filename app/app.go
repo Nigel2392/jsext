@@ -246,23 +246,31 @@ func (a *Application) WrapURL(f func(a *Application, v vars.Vars, u *url.URL)) f
 	}
 }
 
-// Render a component to the application.
-func (a *Application) Render(e ...components.Component) {
-	a.render(e...)
+// Renders components of the following types to the application:
+// jsext.Value, jsext.Element, components.Component, js.Value, string
+func (a *Application) Render(e ...any) {
+	a.Base.InnerHTML("")
+	for _, el := range e {
+		switch el.(type) {
+		case jsext.Value:
+			a.Base.AppendChild(jsext.Element(el.(jsext.Value)))
+		case jsext.Element:
+			a.Base.AppendChild(el.(jsext.Element))
+		case components.Component:
+			a.Base.AppendChild(el.(components.Component).Render())
+		case js.Value:
+			a.Base.AppendChild(jsext.Element(el.(js.Value)))
+		case string:
+			var oldHTML = a.Base.Get("innerHTML")
+			a.Base.Set("innerHTML", oldHTML.String()+el.(string))
+		}
+	}
+	a.renderBases()
 }
 
 // Redirect to a url.
 func (a *Application) Redirect(url string) {
 	a.Router.Redirect(url)
-}
-
-// Render a component to the application.
-func (a *Application) render(e ...components.Component) {
-	a.Base.InnerHTML("")
-	for _, el := range e {
-		a.Base.AppendChild(el.Render())
-	}
-	a.renderBases()
 }
 
 // InnerHTML sets the inner HTML of the element.

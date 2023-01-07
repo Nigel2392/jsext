@@ -165,21 +165,6 @@ func (e Element) GetStyleProperty(name string) string {
 	return e.JSValue().Get("style").Get(name).String()
 }
 
-// Get an attribute of the element.
-func (e Element) GetAttribute(name string) Value {
-	return e.Get(name)
-}
-
-// Get a property of the element.
-func (e Element) GetProperty(name string) Value {
-	return e.Get(name)
-}
-
-// Set a property of the element.
-func (e Element) SetProperty(name, value string) {
-	e.JSValue().Set(name, value)
-}
-
 // Get the value of the element.
 func (e Element) GetClassList() Value {
 	return Value(e.JSValue().Get("classList"))
@@ -337,6 +322,12 @@ func (e Element) ClientWidth() int {
 // Get the element's dataset.
 func (e Element) Dataset() Value {
 	return Value(e.JSValue().Get("dataset"))
+}
+
+// Return the element's dataset as map
+func (e Element) MapDataset() map[string]string {
+	var dataset = e.Dataset()
+	return ObjectToMapString(dataset.Value())
 }
 
 // Get the element's first child.

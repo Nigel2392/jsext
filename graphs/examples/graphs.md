@@ -1,6 +1,15 @@
 # Simple example of a graph
 
 JSExt also has support for graphs. The following example shows how to create a graph.
+
+Supports the following types of graphs:
+```go
+options.Bar
+options.Line
+options.Pie
+options.Donut
+```
+
 ```go
 var canvasDiv = js.Global().Get("document").Call("createElement", "div")
 var Canvas = canvas.NewCanvas(640, 640)
