@@ -247,22 +247,27 @@ func (a *Application) WrapURL(f func(a *Application, v vars.Vars, u *url.URL)) f
 }
 
 // Renders components of the following types to the application:
-// jsext.Value, jsext.Element, components.Component, js.Value, string
+//
+//   - jsext.Value
+//   - jsext.Element
+//   - components.Component
+//   - js.Value
+//   - string
 func (a *Application) Render(e ...any) {
 	a.Base.InnerHTML("")
 	for _, el := range e {
-		switch el.(type) {
+		switch el := el.(type) {
 		case jsext.Value:
-			a.Base.AppendChild(jsext.Element(el.(jsext.Value)))
+			a.Base.AppendChild(jsext.Element(el))
 		case jsext.Element:
-			a.Base.AppendChild(el.(jsext.Element))
+			a.Base.AppendChild(el)
 		case components.Component:
-			a.Base.AppendChild(el.(components.Component).Render())
+			a.Base.AppendChild(el.Render())
 		case js.Value:
-			a.Base.AppendChild(jsext.Element(el.(js.Value)))
+			a.Base.AppendChild(jsext.Element(el))
 		case string:
 			var oldHTML = a.Base.Get("innerHTML")
-			a.Base.Set("innerHTML", oldHTML.String()+el.(string))
+			a.Base.Set("innerHTML", oldHTML.String()+el)
 		}
 	}
 	a.renderBases()
