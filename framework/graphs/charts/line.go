@@ -197,7 +197,7 @@ func Line(Canvas canvas.Canvas, opts options.GraphOptions) {
 			if x > x1 && x < x2 && y > y1 && y < y2 {
 				ctx.ClearRect(0, 0, float64(opts.WidthPX), float64(opts.HeightPX))
 				drawCanvas()
-				drawTooltip(ctx, width, height, x1-50, y1-20, labelOptions.Label(i/2)+": "+convert.FormatNumber(opts.Values[i/2]))
+				drawTooltip(ctx, width, height, x1-50, y1-20, labelOptions.UnderlyingLabel(i/2)+": "+convert.FormatNumber(opts.Values[i/2]))
 			} else {
 				for i := 0; i < len(opts.Values); i++ {
 					var x1 = leftOfChart + (float64(i) * labelWidth) + (labelWidth / 2)

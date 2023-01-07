@@ -129,7 +129,7 @@ func Bar(Canvas canvas.Canvas, opts options.GraphOptions) {
 				// Draw the tooltip.
 				ctx.ClearRect(0, 0, float64(width), float64(height))
 				drawCanvas()
-				drawTooltip(ctx, width, height, x, y, labelOptions.Label(i)+": "+convert.FormatNumber(opts.Values[i]))
+				drawTooltip(ctx, width, height, x, y, labelOptions.UnderlyingLabel(i)+": "+convert.FormatNumber(opts.Values[i]))
 				// Check if the value is not on any bar, but maybe between them. If the mouse is not over a bar on the canvas, clear the canvas.
 			} else {
 				for i := 0; i < len(opts.Values); i++ {

@@ -21,18 +21,19 @@ func (l *LabelOpts) SetLabels(labels []string, values []any) {
 	l.UnderLying = make([]string, len(values))
 	if len(labels) > 0 && len(labels) == len(values) {
 		l.Labels = labels
+		l.UnderLying = labels
 	} else {
 		// If the labels are x times the length of the values, fill x spots in between the list of labels
 		// with the string zero value.
 		if len(labels) > 0 && len(values)%len(labels) == 0 {
-			var labelDivisor = len(values) / len(labels)
+			var labelMod = len(values) / len(labels)
 			var labelIndex = 0
 			var lastLabel = ""
 			for i := 0; i < len(values); i++ {
-				if i%labelDivisor == 0 {
-					l.Labels[i] = labels[labelIndex]
-					l.UnderLying[i] = labels[labelIndex]
+				if i%labelMod == 0 {
 					lastLabel = labels[labelIndex]
+					l.Labels[i] = lastLabel
+					l.UnderLying[i] = lastLabel
 					labelIndex++
 				} else {
 					l.Labels[i] = ""
@@ -42,6 +43,7 @@ func (l *LabelOpts) SetLabels(labels []string, values []any) {
 		} else {
 			for i := 0; i < len(values); i++ {
 				l.Labels[i] = strconv.FormatFloat(convert.ToFloat(values[i]), 'f', 2, 64)
+				l.UnderLying[i] = labels[i]
 			}
 		}
 	}
