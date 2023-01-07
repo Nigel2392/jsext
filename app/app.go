@@ -255,6 +255,18 @@ func (a *Application) WrapURL(f func(a *Application, v vars.Vars, u *url.URL)) f
 //   - string
 func (a *Application) Render(e ...any) {
 	a.Base.InnerHTML("")
+	a.appendAny(e...)
+	a.renderBases()
+}
+
+// Append components of the following types to the application:
+//
+//   - jsext.Value
+//   - jsext.Element
+//   - components.Component
+//   - js.Value
+//   - string
+func (a *Application) appendAny(e ...any) {
 	for _, el := range e {
 		switch el := el.(type) {
 		case jsext.Value:
@@ -270,7 +282,22 @@ func (a *Application) Render(e ...any) {
 			a.Base.Set("innerHTML", oldHTML.String()+el)
 		}
 	}
-	a.renderBases()
+}
+
+// insertBefore a list of components to the application.
+func (a *Application) insertBefore(before jsext.Element, e ...any) {
+	for _, el := range e {
+		switch el := el.(type) {
+		case jsext.Value:
+			a.Base.InsertBefore(jsext.Element(el), before)
+		case jsext.Element:
+			a.Base.InsertBefore(el, before)
+		case components.Component:
+			a.Base.InsertBefore(el.Render(), before)
+		case js.Value:
+			a.Base.InsertBefore(jsext.Element(el), before)
+		}
+	}
 }
 
 // Redirect to a url.
@@ -294,32 +321,23 @@ func (a *Application) RenderText(text string) *Application {
 	return a
 }
 
-// SetInnerElement clears the inner HTML and appends the element.
-func (a *Application) RenderElement(el jsext.Element) *Application {
-	a.Base.InnerHTML("")
-	a.Base.AppendChild(el)
-	a.renderBases()
-	return a
-}
-
-func (a *Application) RenderValue(v js.Value) *Application {
-	a.Base.InnerHTML("")
-	a.Base.AppendChild(jsext.Element(v))
-	a.renderBases()
-	return a
-}
-
 // AppendChild appends a child to the element.
-func (a *Application) AppendChild(e components.Component) *Application {
+// Can render the following types:
+//
+//   - jsext.Value
+//   - jsext.Element
+//   - components.Component
+//   - js.Value
+func (a *Application) AppendChild(e ...any) *Application {
 	// If footer is not nil, append before it
 	if a.Footer != nil {
 		var footer, ok = a.Footer.(*elements.Element)
 		if !ok {
 			panic("footer is not an element, cannot append before it.")
 		}
-		a.Base.InsertBefore(e.Render(), footer.JSExtElement())
+		a.insertBefore(footer.Render(), e...)
 	} else {
-		a.Base.AppendChild(e.Render())
+		a.appendAny(e...)
 	}
 	return a
 }
