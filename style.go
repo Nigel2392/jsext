@@ -29,19 +29,19 @@ func (s Style) Unset(key string) {
 
 //https://www.w3schools.com/jsref/dom_obj_style.asp
 
-func (s Style) Aligncontent(str ...string) string {
+func (s Style) AlignContent(str ...string) string {
 	if len(str) > 0 {
 		s.Set("alignContent", str[0])
 	}
 	return s.Get("alignContent").String()
 }
-func (s Style) Alignitems(str ...string) string {
+func (s Style) AlignItems(str ...string) string {
 	if len(str) > 0 {
 		s.Set("alignItems", str[0])
 	}
 	return s.Get("alignItems").String()
 }
-func (s Style) Alignself(str ...string) string {
+func (s Style) AlignSelf(str ...string) string {
 	if len(str) > 0 {
 		s.Set("alignSelf", str[0])
 	}
@@ -53,49 +53,49 @@ func (s Style) Animation(str ...string) string {
 	}
 	return s.Get("animation").String()
 }
-func (s Style) Animationdelay(str ...string) string {
+func (s Style) AnimationDelay(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationDelay", str[0])
 	}
 	return s.Get("animationDelay").String()
 }
-func (s Style) Animationdirection(str ...string) string {
+func (s Style) AnimationDirection(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationDirection", str[0])
 	}
 	return s.Get("animationDirection").String()
 }
-func (s Style) Animationduration(str ...string) string {
+func (s Style) AnimationDuration(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationDuration", str[0])
 	}
 	return s.Get("animationDuration").String()
 }
-func (s Style) Animationfillmode(str ...string) string {
+func (s Style) AnimationFillMode(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationFillMode", str[0])
 	}
 	return s.Get("animationFillMode").String()
 }
-func (s Style) Animationiterationcount(str ...string) string {
+func (s Style) AnimationIterationCount(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationIterationCount", str[0])
 	}
 	return s.Get("animationIterationCount").String()
 }
-func (s Style) Animationname(str ...string) string {
+func (s Style) AnimationName(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationName", str[0])
 	}
 	return s.Get("animationName").String()
 }
-func (s Style) Animationtimingfunction(str ...string) string {
+func (s Style) AnimationTimingFunction(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationTimingFunction", str[0])
 	}
 	return s.Get("animationTimingFunction").String()
 }
-func (s Style) Animationplaystate(str ...string) string {
+func (s Style) AnimationPlayState(str ...string) string {
 	if len(str) > 0 {
 		s.Set("animationPlayState", str[0])
 	}
@@ -107,55 +107,55 @@ func (s Style) Background(str ...string) string {
 	}
 	return s.Get("background").String()
 }
-func (s Style) Backgroundattachment(str ...string) string {
+func (s Style) BackgroundAttachment(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundAttachment", str[0])
 	}
 	return s.Get("backgroundAttachment").String()
 }
-func (s Style) Backgroundcolor(str ...string) string {
+func (s Style) BackgroundColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundColor", str[0])
 	}
 	return s.Get("backgroundColor").String()
 }
-func (s Style) Backgroundimage(str ...string) string {
+func (s Style) BackgroundImage(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundImage", str[0])
 	}
 	return s.Get("backgroundImage").String()
 }
-func (s Style) Backgroundposition(str ...string) string {
+func (s Style) BackgroundPosition(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundPosition", str[0])
 	}
 	return s.Get("backgroundPosition").String()
 }
-func (s Style) Backgroundrepeat(str ...string) string {
+func (s Style) BackgroundRepeat(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundRepeat", str[0])
 	}
 	return s.Get("backgroundRepeat").String()
 }
-func (s Style) Backgroundclip(str ...string) string {
+func (s Style) BackgroundClip(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundClip", str[0])
 	}
 	return s.Get("backgroundClip").String()
 }
-func (s Style) Backgroundorigin(str ...string) string {
+func (s Style) BackgroundOrigin(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundOrigin", str[0])
 	}
 	return s.Get("backgroundOrigin").String()
 }
-func (s Style) Backgroundsize(str ...string) string {
+func (s Style) BackgroundSize(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backgroundSize", str[0])
 	}
 	return s.Get("backgroundSize").String()
 }
-func (s Style) Backfacevisibility(str ...string) string {
+func (s Style) BackfaceVisibility(str ...string) string {
 	if len(str) > 0 {
 		s.Set("backfaceVisibility", str[0])
 	}
@@ -167,193 +167,193 @@ func (s Style) Border(str ...string) string {
 	}
 	return s.Get("border").String()
 }
-func (s Style) Borderbottom(str ...string) string {
+func (s Style) BorderBottom(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottom", str[0])
 	}
 	return s.Get("borderBottom").String()
 }
-func (s Style) Borderbottomcolor(str ...string) string {
+func (s Style) BorderBottomColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottomColor", str[0])
 	}
 	return s.Get("borderBottomColor").String()
 }
-func (s Style) Borderbottomleftradius(str ...string) string {
+func (s Style) BorderBottomLeftRadius(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottomLeftRadius", str[0])
 	}
 	return s.Get("borderBottomLeftRadius").String()
 }
-func (s Style) Borderbottomrightradius(str ...string) string {
+func (s Style) BorderBottomRightRadius(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottomRightRadius", str[0])
 	}
 	return s.Get("borderBottomRightRadius").String()
 }
-func (s Style) Borderbottomstyle(str ...string) string {
+func (s Style) BorderBottomStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottomStyle", str[0])
 	}
 	return s.Get("borderBottomStyle").String()
 }
-func (s Style) Borderbottomwidth(str ...string) string {
+func (s Style) BorderBottomWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderBottomWidth", str[0])
 	}
 	return s.Get("borderBottomWidth").String()
 }
-func (s Style) Bordercollapse(str ...string) string {
+func (s Style) BorderCollapse(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderCollapse", str[0])
 	}
 	return s.Get("borderCollapse").String()
 }
-func (s Style) Bordercolor(str ...string) string {
+func (s Style) BorderColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderColor", str[0])
 	}
 	return s.Get("borderColor").String()
 }
-func (s Style) Borderimage(str ...string) string {
+func (s Style) BorderImage(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImage", str[0])
 	}
 	return s.Get("borderImage").String()
 }
-func (s Style) Borderimageoutset(str ...string) string {
+func (s Style) BorderImageOutset(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImageOutset", str[0])
 	}
 	return s.Get("borderImageOutset").String()
 }
-func (s Style) Borderimagerepeat(str ...string) string {
+func (s Style) BorderImageRepeat(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImageRepeat", str[0])
 	}
 	return s.Get("borderImageRepeat").String()
 }
-func (s Style) Borderimageslice(str ...string) string {
+func (s Style) BorderImageSlice(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImageSlice", str[0])
 	}
 	return s.Get("borderImageSlice").String()
 }
-func (s Style) Borderimagesource(str ...string) string {
+func (s Style) BorderImageSource(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImageSource", str[0])
 	}
 	return s.Get("borderImageSource").String()
 }
-func (s Style) Borderimagewidth(str ...string) string {
+func (s Style) BorderImageWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderImageWidth", str[0])
 	}
 	return s.Get("borderImageWidth").String()
 }
-func (s Style) Borderleft(str ...string) string {
+func (s Style) BorderLeft(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderLeft", str[0])
 	}
 	return s.Get("borderLeft").String()
 }
-func (s Style) Borderleftcolor(str ...string) string {
+func (s Style) BorderLeftColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderLeftColor", str[0])
 	}
 	return s.Get("borderLeftColor").String()
 }
-func (s Style) Borderleftstyle(str ...string) string {
+func (s Style) BorderLeftStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderLeftStyle", str[0])
 	}
 	return s.Get("borderLeftStyle").String()
 }
-func (s Style) Borderleftwidth(str ...string) string {
+func (s Style) BorderLeftWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderLeftWidth", str[0])
 	}
 	return s.Get("borderLeftWidth").String()
 }
-func (s Style) Borderradius(str ...string) string {
+func (s Style) BorderRadius(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderRadius", str[0])
 	}
 	return s.Get("borderRadius").String()
 }
-func (s Style) Borderright(str ...string) string {
+func (s Style) BorderRight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderRight", str[0])
 	}
 	return s.Get("borderRight").String()
 }
-func (s Style) Borderrightcolor(str ...string) string {
+func (s Style) BorderRightColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderRightColor", str[0])
 	}
 	return s.Get("borderRightColor").String()
 }
-func (s Style) Borderrightstyle(str ...string) string {
+func (s Style) BorderRightStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderRightStyle", str[0])
 	}
 	return s.Get("borderRightStyle").String()
 }
-func (s Style) Borderrightwidth(str ...string) string {
+func (s Style) BorderRightWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderRightWidth", str[0])
 	}
 	return s.Get("borderRightWidth").String()
 }
-func (s Style) Borderspacing(str ...string) string {
+func (s Style) BorderSpacing(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderSpacing", str[0])
 	}
 	return s.Get("borderSpacing").String()
 }
-func (s Style) Borderstyle(str ...string) string {
+func (s Style) BorderStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderStyle", str[0])
 	}
 	return s.Get("borderStyle").String()
 }
-func (s Style) Bordertop(str ...string) string {
+func (s Style) BorderTop(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTop", str[0])
 	}
 	return s.Get("borderTop").String()
 }
-func (s Style) Bordertopcolor(str ...string) string {
+func (s Style) BorderTopColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTopColor", str[0])
 	}
 	return s.Get("borderTopColor").String()
 }
-func (s Style) Bordertopleftradius(str ...string) string {
+func (s Style) BorderTopLeftRadius(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTopLeftRadius", str[0])
 	}
 	return s.Get("borderTopLeftRadius").String()
 }
-func (s Style) Bordertoprightradius(str ...string) string {
+func (s Style) BorderTopRightRadius(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTopRightRadius", str[0])
 	}
 	return s.Get("borderTopRightRadius").String()
 }
-func (s Style) Bordertopstyle(str ...string) string {
+func (s Style) BorderTopStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTopStyle", str[0])
 	}
 	return s.Get("borderTopStyle").String()
 }
-func (s Style) Bordertopwidth(str ...string) string {
+func (s Style) BorderTopWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderTopWidth", str[0])
 	}
 	return s.Get("borderTopWidth").String()
 }
-func (s Style) Borderwidth(str ...string) string {
+func (s Style) BorderWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("borderWidth", str[0])
 	}
@@ -365,25 +365,25 @@ func (s Style) Bottom(str ...string) string {
 	}
 	return s.Get("bottom").String()
 }
-func (s Style) Boxshadow(str ...string) string {
+func (s Style) BoxShadow(str ...string) string {
 	if len(str) > 0 {
 		s.Set("boxShadow", str[0])
 	}
 	return s.Get("boxShadow").String()
 }
-func (s Style) Boxsizing(str ...string) string {
+func (s Style) BoxSizing(str ...string) string {
 	if len(str) > 0 {
 		s.Set("boxSizing", str[0])
 	}
 	return s.Get("boxSizing").String()
 }
-func (s Style) Captionside(str ...string) string {
+func (s Style) CaptionSide(str ...string) string {
 	if len(str) > 0 {
 		s.Set("captionSide", str[0])
 	}
 	return s.Get("captionSide").String()
 }
-func (s Style) Caretcolor(str ...string) string {
+func (s Style) CaretColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("caretColor", str[0])
 	}
@@ -407,43 +407,43 @@ func (s Style) Color(str ...string) string {
 	}
 	return s.Get("color").String()
 }
-func (s Style) Columncount(str ...string) string {
+func (s Style) ColumnCount(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnCount", str[0])
 	}
 	return s.Get("columnCount").String()
 }
-func (s Style) Columnfill(str ...string) string {
+func (s Style) ColumnFill(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnFill", str[0])
 	}
 	return s.Get("columnFill").String()
 }
-func (s Style) Columngap(str ...string) string {
+func (s Style) ColumnGap(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnGap", str[0])
 	}
 	return s.Get("columnGap").String()
 }
-func (s Style) Columnrule(str ...string) string {
+func (s Style) ColumnRule(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnRule", str[0])
 	}
 	return s.Get("columnRule").String()
 }
-func (s Style) Columnrulecolor(str ...string) string {
+func (s Style) ColumnRuleColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnRuleColor", str[0])
 	}
 	return s.Get("columnRuleColor").String()
 }
-func (s Style) Columnrulestyle(str ...string) string {
+func (s Style) ColumnRuleStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnRuleStyle", str[0])
 	}
 	return s.Get("columnRuleStyle").String()
 }
-func (s Style) Columnrulewidth(str ...string) string {
+func (s Style) ColumnRuleWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnRuleWidth", str[0])
 	}
@@ -455,25 +455,25 @@ func (s Style) Columns(str ...string) string {
 	}
 	return s.Get("columns").String()
 }
-func (s Style) Columnspan(str ...string) string {
+func (s Style) ColumnSpan(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnSpan", str[0])
 	}
 	return s.Get("columnSpan").String()
 }
-func (s Style) Columnwidth(str ...string) string {
+func (s Style) ColumnWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("columnWidth", str[0])
 	}
 	return s.Get("columnWidth").String()
 }
-func (s Style) Counterincrement(str ...string) string {
+func (s Style) CounterIncrement(str ...string) string {
 	if len(str) > 0 {
 		s.Set("counterIncrement", str[0])
 	}
 	return s.Get("counterIncrement").String()
 }
-func (s Style) Counterreset(str ...string) string {
+func (s Style) CounterReset(str ...string) string {
 	if len(str) > 0 {
 		s.Set("counterReset", str[0])
 	}
@@ -497,7 +497,7 @@ func (s Style) Display(str ...string) string {
 	}
 	return s.Get("display").String()
 }
-func (s Style) Emptycells(str ...string) string {
+func (s Style) EmptyCells(str ...string) string {
 	if len(str) > 0 {
 		s.Set("emptyCells", str[0])
 	}
@@ -515,43 +515,43 @@ func (s Style) Flex(str ...string) string {
 	}
 	return s.Get("flex").String()
 }
-func (s Style) Flexbasis(str ...string) string {
+func (s Style) FlexBasis(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexBasis", str[0])
 	}
 	return s.Get("flexBasis").String()
 }
-func (s Style) Flexdirection(str ...string) string {
+func (s Style) FlexDirection(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexDirection", str[0])
 	}
 	return s.Get("flexDirection").String()
 }
-func (s Style) Flexflow(str ...string) string {
+func (s Style) FlexFlow(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexFlow", str[0])
 	}
 	return s.Get("flexFlow").String()
 }
-func (s Style) Flexgrow(str ...string) string {
+func (s Style) FlexGrow(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexGrow", str[0])
 	}
 	return s.Get("flexGrow").String()
 }
-func (s Style) Flexshrink(str ...string) string {
+func (s Style) FlexShrink(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexShrink", str[0])
 	}
 	return s.Get("flexShrink").String()
 }
-func (s Style) Flexwrap(str ...string) string {
+func (s Style) FlexWrap(str ...string) string {
 	if len(str) > 0 {
 		s.Set("flexWrap", str[0])
 	}
 	return s.Get("flexWrap").String()
 }
-func (s Style) Cssfloat(str ...string) string {
+func (s Style) CssFloat(str ...string) string {
 	if len(str) > 0 {
 		s.Set("cssFloat", str[0])
 	}
@@ -563,37 +563,37 @@ func (s Style) Font(str ...string) string {
 	}
 	return s.Get("font").String()
 }
-func (s Style) Fontfamily(str ...string) string {
+func (s Style) FontFamily(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontFamily", str[0])
 	}
 	return s.Get("fontFamily").String()
 }
-func (s Style) Fontsize(str ...string) string {
+func (s Style) FontSize(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontSize", str[0])
 	}
 	return s.Get("fontSize").String()
 }
-func (s Style) Fontstyle(str ...string) string {
+func (s Style) FontStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontStyle", str[0])
 	}
 	return s.Get("fontStyle").String()
 }
-func (s Style) Fontvariant(str ...string) string {
+func (s Style) FontVariant(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontVariant", str[0])
 	}
 	return s.Get("fontVariant").String()
 }
-func (s Style) Fontweight(str ...string) string {
+func (s Style) FontWeight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontWeight", str[0])
 	}
 	return s.Get("fontWeight").String()
 }
-func (s Style) Fontsizeadjust(str ...string) string {
+func (s Style) FontSizeAdjust(str ...string) string {
 	if len(str) > 0 {
 		s.Set("fontSizeAdjust", str[0])
 	}
@@ -611,7 +611,7 @@ func (s Style) Isolation(str ...string) string {
 	}
 	return s.Get("isolation").String()
 }
-func (s Style) Justifycontent(str ...string) string {
+func (s Style) JustifyContent(str ...string) string {
 	if len(str) > 0 {
 		s.Set("justifyContent", str[0])
 	}
@@ -623,37 +623,37 @@ func (s Style) Left(str ...string) string {
 	}
 	return s.Get("left").String()
 }
-func (s Style) Letterspacing(str ...string) string {
+func (s Style) LetterSpacing(str ...string) string {
 	if len(str) > 0 {
 		s.Set("letterSpacing", str[0])
 	}
 	return s.Get("letterSpacing").String()
 }
-func (s Style) Lineheight(str ...string) string {
+func (s Style) LineHeight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("lineHeight", str[0])
 	}
 	return s.Get("lineHeight").String()
 }
-func (s Style) Liststyle(str ...string) string {
+func (s Style) ListStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("listStyle", str[0])
 	}
 	return s.Get("listStyle").String()
 }
-func (s Style) Liststyleimage(str ...string) string {
+func (s Style) ListStyleImage(str ...string) string {
 	if len(str) > 0 {
 		s.Set("listStyleImage", str[0])
 	}
 	return s.Get("listStyleImage").String()
 }
-func (s Style) Liststyleposition(str ...string) string {
+func (s Style) ListStylePosition(str ...string) string {
 	if len(str) > 0 {
 		s.Set("listStylePosition", str[0])
 	}
 	return s.Get("listStylePosition").String()
 }
-func (s Style) Liststyletype(str ...string) string {
+func (s Style) ListStyleType(str ...string) string {
 	if len(str) > 0 {
 		s.Set("listStyleType", str[0])
 	}
@@ -665,61 +665,61 @@ func (s Style) Margin(str ...string) string {
 	}
 	return s.Get("margin").String()
 }
-func (s Style) Marginbottom(str ...string) string {
+func (s Style) MarginBottom(str ...string) string {
 	if len(str) > 0 {
 		s.Set("marginBottom", str[0])
 	}
 	return s.Get("marginBottom").String()
 }
-func (s Style) Marginleft(str ...string) string {
+func (s Style) MarginLeft(str ...string) string {
 	if len(str) > 0 {
 		s.Set("marginLeft", str[0])
 	}
 	return s.Get("marginLeft").String()
 }
-func (s Style) Marginright(str ...string) string {
+func (s Style) MarginRight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("marginRight", str[0])
 	}
 	return s.Get("marginRight").String()
 }
-func (s Style) Margintop(str ...string) string {
+func (s Style) MarginTop(str ...string) string {
 	if len(str) > 0 {
 		s.Set("marginTop", str[0])
 	}
 	return s.Get("marginTop").String()
 }
-func (s Style) Maxheight(str ...string) string {
+func (s Style) MaxHeight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("maxHeight", str[0])
 	}
 	return s.Get("maxHeight").String()
 }
-func (s Style) Maxwidth(str ...string) string {
+func (s Style) MaxWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("maxWidth", str[0])
 	}
 	return s.Get("maxWidth").String()
 }
-func (s Style) Minheight(str ...string) string {
+func (s Style) MinHeight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("minHeight", str[0])
 	}
 	return s.Get("minHeight").String()
 }
-func (s Style) Minwidth(str ...string) string {
+func (s Style) MinWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("minWidth", str[0])
 	}
 	return s.Get("minWidth").String()
 }
-func (s Style) Objectfit(str ...string) string {
+func (s Style) ObjectFit(str ...string) string {
 	if len(str) > 0 {
 		s.Set("objectFit", str[0])
 	}
 	return s.Get("objectFit").String()
 }
-func (s Style) Objectposition(str ...string) string {
+func (s Style) ObjectPosition(str ...string) string {
 	if len(str) > 0 {
 		s.Set("objectPosition", str[0])
 	}
@@ -749,25 +749,25 @@ func (s Style) Outline(str ...string) string {
 	}
 	return s.Get("outline").String()
 }
-func (s Style) Outlinecolor(str ...string) string {
+func (s Style) OutlineColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("outlineColor", str[0])
 	}
 	return s.Get("outlineColor").String()
 }
-func (s Style) Outlineoffset(str ...string) string {
+func (s Style) OutlineOffset(str ...string) string {
 	if len(str) > 0 {
 		s.Set("outlineOffset", str[0])
 	}
 	return s.Get("outlineOffset").String()
 }
-func (s Style) Outlinestyle(str ...string) string {
+func (s Style) OutlineStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("outlineStyle", str[0])
 	}
 	return s.Get("outlineStyle").String()
 }
-func (s Style) Outlinewidth(str ...string) string {
+func (s Style) OutlineWidth(str ...string) string {
 	if len(str) > 0 {
 		s.Set("outlineWidth", str[0])
 	}
@@ -779,13 +779,13 @@ func (s Style) Overflow(str ...string) string {
 	}
 	return s.Get("overflow").String()
 }
-func (s Style) Overflowx(str ...string) string {
+func (s Style) OverflowX(str ...string) string {
 	if len(str) > 0 {
 		s.Set("overflowX", str[0])
 	}
 	return s.Get("overflowX").String()
 }
-func (s Style) Overflowy(str ...string) string {
+func (s Style) OverflowY(str ...string) string {
 	if len(str) > 0 {
 		s.Set("overflowY", str[0])
 	}
@@ -797,43 +797,43 @@ func (s Style) Padding(str ...string) string {
 	}
 	return s.Get("padding").String()
 }
-func (s Style) Paddingbottom(str ...string) string {
+func (s Style) PaddingBottom(str ...string) string {
 	if len(str) > 0 {
 		s.Set("paddingBottom", str[0])
 	}
 	return s.Get("paddingBottom").String()
 }
-func (s Style) Paddingleft(str ...string) string {
+func (s Style) PaddingLeft(str ...string) string {
 	if len(str) > 0 {
 		s.Set("paddingLeft", str[0])
 	}
 	return s.Get("paddingLeft").String()
 }
-func (s Style) Paddingright(str ...string) string {
+func (s Style) PaddingRight(str ...string) string {
 	if len(str) > 0 {
 		s.Set("paddingRight", str[0])
 	}
 	return s.Get("paddingRight").String()
 }
-func (s Style) Paddingtop(str ...string) string {
+func (s Style) PaddingTop(str ...string) string {
 	if len(str) > 0 {
 		s.Set("paddingTop", str[0])
 	}
 	return s.Get("paddingTop").String()
 }
-func (s Style) Pagebreakafter(str ...string) string {
+func (s Style) PageBreakAfter(str ...string) string {
 	if len(str) > 0 {
 		s.Set("pageBreakAfter", str[0])
 	}
 	return s.Get("pageBreakAfter").String()
 }
-func (s Style) Pagebreakbefore(str ...string) string {
+func (s Style) PageBreakBefore(str ...string) string {
 	if len(str) > 0 {
 		s.Set("pageBreakBefore", str[0])
 	}
 	return s.Get("pageBreakBefore").String()
 }
-func (s Style) Pagebreakinside(str ...string) string {
+func (s Style) PageBreakInside(str ...string) string {
 	if len(str) > 0 {
 		s.Set("pageBreakInside", str[0])
 	}
@@ -845,7 +845,7 @@ func (s Style) Perspective(str ...string) string {
 	}
 	return s.Get("perspective").String()
 }
-func (s Style) Perspectiveorigin(str ...string) string {
+func (s Style) PerspectiveOrigin(str ...string) string {
 	if len(str) > 0 {
 		s.Set("perspectiveOrigin", str[0])
 	}
@@ -875,79 +875,79 @@ func (s Style) Right(str ...string) string {
 	}
 	return s.Get("right").String()
 }
-func (s Style) Scrollbehavior(str ...string) string {
+func (s Style) ScrollBehavior(str ...string) string {
 	if len(str) > 0 {
 		s.Set("scrollBehavior", str[0])
 	}
 	return s.Get("scrollBehavior").String()
 }
-func (s Style) Tablelayout(str ...string) string {
+func (s Style) TableLayout(str ...string) string {
 	if len(str) > 0 {
 		s.Set("tableLayout", str[0])
 	}
 	return s.Get("tableLayout").String()
 }
-func (s Style) Tabsize(str ...string) string {
+func (s Style) TabSize(str ...string) string {
 	if len(str) > 0 {
 		s.Set("tabSize", str[0])
 	}
 	return s.Get("tabSize").String()
 }
-func (s Style) Textalign(str ...string) string {
+func (s Style) TextAlign(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textAlign", str[0])
 	}
 	return s.Get("textAlign").String()
 }
-func (s Style) Textalignlast(str ...string) string {
+func (s Style) TextAlignLast(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textAlignLast", str[0])
 	}
 	return s.Get("textAlignLast").String()
 }
-func (s Style) Textdecoration(str ...string) string {
+func (s Style) TextDecoration(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textDecoration", str[0])
 	}
 	return s.Get("textDecoration").String()
 }
-func (s Style) Textdecorationcolor(str ...string) string {
+func (s Style) TextDecorationColor(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textDecorationColor", str[0])
 	}
 	return s.Get("textDecorationColor").String()
 }
-func (s Style) Textdecorationline(str ...string) string {
+func (s Style) TextDecorationLine(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textDecorationLine", str[0])
 	}
 	return s.Get("textDecorationLine").String()
 }
-func (s Style) Textdecorationstyle(str ...string) string {
+func (s Style) TextDecorationStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textDecorationStyle", str[0])
 	}
 	return s.Get("textDecorationStyle").String()
 }
-func (s Style) Textindent(str ...string) string {
+func (s Style) TextIndent(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textIndent", str[0])
 	}
 	return s.Get("textIndent").String()
 }
-func (s Style) Textoverflow(str ...string) string {
+func (s Style) TextOverflow(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textOverflow", str[0])
 	}
 	return s.Get("textOverflow").String()
 }
-func (s Style) Textshadow(str ...string) string {
+func (s Style) TextShadow(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textShadow", str[0])
 	}
 	return s.Get("textShadow").String()
 }
-func (s Style) Texttransform(str ...string) string {
+func (s Style) TextTransform(str ...string) string {
 	if len(str) > 0 {
 		s.Set("textTransform", str[0])
 	}
@@ -965,13 +965,13 @@ func (s Style) Transform(str ...string) string {
 	}
 	return s.Get("transform").String()
 }
-func (s Style) Transformorigin(str ...string) string {
+func (s Style) TransformOrigin(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transformOrigin", str[0])
 	}
 	return s.Get("transformOrigin").String()
 }
-func (s Style) Transformstyle(str ...string) string {
+func (s Style) TransformStyle(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transformStyle", str[0])
 	}
@@ -983,43 +983,43 @@ func (s Style) Transition(str ...string) string {
 	}
 	return s.Get("transition").String()
 }
-func (s Style) Transitionproperty(str ...string) string {
+func (s Style) TransitionProperty(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transitionProperty", str[0])
 	}
 	return s.Get("transitionProperty").String()
 }
-func (s Style) Transitionduration(str ...string) string {
+func (s Style) TransitionDuration(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transitionDuration", str[0])
 	}
 	return s.Get("transitionDuration").String()
 }
-func (s Style) Transitiontimingfunction(str ...string) string {
+func (s Style) TransitionTimingFunction(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transitionTimingFunction", str[0])
 	}
 	return s.Get("transitionTimingFunction").String()
 }
-func (s Style) Transitiondelay(str ...string) string {
+func (s Style) TransitionDelay(str ...string) string {
 	if len(str) > 0 {
 		s.Set("transitionDelay", str[0])
 	}
 	return s.Get("transitionDelay").String()
 }
-func (s Style) Unicodebidi(str ...string) string {
+func (s Style) UnicodeBidi(str ...string) string {
 	if len(str) > 0 {
 		s.Set("unicodeBidi", str[0])
 	}
 	return s.Get("unicodeBidi").String()
 }
-func (s Style) Userselect(str ...string) string {
+func (s Style) UserSelect(str ...string) string {
 	if len(str) > 0 {
 		s.Set("userSelect", str[0])
 	}
 	return s.Get("userSelect").String()
 }
-func (s Style) Verticalalign(str ...string) string {
+func (s Style) VerticalAlign(str ...string) string {
 	if len(str) > 0 {
 		s.Set("verticalAlign", str[0])
 	}
@@ -1031,7 +1031,7 @@ func (s Style) Visibility(str ...string) string {
 	}
 	return s.Get("visibility").String()
 }
-func (s Style) Whitespace(str ...string) string {
+func (s Style) WhiteSpace(str ...string) string {
 	if len(str) > 0 {
 		s.Set("whiteSpace", str[0])
 	}
@@ -1043,19 +1043,19 @@ func (s Style) Width(str ...string) string {
 	}
 	return s.Get("width").String()
 }
-func (s Style) Wordbreak(str ...string) string {
+func (s Style) WordBreak(str ...string) string {
 	if len(str) > 0 {
 		s.Set("wordBreak", str[0])
 	}
 	return s.Get("wordBreak").String()
 }
-func (s Style) Wordspacing(str ...string) string {
+func (s Style) WordSpacing(str ...string) string {
 	if len(str) > 0 {
 		s.Set("wordSpacing", str[0])
 	}
 	return s.Get("wordSpacing").String()
 }
-func (s Style) Wordwrap(str ...string) string {
+func (s Style) WordWrap(str ...string) string {
 	if len(str) > 0 {
 		s.Set("wordWrap", str[0])
 	}
@@ -1067,7 +1067,7 @@ func (s Style) Widows(str ...string) string {
 	}
 	return s.Get("widows").String()
 }
-func (s Style) Zindex(str ...string) string {
+func (s Style) ZIndex(str ...string) string {
 	if len(str) > 0 {
 		s.Set("zIndex", str[0])
 	}
