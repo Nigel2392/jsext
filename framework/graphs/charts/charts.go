@@ -73,16 +73,22 @@ type number interface {
 	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | uintptr | float32 | float64
 }
 
-func Min[T number](a, b T) T {
-	if a < b {
-		return a
+func Min[T number](a ...T) T {
+	var min T
+	for _, v := range a {
+		if v < min {
+			min = v
+		}
 	}
-	return b
+	return min
 }
 
-func Max[T number](a, b T) T {
-	if a > b {
-		return a
+func Max[T number](a ...T) T {
+	var max T
+	for _, v := range a {
+		if v > max {
+			max = v
+		}
 	}
-	return b
+	return max
 }

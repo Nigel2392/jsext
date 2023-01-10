@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/Nigel2392/jsext/canvas"
-	"github.com/Nigel2392/jsext/framework/graphs/convert"
 	"github.com/Nigel2392/jsext/framework/graphs/options"
+	"github.com/Nigel2392/jsext/framework/helpers/convert"
 )
 
 func Pie(Canvas canvas.Canvas, opts options.GraphOptions, donut bool) {

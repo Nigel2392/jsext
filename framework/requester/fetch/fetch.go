@@ -9,19 +9,19 @@ import (
 )
 
 type Request struct {
-	Body        []byte            `json:"body,omitempty"`
-	BodyUsed    bool              `json:"bodyUsed,omitempty"`
-	Cache       string            `json:"cache,omitempty"`
-	Credentials string            `json:"credentials,omitempty"`
-	Destination string            `json:"destination,omitempty"`
-	Headers     map[string]string `json:"headers,omitempty"`
-	Integrity   string            `json:"integrity,omitempty"`
-	Method      string            `json:"method,omitempty"`
-	Mode        string            `json:"mode,omitempty"`
-	Priority    string            `json:"priority,omitempty"`
-	Redirect    string            `json:"redirect,omitempty"`
-	Referrer    string            `json:"referrer,omitempty"`
-	URL         string            `json:"url,omitempty"`
+	Body        []byte
+	BodyUsed    bool
+	Cache       string
+	Credentials string
+	Destination string
+	Headers     map[string]string
+	Integrity   string
+	Method      string
+	Mode        string
+	Priority    string
+	Redirect    string
+	Referrer    string
+	URL         string
 }
 
 func (f *Request) SetHeader(key, value string) {

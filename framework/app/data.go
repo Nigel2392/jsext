@@ -156,15 +156,15 @@ func formatString(data interface{}) string {
 	case int64:
 		return strconv.Itoa(int(data))
 	case uint:
-		return strconv.Itoa(int(data))
+		return strconv.FormatUint(uint64(data), 10)
 	case uint8:
-		return strconv.Itoa(int(data))
+		return strconv.FormatUint(uint64(data), 10)
 	case uint16:
-		return strconv.Itoa(int(data))
+		return strconv.FormatUint(uint64(data), 10)
 	case uint32:
-		return strconv.Itoa(int(data))
+		return strconv.FormatUint(uint64(data), 10)
 	case uint64:
-		return strconv.Itoa(int(data))
+		return strconv.FormatUint(data, 10)
 	case float32:
 		return strconv.FormatFloat(float64(data), 'f', -1, 32)
 	case float64:

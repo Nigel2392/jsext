@@ -5,9 +5,9 @@ import (
 
 	"github.com/Nigel2392/jsext/canvas"
 	"github.com/Nigel2392/jsext/canvas/context"
-	"github.com/Nigel2392/jsext/framework/graphs/convert"
 	"github.com/Nigel2392/jsext/framework/graphs/labels"
 	"github.com/Nigel2392/jsext/framework/graphs/options"
+	"github.com/Nigel2392/jsext/framework/helpers/convert"
 )
 
 func Bar(Canvas canvas.Canvas, opts options.GraphOptions) {

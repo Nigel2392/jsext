@@ -11,6 +11,7 @@ options.Donut
 ```
 
 ```go
+var Application = app.App("#app")
 var canvasDiv = js.Global().Get("document").Call("createElement", "div")
 var Canvas = canvas.NewCanvas(640, 640)
 // Canvas.Style().Border("1px solid black")

@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/Nigel2392/jsext/canvas/context"
-	"github.com/Nigel2392/jsext/framework/graphs/convert"
+	"github.com/Nigel2392/jsext/framework/helpers/convert"
 )
 
 type LabelOpts struct {
