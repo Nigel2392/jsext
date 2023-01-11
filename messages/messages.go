@@ -15,13 +15,13 @@ import (
 type MessageType string
 
 const (
-	Info    MessageType = "info"
-	Success MessageType = "success"
-	Warning MessageType = "warning"
-	Error   MessageType = "error"
+	Info    = "info"
+	Success = "success"
+	Warning = "warning"
+	Error   = "error"
 )
 
-func SendMessage(typ MessageType, message string) {
+func SendMessage(typ, message string) {
 	jsext.EventEmit("jsextMessages", string(typ), message)
 }
 

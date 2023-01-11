@@ -407,6 +407,10 @@ func BytesToArray(b []byte) Value {
 	return Value(buffer)
 }
 
+func Alert(message string) {
+	Call("alert", message)
+}
+
 // Get a value from the global scope.
 func Get(key string) Value {
 	return Value(Global.Get(key))

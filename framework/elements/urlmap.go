@@ -2,8 +2,8 @@ package elements
 
 import (
 	"strings"
-	"sync"
 
+	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/framework/router"
 )
 
@@ -11,7 +11,7 @@ import (
 type URLs struct {
 	order []string
 	urls  map[string]*Element
-	mu    *sync.Mutex
+	// mu    *sync.Mutex
 }
 
 // Create a new url map
@@ -19,7 +19,7 @@ func NewURLs() *URLs {
 	return &URLs{
 		urls:  make(map[string]*Element),
 		order: make([]string, 0),
-		mu:    &sync.Mutex{},
+		// mu:    &sync.Mutex{},
 	}
 }
 
@@ -45,10 +45,10 @@ func (u *URLs) Set(key string, value *Element, external ...bool) {
 	if _, ok := u.urls[key]; ok {
 		panic("URL already exists: " + key)
 	}
-	u.mu.Lock()
+	// u.mu.Lock()
 	u.urls[key] = value
 	u.order = append(u.order, key)
-	u.mu.Unlock()
+	// u.mu.Unlock()
 }
 
 // Delete a url element from the map, and remove it from the DOM
@@ -59,7 +59,7 @@ func (u *URLs) Delete(key string) {
 	if element, ok = u.urls[key]; !ok {
 		panic("URL does not exist: " + key)
 	}
-	u.mu.Lock()
+	// u.mu.Lock()
 	delete(u.urls, key)
 	element.Remove()
 	for i, v := range u.order {
@@ -68,7 +68,7 @@ func (u *URLs) Delete(key string) {
 			break
 		}
 	}
-	u.mu.Unlock()
+	// u.mu.Unlock()
 }
 
 // Set display to none for all urls,
@@ -159,5 +159,19 @@ func (u *URLs) FromElements(elems ...*Element) {
 			continue
 		}
 		u.Set(v.Text, v)
+	}
+}
+
+// On click action for URLs
+// Takes a function that takes a URL element and the event.target | this
+func (u *URLs) OnClick(f func(*Element, jsext.Value)) {
+	for _, v := range u.urls {
+		v.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+			var target = event.Target()
+			if target.IsUndefined() || target.IsNull() {
+				target = this
+			}
+			f(v, target)
+		})
 	}
 }
