@@ -2,6 +2,7 @@ package navbars
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Nigel2392/jsext/framework/components"
 	"github.com/Nigel2392/jsext/framework/elements"
@@ -13,6 +14,19 @@ type Logo struct {
 	ResourceURL string
 	Alt         string
 	URL         string
+}
+
+func NewLogo(resourceURL, url string) *Logo {
+	var alt = "Logo"
+	if resourceURL != "" && strings.Contains(resourceURL, "/") && strings.Contains(resourceURL, ".") {
+		alt = resourceURL[strings.LastIndex(resourceURL, "/")+1:]
+		alt = alt[:strings.LastIndex(alt, ".")]
+	}
+	return &Logo{
+		ResourceURL: resourceURL,
+		Alt:         alt,
+		URL:         url,
+	}
 }
 
 // Simple reusable navbar css
@@ -43,21 +57,31 @@ func getCSS(prefix, bg, fg string) string {
 }
 
 // Simple navbar base.
-func plainNav(foreground, background string, middle bool) []*elements.Element {
+func plainNav(foreground, background string, middle int) []*elements.Element {
 	var navbarMain = elements.Div().AttrClass(prefix + "main")
 	var navbarLeft = navbarMain.Div().AttrClass(prefix + "left")
-	var navbarMiddle *elements.Element
 	var navbarRight = navbarMain.Div().AttrClass(prefix + "right")
+	var navItemSlice = make([]*elements.Element, 0, 3+middle)
+	navItemSlice = append(navItemSlice, navbarMain, navbarLeft)
+
 	// Create middle element if specified.
 	// Set the grid-template-columns to 2 or 3 depending on if middle is specified.
 	var repeat = 2
 	var templateAreas = `"left right"`
-	if middle {
-		navbarMiddle = navbarMain.Div().AttrClass(prefix + "middle")
-		repeat = 3
-		templateAreas = `"left middle right"`
+	var middleCSS = strings.Builder{}
+
+	if middle > 0 {
+		repeat = 2 + middle
+		templateAreas = `"left`
+		for i := 0; i < middle; i++ {
+			templateAreas += ` middle-` + strconv.Itoa(i) + ``
+			navItemSlice = append(navItemSlice, navbarMain.Div().AttrClass(prefix+"middle-"+strconv.Itoa(i)))
+			middleCSS.WriteString(`.` + prefix + `middle-` + strconv.Itoa(i) + ` { grid-area: middle-` + strconv.Itoa(i) + `; }`)
+		}
+		templateAreas += ` right"`
 	}
-	navbarMain.StyleBlock(
+
+	middleCSS.WriteString(
 		`.` + prefix + `main {
 			width: 100%;
 			height: 50px;
@@ -71,14 +95,14 @@ func plainNav(foreground, background string, middle bool) []*elements.Element {
 			column-gap: 0px;
 		}
 		.` + prefix + `left { grid-area: left; margin-left: 1%; }
-		.` + prefix + `middle { grid-area: middle; }
 		.` + prefix + `right { grid-area: right; text-align: right; margin-right: 1%; }`)
 
+	navbarMain.StyleBlock(middleCSS.String())
+
+	navItemSlice = append(navItemSlice, navbarRight)
+
 	// Also return middle element if specified.
-	if middle {
-		return []*elements.Element{navbarMain, navbarLeft, navbarMiddle, navbarRight}
-	}
-	return []*elements.Element{navbarMain, navbarLeft, navbarRight}
+	return navItemSlice
 }
 
 // Variables for styling the Official navbar's colors
@@ -87,7 +111,7 @@ var OfficialBackground = "#142836"
 
 // The navbar element.
 func Official(logo *Logo, urls *elements.URLs) *elements.Element {
-	var items = plainNav(OfficialForeground, OfficialBackground, false)
+	var items = plainNav(OfficialForeground, OfficialBackground, 0)
 	var navbarMain, navbarLeft, navbarRight = items[0], items[1], items[2]
 
 	navbarMain.StyleBlock(getCSS(prefix, OfficialBackground, OfficialForeground))
@@ -111,25 +135,26 @@ var SearchText = "Search"
 func Search(logo *Logo, urls *elements.URLs) (*elements.Element, []*elements.Element) {
 	var items = components.SearchBar("search-", "#333333", "#ffffff", "Search")
 	var searchBarContainer = items[0]
-	var navbar = Custom(searchBarContainer, logo, urls, SearchBackground, SearchForeground)
+	var navbar = Custom(logo, urls, SearchBackground, SearchForeground, searchBarContainer)
 	return navbar, items[1:]
 }
 
-func Custom(middle *elements.Element, logo *Logo, urls *elements.URLs, bg, fg string) *elements.Element {
-	var items = plainNav(fg, bg, true)
-	var navbarMain, navbarLeft, navbarMiddle, navbarRight = items[0], items[1], items[2], items[3]
+func Custom(logo *Logo, urls *elements.URLs, bg, fg string, middle ...*elements.Element) *elements.Element {
+	var items = plainNav(fg, bg, len(middle))
 
-	navbarMain.StyleBlock(getCSS(prefix, bg, fg))
+	items[0].StyleBlock(getCSS(prefix, bg, fg))
 
-	navbarLeft.A(logo.URL).AttrClass(prefix + "logo-url").Append(
+	items[1].A(logo.URL).AttrClass(prefix + "logo-url").Append(
 		elements.Img(logo.ResourceURL).AttrAlt(logo.Alt).AttrClass(prefix + "logo"),
 	)
 
-	navbarMiddle.Append(middle)
+	for i := 0; i < len(middle); i++ {
+		items[i+2].Append(middle[i])
+	}
 
 	urls.ForEach(func(k string, elem *elements.Element) {
-		navbarRight.Append(elem.AttrClass(prefix + "url"))
+		items[len(middle)+len(items)-2].Append(elem.AttrClass(prefix + "url"))
 	})
 
-	return navbarMain
+	return items[0]
 }
