@@ -66,21 +66,21 @@ func plainNav(foreground, background string, middle int) []*elements.Element {
 
 	// Create middle element if specified.
 	// Set the grid-template-columns to 2 or 3 depending on if middle is specified.
-	var repeat = 2
 	var templateAreas = `"left right"`
 	var middleCSS = strings.Builder{}
-
+	var columnBuilder = strings.Builder{}
+	columnBuilder.WriteString("1.5fr")
 	if middle > 0 {
-		repeat = 2 + middle
 		templateAreas = `"left`
 		for i := 0; i < middle; i++ {
 			templateAreas += ` middle-` + strconv.Itoa(i) + ``
 			navItemSlice = append(navItemSlice, navbarMain.Div().AttrClass(prefix+"middle-"+strconv.Itoa(i)))
 			middleCSS.WriteString(`.` + prefix + `middle-` + strconv.Itoa(i) + ` { grid-area: middle-` + strconv.Itoa(i) + `; }`)
+			columnBuilder.WriteString(" 1fr")
 		}
 		templateAreas += ` right"`
 	}
-
+	columnBuilder.WriteString(" 1.5fr")
 	middleCSS.WriteString(
 		`.` + prefix + `main {
 			width: 100%;
@@ -89,10 +89,10 @@ func plainNav(foreground, background string, middle int) []*elements.Element {
 			color: ` + foreground + `;
 			overflow: hidden;
 			display: grid;
-			grid-template-columns: repeat(` + strconv.Itoa(repeat) + `, 1fr);
+			grid-template-columns: ` + columnBuilder.String() + `;
 			grid-template-areas: ` + templateAreas + `;
 			grid-template-rows: 1fr;
-			column-gap: 0px;
+			column-gap: 3px;
 		}
 		.` + prefix + `left { grid-area: left; margin-left: 1%; }
 		.` + prefix + `right { grid-area: right; text-align: right; margin-right: 1%; }`)
