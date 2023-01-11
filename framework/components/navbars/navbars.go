@@ -153,7 +153,7 @@ func Custom(logo *Logo, urls *elements.URLs, bg, fg string, middle ...*elements.
 	}
 
 	urls.ForEach(func(k string, elem *elements.Element) {
-		items[len(middle)+len(items)-2].Append(elem.AttrClass(prefix + "url"))
+		items[len(items)-1].Append(elem.AttrClass(prefix + "url"))
 	})
 
 	return items[0]
