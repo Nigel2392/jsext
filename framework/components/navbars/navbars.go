@@ -37,11 +37,12 @@ func getCSS(prefix, bg, fg string) string {
 		}
 		.` + prefix + `url {
 			display: inline-block;
-			padding: 15px 10px;
+			padding: 0 10px;
 			text-decoration: none;
 			font-weight: bold;
 			color: ` + fg + `;
 			height: 50px;
+			line-height: 50px;
 			transition: 0.3s;
 			font-size: 20px;
 		}
