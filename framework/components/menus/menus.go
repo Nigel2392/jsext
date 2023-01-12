@@ -423,7 +423,7 @@ func Dropdown(options DropdownOptions) *elements.Element {
 	return dropDownContainer
 }
 
-func DropdownElement(opts DropdownOptions) *elements.Element {
+func DropdownElement(opts DropdownOptions, absolutePosition bool) *elements.Element {
 
 	if len(opts.MenuItems) == 0 {
 		panic("No menu items provided")
@@ -450,6 +450,11 @@ func DropdownElement(opts DropdownOptions) *elements.Element {
 		menu.JSExtElement().ClassList().Toggle(opts.Prefix + "show")
 	})
 
+	var pos = "relative"
+	if absolutePosition {
+		pos = "absolute"
+	}
+
 	var css = `
 		.` + opts.Prefix + `dropdown {
 			position: relative;
@@ -468,7 +473,7 @@ func DropdownElement(opts DropdownOptions) *elements.Element {
 		.` + opts.Prefix + `dropdown-content {
 			width: calc(` + opts.Width + ` - ` + opts.BorderWidth + ` * 2 + ` + opts.ButtonBorderWidth + ` * 2);
 			height: 0px;
-			position: absolute;
+			position: ` + pos + `;
 			background-color: ` + opts.Background + `;
 			border: none;
 			overflow: hidden;
