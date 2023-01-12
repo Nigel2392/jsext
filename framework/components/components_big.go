@@ -7,6 +7,7 @@ import (
 	"github.com/Nigel2392/jsext/canvas"
 	"github.com/Nigel2392/jsext/framework/components/carousels"
 	"github.com/Nigel2392/jsext/framework/components/loaders"
+	"github.com/Nigel2392/jsext/framework/components/misc"
 	"github.com/Nigel2392/jsext/framework/components/navbars"
 	"github.com/Nigel2392/jsext/framework/elements"
 	"github.com/Nigel2392/jsext/framework/graphs/charts"
@@ -76,3 +77,5 @@ var Navbars = navbars_module{
 	Search:   navbars.Search,
 	Custom:   navbars.Custom,
 }
+
+var SearchBar = misc.SearchBar

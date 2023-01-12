@@ -99,12 +99,12 @@ func Plain(options *Options) *elements.Element {
 		position: absolute;
 		top: 0;
 		left: 0;
-		display: none;
-		transition: display 0.5s;
+		opacity: 0;
+		transition: opacity 0.5s;
 		object-fit: contain;
 	}
 	.` + options.Prefix + `carousel-item.active {
-		display: block !important;
+		opacity: 1;
 	}`
 	var indicatorList = make([]*elements.Element, len(options.Items))
 
