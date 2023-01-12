@@ -2,6 +2,7 @@ package hashrouter
 
 import (
 	"net/url"
+	"strings"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext"
@@ -9,6 +10,9 @@ import (
 	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
+
+var RT_PREFIX = "router:"
+var RT_PREFIX_EXTERNAL = "router:external:"
 
 type HashRouter struct {
 	routes          map[string]*routes.Route
@@ -131,6 +135,7 @@ func (r *HashRouter) Redirect(hash string) {
 }
 
 func (r *HashRouter) route() {
+	jsext.Element(jsext.Document).AddEventListener("click", r.changePage)
 	js.Global().Get("window").Set("onhashchange", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if r.onPageChange != nil {
 			r.onPageChange(nil, nil)
@@ -161,4 +166,28 @@ func (r *HashRouter) route() {
 		hash = "#"
 	}
 	r.Handle(hash)
+}
+
+func (r *HashRouter) changePage(this jsext.Value, event jsext.Event) {
+	// Get the object if it is valid.
+	if !event.Value().IsObject() {
+		return
+	}
+	var target = jsext.Element(event.Target())
+	if target.Value().IsUndefined() {
+		return
+	}
+	var path = target.Href()
+	// Only stop the default action if the link is an internal link
+	// Which means it starts with the RT_PREFIX and we need to handle it
+	if !strings.HasPrefix(path, RT_PREFIX) {
+		if strings.HasPrefix(path, RT_PREFIX_EXTERNAL) {
+			path = strings.TrimPrefix(path, RT_PREFIX_EXTERNAL)
+			jsext.Window.Get("location").Set("href", path)
+		}
+		return
+	}
+	event.PreventDefault()
+	path = strings.TrimPrefix(path, RT_PREFIX)
+	r.Handle(path)
 }
