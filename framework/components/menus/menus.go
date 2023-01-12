@@ -302,7 +302,6 @@ func (d *DropdownOptions) SetDefaults() {
 		d.Prefix = "jsext-dropdown-"
 	}
 	d.Width = "calc(" + d.Width + " - calc(" + d.BorderWidth + " * 2))"
-	d.ButtonWidth = "calc(" + d.ButtonWidth + " - calc(" + d.ButtonBorderWidth + " * 2))"
 }
 
 func Dropdown(options DropdownOptions) *elements.Element {
