@@ -41,7 +41,7 @@ func getCSS(prefix, bg, fg string) string {
 			text-decoration: none;
 			font-weight: bold;
 			color: ` + fg + `;
-			height: 100%;
+			height: 50px;
 			transition: 0.3s;
 			font-size: 20px;
 		}
