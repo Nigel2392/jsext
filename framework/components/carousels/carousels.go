@@ -190,7 +190,7 @@ func Plain(options *Options) *elements.Element {
 		var indicators = CarouselContainer.Div().AttrClass(options.Prefix + "indicators")
 		for i := range options.Items {
 			var indicator = indicators.Div().AttrClass(options.Prefix + "indicator")
-			if i == 0 {
+			if i == activeItem {
 				indicator.AttrClass("active")
 			}
 			indicator.Set("data-index", strconv.Itoa(i))
