@@ -255,7 +255,7 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 	return menu_container //, urlItems
 }
 
-type DropDownOptions struct {
+type DropdownOptions struct {
 	Background     string
 	Color          string
 	BorderWidth    string
@@ -269,7 +269,7 @@ type DropDownOptions struct {
 	Prefix         string
 }
 
-func (d *DropDownOptions) SetDefaults() {
+func (d *DropdownOptions) SetDefaults() {
 	if d.Background == "" {
 		d.Background = "#ffffff"
 	}
@@ -300,7 +300,7 @@ func (d *DropDownOptions) SetDefaults() {
 	d.Width = "calc(" + d.Width + " - calc(" + d.BorderWidth + " * 2))"
 }
 
-func Dropdown(options DropDownOptions) *elements.Element {
+func Dropdown(options DropdownOptions) *elements.Element {
 	if len(options.MenuItems) == 0 {
 		panic("DropDownMenu: No menu items provided")
 	}
@@ -354,6 +354,7 @@ func Dropdown(options DropDownOptions) *elements.Element {
 			cursor: pointer;
 			width: ` + options.ButtonWidth + `;
 			height: ` + options.ButtonHeight + `;
+			transition: 0.3s;
 		}
 		.` + options.Prefix + `dropbtn:hover {
 			background-color: ` + options.Color + `;
@@ -386,6 +387,7 @@ func Dropdown(options DropDownOptions) *elements.Element {
 			text-align: center;
 			height: calc(` + options.Height + ` / ` + strconv.Itoa(options.ItemsPerColumn) + `);
 			line-height: calc(` + options.Height + `/ ` + strconv.Itoa(options.ItemsPerColumn) + `);
+			transition: 0.3s;
 		}
 		.` + options.Prefix + `item:hover {
 			background-color: ` + options.Color + `;
