@@ -7,7 +7,7 @@ import (
 	"github.com/Nigel2392/jsext/framework/elements"
 )
 
-type CarouselOptions struct {
+type Options struct {
 	// The width of the carousel.
 	Width string
 	// The height of the carousel.
@@ -28,7 +28,7 @@ type CarouselOptions struct {
 	Prefix string
 }
 
-func (c *CarouselOptions) SetDefaults() {
+func (c *Options) SetDefaults() {
 	if c.Width == "" {
 		c.Width = "100%"
 	}
@@ -52,7 +52,7 @@ func (c *CarouselOptions) SetDefaults() {
 	}
 }
 
-func Plain(options CarouselOptions) *elements.Element {
+func Plain(options *Options) *elements.Element {
 	if len(options.Items) == 0 {
 		panic("Carousel requires at least one item.")
 	}
@@ -234,7 +234,7 @@ func Plain(options CarouselOptions) *elements.Element {
 	return CarouselContainer
 }
 
-func Image(imageUrls []string, options CarouselOptions) *elements.Element {
+func Image(imageUrls []string, options *Options) *elements.Element {
 	var items = make([]*elements.Element, len(imageUrls))
 	for i, url := range imageUrls {
 		items[i] = elements.Img(url).AttrAlt(url + " Is not available")
