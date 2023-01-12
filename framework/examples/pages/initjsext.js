@@ -9,7 +9,7 @@ window.jsextLoaded = function(){
 // Instance of the wasm module when it is ready
 let instance = null;
 // Path to the WASM module
-let wasmFile = "/static/main.wasm";
+let wasmFile = "https://raw.githubusercontent.com/Nigel2392/jsext/main/framework/examples/pages/main.wasm";
 
 // Set up the loader
 var LoadingText = "loading";
