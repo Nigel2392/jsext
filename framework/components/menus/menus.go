@@ -256,17 +256,18 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 }
 
 type DropdownOptions struct {
-	Background     string
-	Color          string
-	BorderWidth    string
-	Width          string
-	Height         string
-	ButtonWidth    string
-	ButtonHeight   string
-	ButtonText     string
-	MenuItems      []*elements.Element
-	ItemsPerColumn int
-	Prefix         string
+	Background        string
+	Color             string
+	BorderWidth       string
+	Width             string
+	Height            string
+	ButtonBorderWidth string
+	ButtonWidth       string
+	ButtonHeight      string
+	ButtonText        string
+	MenuItems         []*elements.Element
+	ItemsPerColumn    int
+	Prefix            string
 }
 
 func (d *DropdownOptions) SetDefaults() {
@@ -298,6 +299,7 @@ func (d *DropdownOptions) SetDefaults() {
 		d.Prefix = "jsext-dropdown-"
 	}
 	d.Width = "calc(" + d.Width + " - calc(" + d.BorderWidth + " * 2))"
+	d.ButtonWidth = "calc(" + d.ButtonWidth + " - calc(" + d.ButtonBorderWidth + " * 2))"
 }
 
 func Dropdown(options DropdownOptions) *elements.Element {
@@ -355,6 +357,7 @@ func Dropdown(options DropdownOptions) *elements.Element {
 			width: ` + options.ButtonWidth + `;
 			height: ` + options.ButtonHeight + `;
 			transition: 0.3s;
+			border: ` + options.ButtonBorderWidth + ` solid ` + options.Color + `;
 		}
 		.` + options.Prefix + `dropbtn:hover {
 			background-color: ` + options.Color + `;
