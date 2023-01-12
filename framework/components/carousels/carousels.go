@@ -136,6 +136,13 @@ func Plain(options *Options) *elements.Element {
 			border-right:` + options.ControlsSize + ` solid ` + options.ControlsColor + `; 
 			left: 0;
 	    }`
+		var setActive = func(i int) {
+			items[i].JSExtElement().ClassList().Add("active")
+			if options.Indicators {
+				indicatorList[i].JSExtElement().ClassList().Add("active")
+			}
+		}
+
 		left.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
 			for i, item := range items {
 				if item.JSExtElement().ClassList().Call("contains", "active").Bool() {
@@ -144,15 +151,9 @@ func Plain(options *Options) *elements.Element {
 						indicatorList[i].JSExtElement().ClassList().Remove("active")
 					}
 					if i == 0 {
-						items[len(items)-1].JSExtElement().ClassList().Add("active")
-						if options.Indicators {
-							indicatorList[len(items)-1].JSExtElement().ClassList().Add("active")
-						}
+						setActive(len(items) - 1)
 					} else {
-						items[i-1].JSExtElement().ClassList().Add("active")
-						if options.Indicators {
-							indicatorList[i-1].JSExtElement().ClassList().Add("active")
-						}
+						setActive(i - 1)
 					}
 					break
 				}
@@ -166,15 +167,9 @@ func Plain(options *Options) *elements.Element {
 						indicatorList[i].JSExtElement().ClassList().Remove("active")
 					}
 					if i == len(items)-1 {
-						items[0].JSExtElement().ClassList().Add("active")
-						if options.Indicators {
-							indicatorList[0].JSExtElement().ClassList().Add("active")
-						}
+						setActive(0)
 					} else {
-						items[i+1].JSExtElement().ClassList().Add("active")
-						if options.Indicators {
-							indicatorList[i+1].JSExtElement().ClassList().Add("active")
-						}
+						setActive(i + 1)
 					}
 					break
 				}
