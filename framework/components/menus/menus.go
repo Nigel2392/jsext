@@ -277,6 +277,9 @@ func (d *DropdownOptions) SetDefaults() {
 	if d.Color == "" {
 		d.Color = "#333333"
 	}
+	if d.BorderWidth == "" {
+		d.BorderWidth = "0px"
+	}
 	if d.ButtonText == "" {
 		d.ButtonText = "Menu"
 	}
@@ -360,6 +363,7 @@ func Dropdown(options DropdownOptions) *elements.Element {
 			height: ` + options.ButtonHeight + `;
 			transition: 0.3s;
 			border: ` + options.ButtonBorderWidth + ` solid ` + options.Color + `;
+			font-weight: bold;
 		}
 		.` + options.Prefix + `dropbtn:hover {
 			background-color: ` + options.Color + `;
