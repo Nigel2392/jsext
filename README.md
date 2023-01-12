@@ -10,6 +10,9 @@ go get github.com/Nigel2392/jsext@vX.X.X.X
 
 Please check the tags for the latest version, we use an unconventional versioning system, which pkg.go.dev does not like.
 
+## Live Demo
+You can find our live demo on this URL: [nigel2392.github.io/jsext/](https://nigel2392.github.io/jsext/)
+
 ## Features
 JSExt provides a few features to make it easier to interact with Javascript.
 * Easy to use JS interop, wrapping the default `syscall/js` package.
