@@ -121,6 +121,9 @@ func (r *HashRouter) Handle(hash string) {
 	if r.nameToTitle {
 		jsext.Document.Set("title", rt.Name)
 	}
+
+	// Set the location
+	js.Global().Get("window").Get("history").Call("pushState", nil, "", hash)
 }
 
 func (r *HashRouter) Redirect(hash string) {
@@ -143,6 +146,16 @@ func (r *HashRouter) route() {
 		}
 		return nil
 	}))
+	js.Global().Get("window").Call("addEventListener", "popstate", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		var event = args[0]
+		event.Call("preventDefault")
+		hash := js.Global().Get("window").Get("location").Get("hash").String()
+		if hash == "" {
+			hash = "#"
+		}
+		return nil
+	}))
+
 	hash := js.Global().Get("window").Get("location").Get("hash").String()
 	if hash == "" {
 		hash = "#"
