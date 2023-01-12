@@ -75,7 +75,7 @@ func (a *Application) SetClientFunc(f func() *requester.APIClient) *Application 
 
 // Initialize a new application.
 // If id is empty, the application will be initialized on the body.
-func App(querySelector string, rt ...*router.Router) *Application {
+func App(querySelector string, rt ...components.Router) *Application {
 	// Get the application body
 	var elem jsext.Element
 	if querySelector == "" {
