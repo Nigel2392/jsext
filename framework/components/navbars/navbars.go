@@ -75,7 +75,7 @@ func plainNav(foreground, background string, middle int) []*elements.Element {
 		for i := 0; i < middle; i++ {
 			templateAreas += ` middle-` + strconv.Itoa(i) + ``
 			navItemSlice = append(navItemSlice, navbarMain.Div().AttrClass(prefix+"middle-"+strconv.Itoa(i)))
-			middleCSS.WriteString(`.` + prefix + `middle-` + strconv.Itoa(i) + ` { grid-area: middle-` + strconv.Itoa(i) + `; }`)
+			middleCSS.WriteString(`.` + prefix + `middle-` + strconv.Itoa(i) + ` { grid-area: middle-` + strconv.Itoa(i) + `; height: 50px; }`)
 			columnBuilder.WriteString(" 1fr")
 		}
 		templateAreas += ` right"`
@@ -93,8 +93,8 @@ func plainNav(foreground, background string, middle int) []*elements.Element {
 			grid-template-rows: 1fr;
 			column-gap: 3px;
 		}
-		.` + prefix + `left { grid-area: left; margin-left: 1%; }
-		.` + prefix + `right { grid-area: right; text-align: right; margin-right: 1%; }`)
+		.` + prefix + `left { grid-area: left; margin-left: 1%; height: 50px; }
+		.` + prefix + `right { grid-area: right; text-align: right; margin-right: 1%; height: 50px; }`)
 
 	navbarMain.StyleBlock(middleCSS.String())
 
