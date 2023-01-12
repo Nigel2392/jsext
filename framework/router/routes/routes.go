@@ -1,4 +1,4 @@
-package router
+package routes
 
 import (
 	"fmt"
@@ -45,43 +45,43 @@ const (
 // Routes to be registered in the router
 type Route struct {
 	Name              string
-	name              string
+	Internal_name     string
 	Path              string
 	Callable          func(v vars.Vars, u *url.URL)
 	RegexUrl          string
-	skipTrailingSlash bool
+	SkipTrailingSlash bool
 	Children          []*Route
 }
 
 func (r *Route) String() string {
 	var sb = &strings.Builder{}
 	var level = 0
-	r.stringIndent(sb, level)
+	r.StringIndent(sb, level)
 	for _, child := range r.Children {
-		child.stringIndent(sb, level+1)
+		child.StringIndent(sb, level+1)
 	}
 	return sb.String()
 }
 
-func (r *Route) stringIndent(sb *strings.Builder, level int) {
+func (r *Route) StringIndent(sb *strings.Builder, level int) {
 	var indent = strings.Repeat("  ", level)
 	sb.WriteString(fmt.Sprintf("%sRoute: %s\n", indent, r.Name))
 	sb.WriteString(fmt.Sprintf("%sPath: %s\n", indent, r.Path))
 	sb.WriteString(fmt.Sprintf("%sRegex: %s\n", indent, r.RegexUrl))
 	sb.WriteString(fmt.Sprintf("%sChildren: %d\n", indent, len(r.Children)))
 	for _, child := range r.Children {
-		child.stringIndent(sb, level+1)
+		child.StringIndent(sb, level+1)
 	}
 }
 
-func (r *Route) getRoute(name string) *Route {
+func (r *Route) GetRoute(name string) *Route {
 	for _, route := range r.Children {
-		if route.name == name {
+		if route.Internal_name == name {
 			return route
 		}
 	}
 	for _, route := range r.Children {
-		var rt = route.getRoute(name)
+		var rt = route.GetRoute(name)
 		if rt != nil {
 			return rt
 		}
@@ -97,7 +97,7 @@ func (r *Route) getRoute(name string) *Route {
 //
 // Will result in the path "/api/posts"
 func (r *Route) Register(name, path string, callable func(v vars.Vars, u *url.URL)) *Route {
-	if r.skipTrailingSlash && len(path) > 1 {
+	if r.SkipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
 	if !strings.HasPrefix(path, "/") && !strings.HasSuffix(r.Path, "/") {
@@ -106,10 +106,10 @@ func (r *Route) Register(name, path string, callable func(v vars.Vars, u *url.UR
 		path = path[1:]
 	}
 	path = r.Path + path
-	name = r.name + ":" + name
+	name = r.Internal_name + ":" + name
 
 	for _, route := range r.Children {
-		if route.name == name {
+		if route.Internal_name == name {
 			panic("Route already exists: " + name)
 		}
 	}
@@ -117,7 +117,7 @@ func (r *Route) Register(name, path string, callable func(v vars.Vars, u *url.UR
 	var showNameSlice = strings.Split(name, ":")
 	var showName = showNameSlice[len(showNameSlice)-1]
 
-	var route = &Route{Name: showName, name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
+	var route = &Route{Name: showName, Internal_name: name, Path: path, Callable: callable, SkipTrailingSlash: r.SkipTrailingSlash}
 	r.Children = append(r.Children, route)
 	return route
 }
@@ -211,7 +211,7 @@ func (r *Route) URL(args ...any) string {
 	for i, part := range parts {
 		if strings.HasPrefix(part, RT_PATH_VAR_PREFIX) && strings.HasSuffix(part, RT_PATH_VAR_SUFFIX) {
 			if len(args) == 0 {
-				panic("not enough arguments for URL: " + r.name)
+				panic("not enough arguments for URL: " + r.Internal_name)
 			}
 			var arg = args[0]
 			args = args[1:]

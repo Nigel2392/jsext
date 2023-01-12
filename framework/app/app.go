@@ -13,6 +13,8 @@ import (
 	"github.com/Nigel2392/jsext/framework/elements"
 	"github.com/Nigel2392/jsext/framework/requester"
 	"github.com/Nigel2392/jsext/framework/router"
+	"github.com/Nigel2392/jsext/framework/router/hashrouter"
+	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
 
@@ -38,7 +40,7 @@ var WAITER = make(chan struct{})
 // Main application, holds router and is the core of the
 type Application struct {
 	BaseElemSelector string
-	Router           *router.Router
+	Router           components.Router
 	client           *requester.APIClient
 	Navbar           components.Component
 	Footer           components.Component
@@ -83,11 +85,11 @@ func App(querySelector string, rt ...*router.Router) *Application {
 		elem = jsext.QuerySelector(querySelector)
 	}
 	// Get the application router
-	var r *router.Router
+	var r components.Router
 	if len(rt) > 0 {
 		r = rt[0]
 	} else {
-		r = router.NewRouter()
+		r = hashrouter.NewRouter()
 		r.SkipTrailingSlash()
 		r.NameToTitle(true)
 	}
@@ -229,7 +231,7 @@ func (a *Application) Load(f func()) {
 }
 
 // Register routes to the application.
-func (a *Application) Register(name string, path string, callable func(a *Application, v vars.Vars, u *url.URL)) *router.Route {
+func (a *Application) Register(name string, path string, callable func(a *Application, v vars.Vars, u *url.URL)) *routes.Route {
 	var ncall func(v vars.Vars, u *url.URL)
 	if callable != nil {
 		ncall = a.WrapURL(callable)

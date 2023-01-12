@@ -4,7 +4,11 @@
 package components
 
 import (
+	"net/url"
+
 	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/framework/router/routes"
+	"github.com/Nigel2392/jsext/framework/router/vars"
 )
 
 // Component interface
@@ -30,4 +34,16 @@ type Loader interface {
 type URL struct {
 	Name string
 	Url  string
+}
+
+type Router interface {
+	Register(string, string, func(v vars.Vars, u *url.URL)) *routes.Route
+	Run()
+	OnLoad(f func())
+	OnPageChange(func(v vars.Vars, u *url.URL))
+	Redirect(string)
+	AfterPageChange(f func(vars.Vars, *url.URL))
+	OnError(func(err error))
+	SkipTrailingSlash()
+	NameToTitle(bool)
 }

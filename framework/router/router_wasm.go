@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
@@ -55,32 +56,28 @@ func DefaultRouterErrorDisplay(err error) {
 }
 
 // Get a route by index.
-func (r *Router) GetIndex(i int) *Route {
+func (r *Router) GetIndex(i int) *routes.Route {
 	return r.routes[i]
 }
 
 // Set on load function.
-func (r *Router) OnLoad(f func()) *Router {
+func (r *Router) OnLoad(f func()) {
 	r.onLoad = f
-	return r
 }
 
 // Set on page change function.
-func (r *Router) OnPageChange(f func(vars.Vars, *url.URL)) *Router {
+func (r *Router) OnPageChange(f func(vars.Vars, *url.URL)) {
 	r.onPageChange = f
-	return r
 }
 
 // Set after page change function.
-func (r *Router) AfterPageChange(f func(vars.Vars, *url.URL)) *Router {
+func (r *Router) AfterPageChange(f func(vars.Vars, *url.URL)) {
 	r.afterPageChange = f
-	return r
 }
 
 // Automatically convert the name of the route to the title of the page.
-func (r *Router) NameToTitle(b bool) *Router {
+func (r *Router) NameToTitle(b bool) {
 	r.nameToTitle = b
-	return r
 }
 
 var RT_PREFIX = "router:"
@@ -213,7 +210,7 @@ func (r *Router) Forward() {
 
 // Current route.
 // Returns the route, the variables passed to the route, and if the route was found.
-func (r *Router) Current() (*Route, bool) {
+func (r *Router) Current() (*routes.Route, bool) {
 	var path = jsext.Window.Get("location").Get("href").String()
 	var url, err = url.Parse(path)
 	if err != nil {

@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
 
 // Router is the main router struct.
 type Router struct {
-	routes            []*Route
+	routes            []*routes.Route
 	skipTrailingSlash bool
 	nameToTitle       bool
 	onErr             func(err error)
@@ -23,25 +24,22 @@ type Router struct {
 
 // Initialize a new router.
 func NewRouter() *Router {
-	return &Router{routes: make([]*Route, 0)}
+	return &Router{routes: make([]*routes.Route, 0)}
 }
 
 // SkipTrailingSlash will skip the trailing slash in the path.
-func (r *Router) SkipTrailingSlash() *Router {
+func (r *Router) SkipTrailingSlash() {
 	r.skipTrailingSlash = true
-	return r
 }
 
 // Add a middleware to the router.
-func (r *Router) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) *Router {
+func (r *Router) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) {
 	r.middlewares = append(r.middlewares, middleware)
-	return r
 }
 
 // Decide what to do on errors.
-func (r *Router) OnError(cb func(err error)) *Router {
+func (r *Router) OnError(cb func(err error)) {
 	r.onErr = cb
-	return r
 }
 
 // Throw an error in the router with a message.
@@ -71,13 +69,13 @@ func (r *Router) String() string {
 	sb.WriteString("Skip trailing slash: " + strconv.FormatBool(r.skipTrailingSlash) + "\n")
 	var level = 0
 	for _, route := range r.routes {
-		route.stringIndent(sb, level)
+		route.StringIndent(sb, level)
 	}
 	return sb.String()
 }
 
 // Match a raw path.
-func (r *Router) Match(path string) (*Route, vars.Vars, bool) {
+func (r *Router) Match(path string) (*routes.Route, vars.Vars, bool) {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
@@ -86,22 +84,22 @@ func (r *Router) Match(path string) (*Route, vars.Vars, bool) {
 			return rt, vars, match
 		}
 	}
-	return &Route{
-		name: "404",
-		Path: path,
+	return &routes.Route{
+		Internal_name: "404",
+		Path:          path,
 	}, nil, false
 }
 
 // Get a route by name.
 // If it does not directly exist, it will search in the subroutes.
-func (r *Router) GetRoute(name string) *Route {
+func (r *Router) GetRoute(name string) *routes.Route {
 	for _, route := range r.routes {
-		if route.name == name {
+		if route.Internal_name == name {
 			return route
 		}
 	}
 	for _, route := range r.routes {
-		var rt = route.getRoute(name)
+		var rt = route.GetRoute(name)
 		if rt != nil {
 			return rt
 		}
@@ -111,16 +109,16 @@ func (r *Router) GetRoute(name string) *Route {
 
 // Register a new route.
 // If the route name already exists, it will panic.
-func (r *Router) Register(name, path string, callable func(v vars.Vars, u *url.URL)) *Route {
+func (r *Router) Register(name, path string, callable func(v vars.Vars, u *url.URL)) *routes.Route {
 	if r.skipTrailingSlash && len(path) > 1 {
 		path = strings.TrimSuffix(path, "/")
 	}
 	for _, route := range r.routes {
-		if route.name == name {
+		if route.Internal_name == name {
 			panic("Router [500] route name already exists: " + name)
 		}
 	}
-	var route = &Route{Name: name, name: name, Path: path, Callable: callable, skipTrailingSlash: r.skipTrailingSlash}
+	var route = &routes.Route{Name: name, Internal_name: name, Path: path, Callable: callable, SkipTrailingSlash: r.skipTrailingSlash}
 	r.routes = append(r.routes, route)
 	return route
 }

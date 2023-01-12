@@ -9,7 +9,8 @@ import (
 )
 
 func TestRouter(t *testing.T) {
-	var rt = router.NewRouter().SkipTrailingSlash()
+	var rt = router.NewRouter()
+	rt.SkipTrailingSlash()
 
 	var homeRoute = rt.Register("home", "/", func(vars vars.Vars, u *url.URL) {
 		t.Log("Index")
