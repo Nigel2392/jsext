@@ -286,6 +286,9 @@ func (d *DropdownOptions) SetDefaults() {
 	if d.Height == "" {
 		d.Height = "400px"
 	}
+	if d.ButtonBorderWidth == "" {
+		d.ButtonBorderWidth = "0px"
+	}
 	if d.ButtonWidth == "" {
 		d.ButtonWidth = "100%"
 	}
