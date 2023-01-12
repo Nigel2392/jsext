@@ -29,6 +29,8 @@ type Options struct {
 	Items []*elements.Element
 	// Class prefix
 	Prefix string
+	// Active item
+	ActiveItem int
 }
 
 func (c *Options) SetDefaults() {
@@ -65,11 +67,16 @@ func Plain(options *Options) *elements.Element {
 	var Carousel = CarouselContainer.Div().AttrClass(options.Prefix + "carousel")
 	var CarouselInner = Carousel.Div().AttrClass(options.Prefix + "carousel-inner")
 
+	var activeItem = options.ActiveItem
+	if activeItem < 0 || activeItem >= len(options.Items) {
+		activeItem = 0
+	}
+
 	var items = make([]*elements.Element, len(options.Items))
 	for i, item := range options.Items {
 		var itemClass = options.Prefix + "carousel-item"
 		items[i] = item
-		if i == 0 {
+		if i == activeItem {
 			CarouselInner.Append(item.AttrClass(itemClass, "active"))
 		} else {
 			CarouselInner.Append(item.AttrClass(itemClass))
