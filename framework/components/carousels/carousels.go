@@ -117,7 +117,7 @@ func Plain(options *Options) *elements.Element {
 		// CarouselContainer.Div().AttrClass(options.Prefix+"arrow-right", options.Prefix+"arrow")
 		css += `
 		.` + options.Prefix + `arrow {
-			visibility: hidden;
+			opacity: 0;
 			width: 0; 
 			height: 0; 
 			border-top: ` + options.ControlsSize + ` solid transparent;
@@ -125,10 +125,11 @@ func Plain(options *Options) *elements.Element {
 			position: absolute;
 			top: 50%;
 			transform: translateY(-50%);
+			transition: opacity 0.3s ease-in;
 			cursor: pointer;
 		  }
 		.` + options.Prefix + `container:hover .` + options.Prefix + `arrow {
-			visibility: visible;
+			opacity: 1;
 		}
 		.` + options.Prefix + `arrow-right {
 			border-left: ` + options.ControlsSize + ` solid ` + options.ControlsColor + `;
