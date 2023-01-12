@@ -1,10 +1,13 @@
+//go:build js && wasm
+// +build js,wasm
+
 package navbars
 
 import (
 	"strconv"
 	"strings"
 
-	"github.com/Nigel2392/jsext/framework/components"
+	"github.com/Nigel2392/jsext/framework/components/misc"
 	"github.com/Nigel2392/jsext/framework/elements"
 )
 
@@ -133,7 +136,7 @@ var SearchText = "Search"
 
 // Returns the main navbar element, and the searchbar element, with the submit button in an array.
 func Search(logo *Logo, urls *elements.URLs) (*elements.Element, []*elements.Element) {
-	var items = components.SearchBar("search-", "#333333", "#ffffff", "Search")
+	var items = misc.SearchBar("search-", "#333333", "#ffffff", "Search")
 	var searchBarContainer = items[0]
 	var navbar = Custom(logo, urls, SearchBackground, SearchForeground, searchBarContainer)
 	return navbar, items[1:]
