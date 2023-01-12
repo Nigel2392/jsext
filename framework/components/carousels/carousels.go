@@ -82,6 +82,8 @@ func Plain(options *Options) *elements.Element {
 		background-color: ` + options.Background + `;
 		position: relative;
 		border: ` + options.Border + `;
+		border-radius: 0.25em;
+		padding: calc(0.5em + 0.5vw);
 	}
 
 	.` + options.Prefix + `carousel {
@@ -130,11 +132,11 @@ func Plain(options *Options) *elements.Element {
 		}
 		.` + options.Prefix + `arrow-right {
 			border-left: ` + options.ControlsSize + ` solid ` + options.ControlsColor + `;
-			right: 0;
+			right: calc(0.5em + 0.5vw);
 	    }
 	    .` + options.Prefix + `arrow-left {
 			border-right:` + options.ControlsSize + ` solid ` + options.ControlsColor + `; 
-			left: 0;
+			left: calc(0.5em + 0.5vw);
 	    }`
 		var setActive = func(i int) {
 			items[i].JSExtElement().ClassList().Add("active")

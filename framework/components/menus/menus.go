@@ -265,6 +265,8 @@ type DropdownOptions struct {
 	ButtonWidth       string
 	ButtonHeight      string
 	ButtonText        string
+	Header            *elements.Element
+	Footer            *elements.Element
 	MenuItems         []*elements.Element
 	ItemsPerColumn    int
 	Prefix            string
@@ -419,4 +421,83 @@ func Dropdown(options DropdownOptions) *elements.Element {
 	dropDownContainer.StyleBlock(css)
 
 	return dropDownContainer
+}
+
+func DropdownElement(opts DropdownOptions) *elements.Element {
+
+	if len(opts.MenuItems) == 0 {
+		panic("No menu items provided")
+	}
+	if opts.Header == nil {
+		panic("No header provided")
+	}
+
+	opts.SetDefaults()
+
+	var container = elements.Div().AttrClass(opts.Prefix + "dropdown")
+	var header = container.Div().AttrClass(opts.Prefix + "dropdown-header").Append(opts.Header)
+	container.Append()
+	var menu = container.Div().AttrClass(opts.Prefix + "dropdown-content")
+
+	menu.Append(elements.Div().AttrClass(opts.Prefix + "dropdown-item").Append(opts.MenuItems[0]))
+
+	if opts.Footer != nil {
+		var footer_no_ptr = *opts.Footer
+		var footer = &footer_no_ptr
+		container.Append(elements.Div().AttrClass(opts.Prefix + "dropdown-footer").Append(footer))
+	}
+	header.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+		menu.JSExtElement().ClassList().Toggle(opts.Prefix + "show")
+	})
+
+	var css = `
+		.` + opts.Prefix + `dropdown {
+			position: relative;
+			display: inline-block;
+			width: ` + opts.Width + `;
+		}
+		.` + opts.Prefix + `dropdown-header {
+			background-color: ` + opts.Background + `;
+			color: ` + opts.Color + `;
+			text-decoration: none;
+			display: block;
+			border: ` + opts.ButtonBorderWidth + ` solid ` + opts.Color + `;
+			width: ` + opts.Width + `;
+			cursor: pointer;
+		}
+		.` + opts.Prefix + `dropdown-content {
+			width: calc(` + opts.Width + ` - ` + opts.BorderWidth + ` * 2 + ` + opts.ButtonBorderWidth + ` * 2);
+			height: 0px;
+			position: absolute;
+			background-color: ` + opts.Background + `;
+			border: none;
+			overflow: hidden;
+			box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+			z-index: 1;
+			transition: height 0.5s, border 0.5s;
+		}
+		.` + opts.Prefix + `dropdown-content > * {
+			opacity: 0;
+			transition: opacity 0.3s;
+		}
+		.` + opts.Prefix + `dropdown-item {
+			color: ` + opts.Color + `;
+			text-decoration: none;
+			display: block;
+			width: 100%;
+			height: 100%;
+		}
+		.` + opts.Prefix + `dropdown-item:not(:last-child) {
+			border-bottom: ` + opts.BorderWidth + ` solid ` + opts.Color + `;
+		}
+		.` + opts.Prefix + `dropdown a:hover {background-color: #f1f1f1}
+		.` + opts.Prefix + `show {height: ` + opts.Height + `; border:` + opts.BorderWidth + ` solid ` + opts.Color + `;}
+		.` + opts.Prefix + `show > * {
+			opacity: 1;
+		}
+	`
+
+	container.StyleBlock(css)
+
+	return container
 }
