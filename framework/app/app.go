@@ -231,12 +231,12 @@ func (a *Application) Load(f func()) {
 }
 
 // Register routes to the application.
-func (a *Application) Register(name string, path string, callable func(a *Application, v vars.Vars, u *url.URL)) *routes.Route {
+func (a *Application) Register(name string, hashOrPath string, callable func(a *Application, v vars.Vars, u *url.URL)) *routes.Route {
 	var ncall func(v vars.Vars, u *url.URL)
 	if callable != nil {
 		ncall = a.WrapURL(callable)
 	}
-	var route = a.Router.Register(name, path, ncall)
+	var route = a.Router.Register(name, hashOrPath, ncall)
 	return route
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"syscall/js"
 
+	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
@@ -117,6 +118,9 @@ func (r *HashRouter) Handle(hash string) {
 	if r.afterPageChange != nil {
 		r.afterPageChange(nil, nil)
 	}
+	if r.nameToTitle {
+		jsext.Document.Set("title", rt.Name)
+	}
 }
 
 func (r *HashRouter) Redirect(hash string) {
@@ -141,7 +145,7 @@ func (r *HashRouter) route() {
 	}))
 	hash := js.Global().Get("window").Get("location").Get("hash").String()
 	if hash == "" {
-		hash = "#home"
+		hash = "#"
 	}
 	r.Handle(hash)
 }
