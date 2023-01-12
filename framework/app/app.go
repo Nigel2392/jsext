@@ -13,7 +13,6 @@ import (
 	"github.com/Nigel2392/jsext/framework/elements"
 	"github.com/Nigel2392/jsext/framework/requester"
 	"github.com/Nigel2392/jsext/framework/router"
-	"github.com/Nigel2392/jsext/framework/router/hashrouter"
 	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
@@ -89,7 +88,7 @@ func App(querySelector string, rt ...*router.Router) *Application {
 	if len(rt) > 0 {
 		r = rt[0]
 	} else {
-		r = hashrouter.NewRouter()
+		r = router.NewRouter()
 		r.SkipTrailingSlash()
 		r.NameToTitle(true)
 	}
