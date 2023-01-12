@@ -73,6 +73,11 @@ func (e *Element) JSExtElement() jsext.Element {
 	return jsext.Element(e.value)
 }
 
+// Report wether the element is of type specified.
+func (e *Element) Is(tag string) bool {
+	return strings.EqualFold(e.Tag, tag)
+}
+
 // Set the text to be rendered after all children are.
 func (e *Element) TextAfter() *Element {
 	e.textAfter = true

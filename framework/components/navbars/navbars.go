@@ -87,7 +87,6 @@ func plainNav(foreground, background string, middle int) []*elements.Element {
 			height: 50px;
 			background-color: ` + background + `;
 			color: ` + foreground + `;
-			overflow: hidden;
 			display: grid;
 			grid-template-columns: ` + columnBuilder.String() + `;
 			grid-template-areas: ` + templateAreas + `;
