@@ -1,3 +1,6 @@
+//go:build js && wasm
+// +build js,wasm
+
 package hashrouter
 
 import (
@@ -12,7 +15,7 @@ import (
 )
 
 var RT_PREFIX = "router:"
-var RT_PREFIX_EXTERNAL = "router:external:"
+var RT_PREFIX_EXTERNAL = "external:"
 
 type HashRouter struct {
 	routes          map[string]*routes.Route

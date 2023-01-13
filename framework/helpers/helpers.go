@@ -4,6 +4,7 @@
 package helpers
 
 import (
+	"hash/fnv"
 	"math/rand"
 	"reflect"
 	"strconv"
@@ -42,6 +43,16 @@ func RandStringBytesMaskImprSrcUnsafe(n int) string {
 	}
 
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+func FNVHash(s string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(s))
+	return h.Sum32()
+}
+
+func FNVHashString(s string) string {
+	return strconv.FormatUint(uint64(FNVHash(s)), 10)
 }
 
 func ValueToString(v reflect.Value) string {
