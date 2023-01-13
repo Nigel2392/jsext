@@ -107,10 +107,6 @@ func NewTimeTracker(Time time.Time) *TimeTracker {
 	}
 }
 
-func (t *TimeTracker) String() string {
-	return t.Format("%YR years, %MO months, %DD days, %HH hours, %MM minutes, %SS seconds")
-}
-
 func (t *TimeTracker) Strings() (string, string, string, string, string, string) {
 	var string = t.Format("%YR-%MO-%DD-%HH-%MM-%SS")
 	var split = strings.Split(string, "-")

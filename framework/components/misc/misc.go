@@ -180,29 +180,39 @@ func (c *Counter) Sub(i int) {
 }
 
 type TimeCounter struct {
-	time     time.Time
-	format   string
-	element  *elements.Element
-	ticker   *time.Ticker
-	onUpdate func(*convert.TimeTracker, *elements.Element)
+	time       time.Time
+	element    *elements.Element
+	ticker     *time.Ticker
+	formatFunc func(*convert.TimeTracker) string
+	updateFunc func(*convert.TimeTracker, *elements.Element)
 }
 
-func NewTimeCounter(elem *elements.Element, format string) *TimeCounter {
+func NewTimeCounter(elem *elements.Element) *TimeCounter {
 	return &TimeCounter{
 		time:    time.Now(),
-		format:  format,
 		element: elem,
+		formatFunc: func(t *convert.TimeTracker) string {
+			return t.Format("%YR years, %MO months, %DD days, %HH hours, %MM minutes, %SS seconds")
+		},
 	}
 }
 
 func (c *TimeCounter) Increment() { c.Add(time.Second) }
 
-func (c *TimeCounter) OnUpdate(f func(*convert.TimeTracker, *elements.Element)) { c.onUpdate = f }
+func (c *TimeCounter) FormatFunc(f func(*convert.TimeTracker) string)             { c.formatFunc = f }
+func (c *TimeCounter) UpdateFunc(f func(*convert.TimeTracker, *elements.Element)) { c.updateFunc = f }
 
 func (c *TimeCounter) Display(Time time.Time) {
+	if c.formatFunc == nil {
+		panic("Format function is nil")
+	}
+	if c.updateFunc != nil {
+		c.updateFunc(c.Tracker(), c.element)
+		return
+	}
 	// Display time until
 	timeTracker := convert.NewTimeTracker(Time)
-	c.element.InnerHTML(timeTracker.Format(c.format))
+	c.element.InnerHTML(c.formatFunc(timeTracker))
 }
 
 func (c *TimeCounter) Reset() {
@@ -227,20 +237,17 @@ func (c *TimeCounter) Sub(t time.Duration) {
 	c.Display(c.time)
 }
 
-func (c *TimeCounter) Format(format string) {
-	c.format = format
+func (c *TimeCounter) SetFormat(format string) {
 	c.Display(c.time)
 }
 
 func (c *TimeCounter) Live() {
+	c.Display(c.time)
 	c.ticker = time.NewTicker(time.Second)
 	go func() {
 		for range c.ticker.C {
-			if c.onUpdate != nil {
-				c.onUpdate(c.Tracker(), c.element)
-			} else {
-				c.Display(c.time)
-			}
+			c.Display(c.time)
+
 		}
 	}()
 }
