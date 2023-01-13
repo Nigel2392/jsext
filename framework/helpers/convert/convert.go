@@ -1,6 +1,10 @@
 package convert
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+	"time"
+)
 
 func FormatNumber(value any) string {
 	switch value := value.(type) {
@@ -62,4 +66,57 @@ func ToFloat(value any) float64 {
 	default:
 		panic("Value must be a number type")
 	}
+}
+
+type TimeTracker struct {
+	Days    int
+	Hours   int
+	Minutes int
+	Seconds int
+	time    time.Time
+}
+
+func NewTimeTracker(Time time.Time) *TimeTracker {
+	if Time.IsZero() {
+		return &TimeTracker{}
+	}
+	var t time.Duration
+	if Time.After(time.Now()) {
+		t = time.Until(Time)
+	} else {
+		t = time.Since(Time)
+	}
+	var total = int(t.Seconds())
+	var days = int(total / (60 * 60 * 24))
+	var hours = int(total / (60 * 60) % 24)
+	var minutes = int(total/60) % 60
+	var seconds = int(total % 60)
+
+	return &TimeTracker{
+		Days:    days,
+		Hours:   hours,
+		Minutes: minutes,
+		Seconds: seconds,
+		time:    Time,
+	}
+}
+
+func (t *TimeTracker) Format(format string) string {
+	format = strings.ReplaceAll(format, "%D", strconv.Itoa(t.Days))
+	format = strings.ReplaceAll(format, "%H", strconv.Itoa(t.Hours))
+	format = strings.ReplaceAll(format, "%M", strconv.Itoa(t.Minutes))
+	format = strings.ReplaceAll(format, "%S", strconv.Itoa(t.Seconds))
+	return format
+}
+
+func (t *TimeTracker) IsZero() bool {
+	return t.time.IsZero()
+}
+
+func (t *TimeTracker) IsPast() bool {
+	return t.time.Before(time.Now())
+}
+
+func (t *TimeTracker) IsFuture() bool {
+	return t.time.After(time.Now())
 }

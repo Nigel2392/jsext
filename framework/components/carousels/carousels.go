@@ -109,11 +109,15 @@ func Plain(options *Options) *elements.Element {
 		top: 0;
 		left: 0;
 		opacity: 0;
-		transition: opacity 0.5s;
+		transition: 0.5s;
 		object-fit: contain;
+		pointer-events: none;
+		z-index: 0;
 	}
 	.` + options.Prefix + `carousel-item.active {
 		opacity: 1;
+		pointer-events: auto;
+		z-index: 1;
 	}`
 	var indicatorList = make([]*elements.Element, len(options.Items))
 
@@ -134,6 +138,7 @@ func Plain(options *Options) *elements.Element {
 			transform: translateY(-50%);
 			transition: opacity 0.3s ease-in;
 			cursor: pointer;
+			z-index: 2;
 		  }
 		.` + options.Prefix + `container:hover .` + options.Prefix + `arrow {
 			opacity: 1;
@@ -230,6 +235,7 @@ func Plain(options *Options) *elements.Element {
 			margin: 0 5px;
 			cursor: pointer;
 			transition: background-color 0.5s;
+			z-index: 2;
 		}
 		.` + options.Prefix + `indicator.active {
 			background-color: ` + options.ControlsColor + `;
@@ -250,7 +256,7 @@ func Image(imageUrls []string, options *Options, changeOnClick ...bool) *element
 			items[i].AttrStyle("cursor:zoom-in")
 			items[i].AddEventListener("click", func(this jsext.Value, event jsext.Event) {
 				window := jsext.Window
-				window.Call("open", url, "_blank")
+				window.Call("open", this.Get("src").String(), "_blank")
 			})
 		}
 	}

@@ -7,10 +7,12 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/framework/elements"
 	"github.com/Nigel2392/jsext/framework/helpers"
+	"github.com/Nigel2392/jsext/framework/helpers/convert"
 	"github.com/Nigel2392/jsext/framework/helpers/csshelpers"
 )
 
@@ -131,4 +133,121 @@ func Grid(gridPattern string) (*elements.Element, []*elements.Element, error) {
 		`
 	jsext.StyleBlock(className, css)
 	return grid, gridItems, nil
+}
+
+func NewCounter(elem *elements.Element) *Counter {
+	return &Counter{
+		count:   0,
+		element: elem,
+	}
+}
+
+type Counter struct {
+	count   int
+	element *elements.Element
+}
+
+func (c *Counter) Increment() {
+	c.count++
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+func (c *Counter) Decrement() {
+	c.count--
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+func (c *Counter) Reset() {
+	c.count = 0
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+func (c *Counter) Set(i int) {
+	c.count = i
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+func (c *Counter) Get() int {
+	return c.count
+}
+
+func (c *Counter) Add(i int) {
+	c.count += i
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+func (c *Counter) Sub(i int) {
+	c.count -= i
+	c.element.InnerHTML(strconv.Itoa(c.count))
+}
+
+type TimeCounter struct {
+	time    time.Time
+	format  string
+	element *elements.Element
+	ticker  *time.Ticker
+}
+
+func NewTimeCounter(elem *elements.Element, format string) *TimeCounter {
+	return &TimeCounter{
+		time:    time.Now(),
+		format:  format,
+		element: elem,
+	}
+}
+
+func (c *TimeCounter) Increment() {
+	c.Add(time.Second)
+}
+
+func (c *TimeCounter) Display(Time time.Time) {
+	// Display time until
+	timeTracker := convert.NewTimeTracker(Time)
+	c.element.InnerHTML(timeTracker.Format(c.format))
+}
+
+func (c *TimeCounter) Reset() {
+	c.time = time.Now()
+	c.Display(c.time)
+}
+
+func (c *TimeCounter) Set(t time.Time) {
+	c.time = t
+	c.Display(c.time)
+}
+
+func (c *TimeCounter) Get() time.Time {
+	return c.time
+}
+
+func (c *TimeCounter) Add(t time.Duration) {
+	c.time = c.time.Add(t)
+	c.Display(c.time)
+}
+
+func (c *TimeCounter) Sub(t time.Duration) {
+	c.time = c.time.Add(t)
+	c.Display(c.time)
+}
+
+func (c *TimeCounter) Format(format string) {
+	c.format = format
+	c.Display(c.time)
+}
+
+func (c *TimeCounter) Live() {
+	c.ticker = time.NewTicker(time.Second)
+	go func() {
+		for range c.ticker.C {
+			c.Display(c.time)
+		}
+	}()
+}
+
+func (c *TimeCounter) StopLive() {
+	c.ticker.Stop()
+}
+
+func (c *TimeCounter) Tracker() *convert.TimeTracker {
+	return convert.NewTimeTracker(c.time)
 }
