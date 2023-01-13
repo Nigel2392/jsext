@@ -16,7 +16,7 @@ import (
 
 type carousels_module struct {
 	Plain func(*carousels.Options) *elements.Element
-	Image func([]string, *carousels.Options) *elements.Element
+	Image func([]string, *carousels.Options, ...bool) *elements.Element
 }
 
 type loaders_module struct {

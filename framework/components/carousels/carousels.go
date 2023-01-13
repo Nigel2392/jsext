@@ -242,10 +242,17 @@ func Plain(options *Options) *elements.Element {
 	return CarouselContainer
 }
 
-func Image(imageUrls []string, options *Options) *elements.Element {
+func Image(imageUrls []string, options *Options, changeOnClick ...bool) *elements.Element {
 	var items = make([]*elements.Element, len(imageUrls))
 	for i, url := range imageUrls {
 		items[i] = elements.Img(url).AttrAlt(url + " Is not available")
+		if len(changeOnClick) > 0 && changeOnClick[0] {
+			items[i].AttrStyle("cursor:zoom-in")
+			items[i].AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+				window := jsext.Window
+				window.Call("open", url, "_blank")
+			})
+		}
 	}
 	options.Items = items
 	return Plain(options)
