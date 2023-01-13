@@ -380,7 +380,7 @@ func Dropdown(options DropdownOptions) *elements.Element {
 			min-height: ` + options.Height + `;
 			max-height: ` + options.Height + `;
 			overflow: auto;
-			z-index: 1;
+			z-index: 3;
 			border: ` + options.BorderWidth + ` solid ` + options.Color + `;
 		}
 		.` + options.Prefix + `content {
