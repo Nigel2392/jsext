@@ -251,3 +251,7 @@ func (c *TimeCounter) StopLive() {
 func (c *TimeCounter) Tracker() *convert.TimeTracker {
 	return convert.NewTimeTracker(c.time)
 }
+
+func (c *TimeCounter) Date(year int, month time.Month, day int, hour int, min int, sec int, nsec int) {
+	c.Set(time.Now().Add(time.Since(time.Date(year, month, day, hour, min, sec, nsec, time.UTC)) * -1))
+}
