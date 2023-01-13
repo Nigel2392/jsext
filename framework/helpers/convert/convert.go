@@ -69,6 +69,8 @@ func ToFloat(value any) float64 {
 }
 
 type TimeTracker struct {
+	Years   int
+	Months  int
 	Days    int
 	Hours   int
 	Minutes int
@@ -87,12 +89,17 @@ func NewTimeTracker(Time time.Time) *TimeTracker {
 		t = time.Since(Time)
 	}
 	var total = int(t.Seconds())
-	var days = int(total / (60 * 60 * 24))
-	var hours = int(total / (60 * 60) % 24)
-	var minutes = int(total/60) % 60
-	var seconds = int(total % 60)
+	var tim = time.Unix(int64(total), 0)
+	var years = tim.Year() - 1970
+	var months = int(tim.Month() - 1)
+	var days = tim.Day() - 1
+	var hours = tim.Hour()
+	var minutes = tim.Minute()
+	var seconds = tim.Second()
 
 	return &TimeTracker{
+		Years:   years,
+		Months:  months,
 		Days:    days,
 		Hours:   hours,
 		Minutes: minutes,
@@ -102,10 +109,12 @@ func NewTimeTracker(Time time.Time) *TimeTracker {
 }
 
 func (t *TimeTracker) Format(format string) string {
-	format = strings.ReplaceAll(format, "%D", strconv.Itoa(t.Days))
-	format = strings.ReplaceAll(format, "%H", strconv.Itoa(t.Hours))
-	format = strings.ReplaceAll(format, "%M", strconv.Itoa(t.Minutes))
-	format = strings.ReplaceAll(format, "%S", strconv.Itoa(t.Seconds))
+	format = strings.ReplaceAll(format, "%YR", strconv.Itoa(t.Years))
+	format = strings.ReplaceAll(format, "%MO", strconv.Itoa(t.Months))
+	format = strings.ReplaceAll(format, "%DD", strconv.Itoa(t.Days))
+	format = strings.ReplaceAll(format, "%HH", strconv.Itoa(t.Hours))
+	format = strings.ReplaceAll(format, "%MM", strconv.Itoa(t.Minutes))
+	format = strings.ReplaceAll(format, "%SS", strconv.Itoa(t.Seconds))
 	return format
 }
 
