@@ -347,13 +347,21 @@ func (e *Element) RemoveEventListener(event string, fn func(this jsext.Value, ev
 // Set the text of the element
 // Autoescape possible HTML input.
 func (e *Element) InnerText(text string) *Element {
-	e.Text = htmlEscaper.Replace(text)
+	if e.value.IsUndefined() {
+		e.Text = htmlEscaper.Replace(text)
+	} else {
+		e.value.Set("innerHTML", htmlEscaper.Replace(text))
+	}
 	return e
 }
 
 // Set raw HTML of the element.
 func (e *Element) InnerHTML(html string) *Element {
-	e.Text = html
+	if e.value.IsUndefined() {
+		e.Text = html
+	} else {
+		e.value.Set("innerHTML", html)
+	}
 	return e
 }
 
