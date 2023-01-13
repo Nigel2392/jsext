@@ -167,9 +167,7 @@ func (c *Counter) Set(i int) {
 	c.element.InnerHTML(strconv.Itoa(c.count))
 }
 
-func (c *Counter) Get() int {
-	return c.count
-}
+func (c *Counter) Get() int { return c.count }
 
 func (c *Counter) Add(i int) {
 	c.count += i
@@ -196,9 +194,7 @@ func NewTimeCounter(elem *elements.Element, format string) *TimeCounter {
 	}
 }
 
-func (c *TimeCounter) Increment() {
-	c.Add(time.Second)
-}
+func (c *TimeCounter) Increment() { c.Add(time.Second) }
 
 func (c *TimeCounter) Display(Time time.Time) {
 	// Display time until
@@ -216,9 +212,7 @@ func (c *TimeCounter) Set(t time.Time) {
 	c.Display(c.time)
 }
 
-func (c *TimeCounter) Get() time.Time {
-	return c.time
-}
+func (c *TimeCounter) Get() time.Time { return c.time }
 
 func (c *TimeCounter) Add(t time.Duration) {
 	c.time = c.time.Add(t)
@@ -244,13 +238,9 @@ func (c *TimeCounter) Live() {
 	}()
 }
 
-func (c *TimeCounter) StopLive() {
-	c.ticker.Stop()
-}
+func (c *TimeCounter) StopLive() { c.ticker.Stop() }
 
-func (c *TimeCounter) Tracker() *convert.TimeTracker {
-	return convert.NewTimeTracker(c.time)
-}
+func (c *TimeCounter) Tracker() *convert.TimeTracker { return convert.NewTimeTracker(c.time) }
 
 func (c *TimeCounter) Date(year int, month time.Month, day int, hour int, min int, sec int, nsec int) {
 	c.Set(time.Now().Add(time.Since(time.Date(year, month, day, hour, min, sec, nsec, time.UTC)) * -1))
