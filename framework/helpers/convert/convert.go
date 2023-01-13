@@ -107,6 +107,16 @@ func NewTimeTracker(Time time.Time) *TimeTracker {
 	}
 }
 
+func (t *TimeTracker) String() string {
+	return t.Format("%YR years, %MO months, %DD days, %HH hours, %MM minutes, %SS seconds")
+}
+
+func (t *TimeTracker) Strings() (string, string, string, string, string, string) {
+	var string = t.Format("%YR-%MO-%DD-%HH-%MM-%SS")
+	var split = strings.Split(string, "-")
+	return split[0], split[1], split[2], split[3], split[4], split[5]
+}
+
 func (t *TimeTracker) Format(format string) string {
 	format = strings.ReplaceAll(format, "%YR", strconv.Itoa(t.Years))
 	format = strings.ReplaceAll(format, "%MO", strconv.Itoa(t.Months))

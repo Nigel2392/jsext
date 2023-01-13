@@ -180,10 +180,11 @@ func (c *Counter) Sub(i int) {
 }
 
 type TimeCounter struct {
-	time    time.Time
-	format  string
-	element *elements.Element
-	ticker  *time.Ticker
+	time     time.Time
+	format   string
+	element  *elements.Element
+	ticker   *time.Ticker
+	onUpdate func(*convert.TimeTracker, *elements.Element)
 }
 
 func NewTimeCounter(elem *elements.Element, format string) *TimeCounter {
@@ -195,6 +196,8 @@ func NewTimeCounter(elem *elements.Element, format string) *TimeCounter {
 }
 
 func (c *TimeCounter) Increment() { c.Add(time.Second) }
+
+func (c *TimeCounter) OnUpdate(f func(*convert.TimeTracker, *elements.Element)) { c.onUpdate = f }
 
 func (c *TimeCounter) Display(Time time.Time) {
 	// Display time until
@@ -233,7 +236,11 @@ func (c *TimeCounter) Live() {
 	c.ticker = time.NewTicker(time.Second)
 	go func() {
 		for range c.ticker.C {
-			c.Display(c.time)
+			if c.onUpdate != nil {
+				c.onUpdate(c.Tracker(), c.element)
+			} else {
+				c.Display(c.time)
+			}
 		}
 	}()
 }
