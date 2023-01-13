@@ -57,7 +57,7 @@ func ImportLink(name, src, typ, rel string) Import {
 func StyleBlock(name, code string) Import {
 	var style = CreateElement("style")
 	style.Set("type", "text/css")
-	style.Set("text", code)
+	style.Set("innerText", code)
 	var i = Import{
 		name,
 		style,

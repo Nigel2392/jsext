@@ -4,11 +4,39 @@
 package misc
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 
+	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/framework/elements"
+	"github.com/Nigel2392/jsext/framework/helpers"
 	"github.com/Nigel2392/jsext/framework/helpers/csshelpers"
 )
+
+func Join(css ...[]string) []string {
+	var count int
+	for _, v := range css {
+		count += len(v)
+	}
+	var ret = make([]string, 0, count)
+	for _, v := range css {
+		ret = append(ret, v...)
+	}
+	return ret
+}
+
+var Container = []string{
+	"width: 80%",
+	"margin: 1rem auto",
+	"padding: 0 2%",
+	"padding-bottom: 1rem",
+}
+
+var Box = []string{
+	"border-radius: 0 0 0.5rem 0.5rem",
+	"box-shadow: 0 1rem 1rem 0 rgba(0,0,0,0.2)",
+}
 
 // Search bar element with button
 // Returns slice of elements
@@ -63,4 +91,43 @@ func SearchBar(classPrefix, foregroundHex, background, text string) []*elements.
 		}
 	`)
 	return []*elements.Element{searchContainer, searchbar, searchBarSubmit}
+}
+
+var spacing = " "
+var jsextPrefix = "jsext-"
+
+// Provide a grid based on a pattern.
+// Example: "$$$ ## $214" will create a grid with 3 columns.
+// Column 1 will be 3fr, column 2 will be 2fr, column 3 will be 4fr.
+func Grid(gridPattern string) (*elements.Element, []*elements.Element, error) {
+	var className = jsextPrefix + helpers.FNVHashString(gridPattern)
+	var grid = elements.Div().AttrClass(className + "-grid")
+	var splitGrid = strings.Split(gridPattern, spacing)
+	var fractionSlice = make([]string, len(splitGrid))
+	if len(splitGrid) == 0 {
+		return nil, nil, errors.New("Grid pattern is empty")
+	}
+	for i, v := range splitGrid {
+		fractionSlice[i] = strconv.Itoa(len(v)) + "fr"
+	}
+	var gridItems = make([]*elements.Element, len(splitGrid))
+	for i := 0; i < len(splitGrid); i++ {
+		var gridItem = grid.Div().AttrClass(className + "-grid-item")
+		gridItems[i] = gridItem
+	}
+	var fractionString = strings.Join(fractionSlice, " ")
+	var css = `
+		.` + className + `-grid {
+			display: grid;
+			grid-template-columns: ` + fractionString + `;
+			grid-template-rows: auto;
+			grid-gap: 1%;
+			width: 100%;
+		}
+		.` + className + `-grid-item {
+			width: 100%;
+		}
+		`
+	jsext.StyleBlock(className, css)
+	return grid, gridItems, nil
 }

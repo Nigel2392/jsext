@@ -103,8 +103,8 @@ func Plain(options *Options) *elements.Element {
 		position: relative;
 	}
 	.` + options.Prefix + `carousel-item {
-		width: ` + options.Width + `;
-		height: ` + options.Height + `;
+		width: 100%;
+		height: 100%;
 		position: absolute;
 		top: 0;
 		left: 0;
