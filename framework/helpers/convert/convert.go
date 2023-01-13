@@ -89,13 +89,12 @@ func NewTimeTracker(Time time.Time) *TimeTracker {
 		t = time.Since(Time)
 	}
 	var total = int(t.Seconds())
-	var tim = time.Unix(int64(total), 0)
-	var years = tim.Year() - 1970
-	var months = int(tim.Month() - 1)
-	var days = tim.Day() - 1
-	var hours = tim.Hour()
-	var minutes = tim.Minute()
-	var seconds = tim.Second()
+	var years = int(total / (60 * 60 * 24 * 365))
+	var months = int(total / (60 * 60 * 24 * 30) % 12)
+	var days = int(total / (60 * 60 * 24) % 30)
+	var hours = int(total / (60 * 60) % 24)
+	var minutes = int(total/60) % 60
+	var seconds = int(total % 60)
 
 	return &TimeTracker{
 		Years:   years,
