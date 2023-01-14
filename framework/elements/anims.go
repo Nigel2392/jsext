@@ -4,50 +4,87 @@
 package elements
 
 import (
+	"fmt"
+
 	"github.com/Nigel2392/jsext"
 )
 
 // All animations get rendered in a separate goroutine.
-// This however does mean that there can be conflicts if multiple animations are added to the same element.
-
-// Predefined element animations.
-const (
-	FADEIN_CLASS     = "jsext-fade-in"
-	FADEOUT_CLASS    = "jsext-fade-out"
-	BOUNCE_CLASS     = "jsext-bounce"
-	FROMTOP_CLASS    = "jsext-from-top"
-	FROMLEFT_CLASS   = "jsext-from-left"
-	FROMRIGHT_CLASS  = "jsext-from-right"
-	FROMBOTTOM_CLASS = "jsext-from-bottom"
-)
 
 // Predefined element animations.
 type Animation struct {
-	Type     int
-	Duration int
+	Animations     []any
+	Options        map[string]interface{}
+	WhenInViewport bool
 }
 
 // Predefined element animations.
-const (
-	FADEIN     = 0
-	FADEOUT    = 1
-	BOUNCE     = 2
-	FROMTOP    = 3
-	FROMLEFT   = 4
-	FROMRIGHT  = 5
-	FROMBOTTOM = 6
+var (
+	FADEIN = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"opacity": "0", "offset": "0"},
+		map[string]interface{}{"opacity": "1", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+	}}
+	FADEOUT = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"opacity": "1", "offset": "0"},
+		map[string]interface{}{"opacity": "0", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+	}}
+	BOUNCE = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"transform": "scale(1)", "offset": "0"},
+		map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
+		map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
+		map[string]interface{}{"transform": "scale(1.05)", "offset": "0.6"},
+		map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
+		map[string]interface{}{"transform": "scale(1)", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+	}}
+	FROMTOP = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}}
+	FROMLEFT = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}}
+	FROMRIGHT = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}}
+	FROMBOTTOM = Animation{WhenInViewport: true, Animations: []any{
+		map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+	}, Options: map[string]interface{}{
+		"duration":   500,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}}
 )
-
-// Predefined element animations.
-var AnimationMap = map[int]func(e *Element, timeMS int){
-	FADEIN:     fadeIn,
-	FADEOUT:    fadeOut,
-	BOUNCE:     bounce,
-	FROMTOP:    fromTop,
-	FROMLEFT:   fromLeft,
-	FROMRIGHT:  fromRight,
-	FROMBOTTOM: fromBottom,
-}
 
 // Fade the element in once it is visible on screen.
 func (e *Element) FadeIn(timeMS int) *Element {
@@ -93,153 +130,40 @@ func (e *Element) FromBottom(timeMS int) *Element {
 
 func (e *Element) animate() {
 	for _, anim := range e.animations {
-		var f, ok = AnimationMap[anim.Type]
-		if ok {
-			go f(e, anim.Duration)
-		}
+		go e.runAnimation(anim)
 	}
 }
 
-func (e *Element) addAnim(typ, duration int) {
-	e.animations = append(e.animations, Animation{Type: typ, Duration: duration})
-	if !e.value.IsUndefined() {
-		e.animate()
+func (e *Element) Animate(a Animation) {
+	if e.value.IsUndefined() {
+		e.animations = append(e.animations, a)
+		return
+	}
+	e.runAnimation(a)
+}
+
+func (e *Element) runAnimation(a Animation) {
+	var jsArr = jsext.SliceToArray(a.Animations)
+	var jsOpts = jsext.MapToObject(a.Options)
+	if a.WhenInViewport {
+		InViewListener(e, func(this jsext.Value, event jsext.Event) {
+			fmt.Println(a, "is in viewport")
+			e.value.Call("animate", jsArr.Value(), jsOpts.Value())
+		})
+	} else {
+		fmt.Println(a, "is not in viewport")
+		e.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
 }
 
-func (e *Element) Animate(animations []any, opts map[string]interface{}) *Element {
-	var jsArr = jsext.SliceToArray(animations)
-	var jsOpts = jsext.MapToObject(opts)
-	e.value.Call("animate", jsArr.Value(), jsOpts.Value())
-	return e
-}
-
-func fadeIn(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"opacity": "0", "offset": "0"},
-		map[string]interface{}{"opacity": "1", "offset": "1"},
+func (e *Element) addAnim(a Animation, timeMS int) {
+	if timeMS > 0 {
+		a.Options["duration"] = timeMS
 	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}
-
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func fadeOut(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"opacity": "1", "offset": "0"},
-		map[string]interface{}{"opacity": "0", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func fromTop(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func fromLeft(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func fromRight(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func fromBottom(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
-}
-
-func bounce(e *Element, timeMS int) {
-	var arr = []any{
-		map[string]interface{}{"transform": "scale(1)", "offset": "0"},
-		map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
-		map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
-		map[string]interface{}{"transform": "scale(1.05)", "offset": "0.6"},
-		map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
-		map[string]interface{}{"transform": "scale(1)", "offset": "1"},
-	}
-	var opts = map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}
-	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
-		e.Animate(arr, opts)
-	})
+	e.Animate(a)
 }
 
 func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
-	if isInViewport(e) {
-		cb(jsext.Value{}, jsext.Event{})
-	}
-	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
-		if isInViewport(e) {
-			cb(this, event)
-		}
-	})
-}
-
-func InViewListenerSingleExecution(e *Element, cb func(this jsext.Value, event jsext.Event)) {
 	var ran = false
 	if isInViewport(e) {
 		if !ran {
