@@ -724,6 +724,34 @@ func (m *Modal) Create(appendToQuerySelector ...string) {
 	}
 }
 
+type ButtonType int
+
+const (
+	Anchor ButtonType = 0
+	Button ButtonType = 1
+)
+
+func (m *Modal) Button(tag ButtonType, innerText string, url ...string) *elements.Element {
+	var btn *elements.Element
+	switch tag {
+	case Anchor:
+		btn = elements.A("", innerText)
+		if len(url) > 0 {
+			btn.AttrHref(url[0])
+		}
+	case Button:
+		btn = elements.Button("", innerText)
+	}
+	btn.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+		var preventDefault = event.Get("preventDefault")
+		if preventDefault.Truthy() {
+			preventDefault.Invoke()
+		}
+		m.Show()
+	})
+	return btn
+}
+
 func (m *Modal) Delete() {
 	if m.e().Value().Truthy() {
 		m.e().Value().Remove()
