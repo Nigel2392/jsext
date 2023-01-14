@@ -260,22 +260,28 @@ func (c *TimeCounter) Date(year int, month time.Month, day int, hour int, min in
 	c.Set(time.Now().Add(time.Since(time.Date(year, month, day, hour, min, sec, nsec, time.UTC)) * -1))
 }
 
-type JobTreeStyle int
+type RoadMapStyle int
 
 const (
-	JobTreeStyleOne JobTreeStyle = iota
-	JobTreeStyleTwo
+	RoadMapStyleOne RoadMapStyle = iota
+	RoadMapStyleTwo
 )
 
-type JobtreeItem struct {
-	Company   string
-	Title     string
-	Tags      []string
-	StartDate string
-	EndDate   string
+type RoadMapItem struct {
+	Name        string
+	Title       string
+	Description string
+	Tags        []string
+	StartDate   string
+	EndDate     string
 }
 
-type Jobtree struct {
+type Translations struct {
+	To      string
+	Present string
+}
+
+type RoadMapOptions struct {
 	Background          string
 	ItemBackground      string
 	TagBackgroundColors []string
@@ -284,113 +290,139 @@ type Jobtree struct {
 	TagColor            string
 	DivisorColor        string
 	DivisorWidth        string
+	CardMargin          string
+	CardBorderWidth     string
+	CardBorderColor     string
 	Width               string
-	Items               []JobtreeItem
+	Items               []RoadMapItem
 	classPrefix         string
-	Style               JobTreeStyle
+	Style               RoadMapStyle
+	Translations        Translations
 }
 
-func (j *Jobtree) defaultOverrides() {
-	if j.Background == "" {
-		j.Background = "#ffffff"
+func (r *RoadMapOptions) defaultOverrides() {
+	if r.Background == "" {
+		r.Background = "#ffffff"
 	}
-	if j.ItemBackground == "" {
-		j.ItemBackground = `rgb(85,34,195);
+	if r.ItemBackground == "" {
+		r.ItemBackground = `rgb(85,34,195);
 		background: linear-gradient(0deg, rgba(85,34,195,0.40940126050420167) 0%, rgba(113,49,172,1) 100%)`
 	}
-	if j.Color == "" {
-		j.Color = "#ffffff"
+	if r.Color == "" {
+		r.Color = "#ffffff"
 	}
-	if j.TitleColor == "" {
-		j.TitleColor = "#ffffff"
+	if r.TitleColor == "" {
+		r.TitleColor = "#ffffff"
 	}
-	if j.TagColor == "" {
-		j.TagColor = "#ffffff"
+	if r.TagColor == "" {
+		r.TagColor = "#ffffff"
 	}
-	if j.TagBackgroundColors == nil {
-		j.TagBackgroundColors = []string{"#ffffff"}
+	if r.TagBackgroundColors == nil {
+		r.TagBackgroundColors = []string{"#ffffff"}
 	}
-	if j.DivisorColor == "" {
-		j.DivisorColor = "#333333"
+	if r.DivisorColor == "" {
+		r.DivisorColor = "#333333"
 	}
-	if j.DivisorWidth == "" {
-		j.DivisorWidth = "1px"
+	if r.DivisorWidth == "" {
+		r.DivisorWidth = "1px"
 	}
-	if j.Width == "" {
-		j.Width = "100%"
+	if r.Width == "" {
+		r.Width = "100%"
 	}
-	if j.classPrefix == "" {
-		j.classPrefix = "jsext-jobtree-"
+	if r.classPrefix == "" {
+		r.classPrefix = "jsext-jobtree-"
+	}
+	if r.CardMargin == "" {
+		r.CardMargin = "20px"
+	}
+	if r.CardBorderWidth == "" {
+		r.CardBorderWidth = "1px"
+	}
+	if r.CardBorderColor == "" {
+		r.CardBorderColor = "#333333"
+	}
+	if r.Translations.To == "" {
+		r.Translations.To = "to"
+	}
+	if r.Translations.Present == "" {
+		r.Translations.Present = "Present"
 	}
 }
 
-func JobTree(jobTree *Jobtree) *elements.Element {
-	jobTree.defaultOverrides()
+func RoadMap(roadMap *RoadMapOptions) *elements.Element {
+	roadMap.defaultOverrides()
 
-	switch jobTree.Style {
-	case JobTreeStyleOne:
-		return jobTreeStyleOne(jobTree)
-	case JobTreeStyleTwo:
-		return jobTreeStyleTwo(jobTree)
+	switch roadMap.Style {
+	case RoadMapStyleOne:
+		return roadMapStyleOne(roadMap)
+	case RoadMapStyleTwo:
+		return roadMapStyleTwo(roadMap)
 	default:
-		return jobTreeStyleOne(jobTree)
+		return roadMapStyleOne(roadMap)
 	}
 }
 
-func delimitJobTreeCSS(jobTree *Jobtree) string {
-	return `.` + jobTree.classPrefix + `timeline {
+func delimitRoadMapCSS(roadMap *RoadMapOptions) string {
+	var cardMarginCalc string
+	if roadMap.CardMargin != "" && roadMap.CardMargin != "0" {
+		cardMarginCalc = `- calc(` + roadMap.CardMargin + ` / 2)`
+	}
+	return `.` + roadMap.classPrefix + `timeline {
 		position: relative;
-		width: ` + jobTree.Width + `;
+		width: ` + roadMap.Width + `;
 	  }
 	  
-	  .` + jobTree.classPrefix + `timeline::after {
+	  .` + roadMap.classPrefix + `timeline::after {
 		content: '';
 		position: absolute;
-		width: ` + jobTree.DivisorWidth + `;
-		background: ` + jobTree.DivisorColor + `;
-		top: 0;
-		bottom: 0;
+		width: ` + roadMap.DivisorWidth + `;
+		background: ` + roadMap.DivisorColor + `;
+		top: calc(100% / ` + strconv.Itoa(len(roadMap.Items)) + ` / 2 ` + cardMarginCalc + `);
+		bottom: calc(100% / ` + strconv.Itoa(len(roadMap.Items)) + ` / 2 ` + cardMarginCalc + `);
 		left: 50%;
-		margin-left: calc(` + jobTree.DivisorWidth + ` / -2);
+		margin-left: calc(` + roadMap.DivisorWidth + ` / -2);
 	  }`
 }
 
-func jobTreeStyleOne(jobTree *Jobtree) *elements.Element {
-	var timeline = elements.Div().AttrClass(jobTree.classPrefix + "timeline")
+func roadMapStyleOne(roadMap *RoadMapOptions) *elements.Element {
+	var timeline = elements.Div().AttrClass(roadMap.classPrefix + "timeline")
 
-	for i, item := range jobTree.Items {
-		var container = timeline.Div().AttrClass(jobTree.classPrefix + "container")
+	for i, item := range roadMap.Items {
+		var container = timeline.Div().AttrClass(roadMap.classPrefix + "container")
 		if i%2 == 0 {
-			container.AttrClass(jobTree.classPrefix + "right")
+			container.AttrClass(roadMap.classPrefix + "right")
 		} else {
-			container.AttrClass(jobTree.classPrefix + "left")
+			container.AttrClass(roadMap.classPrefix + "left")
 		}
-		container.Div(item.StartDate + " - " + item.EndDate).AttrClass(jobTree.classPrefix + "date")
-		var content = container.Div().AttrClass(jobTree.classPrefix + "content")
-		content.H1(item.Company)
+		container.Div(item.StartDate + " - " + item.EndDate).AttrClass(roadMap.classPrefix + "date")
+		var content = container.Div().AttrClass(roadMap.classPrefix + "content")
+		content.H1(item.Name)
 		content.H2(item.Title)
+		if item.Description != "" {
+			content.P(item.Description)
+		}
 		var paragraph = content.P()
 		var ct = 0
 		var color string
 		for _, tag := range item.Tags {
-			color, ct = helpers.GetColor(jobTree.TagBackgroundColors, ct, "#5555ff")
-			paragraph.Span(tag).AttrClass(jobTree.classPrefix + "content-tag-item").AttrStyle("background-color:" + color)
+			color, ct = helpers.GetColor(roadMap.TagBackgroundColors, ct, "#5555ff")
+			paragraph.Span(tag).AttrClass(roadMap.classPrefix + "content-tag-item").AttrStyle("background-color:" + color)
 		}
 	}
-
-	var css = delimitJobTreeCSS(jobTree) + `	
-	.` + jobTree.classPrefix + `container {
+	roadMap.CardMargin = "0"
+	var css = delimitRoadMapCSS(roadMap) + `	
+	.` + roadMap.classPrefix + `container {
 	  position: relative;
 	  background: inherit;
 	  width: 50%;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `left {
 	  left: 0;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right {
 	  left: 50%;
 	}
-	.` + jobTree.classPrefix + `container::after {
+	.` + roadMap.classPrefix + `container::after {
 	  content: '';
 	  position: absolute;
 	  width: 16px;
@@ -398,49 +430,49 @@ func jobTreeStyleOne(jobTree *Jobtree) *elements.Element {
 	  top: calc(50% - 8px);
 	  right: -8px;
 	  background: #ffffff;
-	  border: 2px solid ` + jobTree.DivisorColor + `;
+	  border: 2px solid ` + roadMap.DivisorColor + `;
 	  border-radius: 16px;
 	  z-index: 1;
 	  transform: translateX(200%);
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::after {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right::after {
 	  left: -8px;
 	  transform: translateX(-200%);
 	}
-	.` + jobTree.classPrefix + `container::before {
+	.` + roadMap.classPrefix + `container::before {
 	  content: '';
 	  position: absolute;
 	  width: 50px;
 	  height: 2px;
 	  top: calc(50% - 1px);
 	  right: 8px;
-	  background: ` + jobTree.DivisorColor + `;
+	  background: ` + roadMap.DivisorColor + `;
 	  z-index: 1;
 	  transform: translateX(100%);
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::before {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right::before {
 	  left: 8px;
 	  transform: translateX(-100%);
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `date {
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `date {
 	  position: absolute;
 	  display: inline-block;
 	  top: calc(50% - 8px);
 	  text-align: center;
 	  font-size: 14px;
 	  font-weight: bold;
-	  color: ` + jobTree.DivisorColor + `;
+	  color: ` + roadMap.DivisorColor + `;
 	  text-transform: uppercase;
 	  letter-spacing: 1px;
 	  z-index: 1;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `date {
 		right:1em;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `date {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `date {
 	  	left: 1em;
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `icon {
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `icon {
 	  position: absolute;
 	  display: inline-block;
 	  width: 40px;
@@ -448,61 +480,61 @@ func jobTreeStyleOne(jobTree *Jobtree) *elements.Element {
 	  padding: 9px 0;
 	  top: calc(50% - 20px);
 	  background: #F6D155;
-	  border: 2px solid ` + jobTree.DivisorColor + `;
+	  border: 2px solid ` + roadMap.DivisorColor + `;
 	  border-radius: 40px;
 	  text-align: center;
 	  font-size: 18px;
-	  color: ` + jobTree.DivisorColor + `;
+	  color: ` + roadMap.DivisorColor + `;
 	  z-index: 1;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `icon {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `icon {
 	  right: 56px;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `icon {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `icon {
 	  left: 56px;
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content {
-	  color: ` + jobTree.Color + `;
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content {
+	  color: ` + roadMap.Color + `;
 	  padding: 30px 90px 30px 30px;
-	  background: ` + jobTree.ItemBackground + `;
+	  background: ` + roadMap.ItemBackground + `;
 	  position: relative;
 	  border-radius: 0 500px 500px 0;
 	}
-	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `content {
+	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `content {
 	  padding: 30px 30px 30px 90px;
 	  border-radius: 500px 0 0 500px;
 	  text-align: right;
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h1 {
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content h1 {
 	  	margin: 0 0 10px 0;
 		font-size: 20px;
 		font-weight: bold;
-		color: ` + jobTree.TitleColor + `;
+		color: ` + roadMap.TitleColor + `;
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h2 {
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content h2 {
 	  margin: 0 0 10px 0;
 	  font-size: 18px;
 	  font-weight: normal;
-	  color: ` + jobTree.TitleColor + `;
+	  color: ` + roadMap.TitleColor + `;
 	}
-	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content p {
+	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content p {
 	  margin: 0;
 	  font-size: 16px;
 	  line-height: 22px;
 	  color: #000000;
 	}
-	.` + jobTree.classPrefix + "content-tag-item" + `{
+	.` + roadMap.classPrefix + "content-tag-item" + `{
 		display: inline-block;
 		padding: 2px 5px;
 		margin: 0 5px 5px 0;
 		border-radius: 5px;
-		color: ` + jobTree.TagColor + `;
+		color: ` + roadMap.TagColor + `;
 	}
 	@media (max-width: 767.98px) {
-	  	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
+	  	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `date {
 			right: -100%;
 	  	}
-	  	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `date {
+	  	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `date {
 			left: -100%;
 		}
 	}
@@ -511,8 +543,138 @@ func jobTreeStyleOne(jobTree *Jobtree) *elements.Element {
 	return timeline
 }
 
-func jobTreeStyleTwo(jobTree *Jobtree) *elements.Element {
-	var timeline = elements.Div().AttrClass(jobTree.classPrefix + "timeline")
+func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
+	var timeline = elements.Div().AttrClass(roadMap.classPrefix + "timeline")
+
+	for i, item := range roadMap.Items {
+		var container = timeline.Div().AttrClass(roadMap.classPrefix + "card-container")
+		var card = container.Div().AttrClass(roadMap.classPrefix + "card")
+		if i%2 == 0 {
+			container.AttrClass(roadMap.classPrefix + "left")
+		} else {
+			container.AttrClass(roadMap.classPrefix + "right")
+		}
+		var (
+			card_header  = elements.Div().AttrClass(roadMap.classPrefix + "card-header")
+			card_body    = elements.Div().AttrClass(roadMap.classPrefix + "card-body")
+			card_footer  = elements.Div().AttrClass(roadMap.classPrefix + "card-footer")
+			card_company = elements.Div().AttrClass(roadMap.classPrefix + "card-name")
+		)
+
+		card_header.Div(item.Title)
+
+		if item.Description != "" {
+			card_body.P(item.Description)
+		}
+		var tagsParagraph = card_body.P()
+		for i, tag := range item.Tags {
+			var spacing = ""
+			if i < len(item.Tags)-1 {
+				spacing = ", "
+			}
+			tagsParagraph.Span(tag + spacing).AttrClass(roadMap.classPrefix + "content-tag-item")
+		}
+
+		if item.StartDate != "" || item.EndDate != "" {
+			if item.StartDate != "" && item.EndDate != "" {
+				card_footer.Div(item.StartDate + " " + roadMap.Translations.To + " " + item.EndDate)
+			} else if item.StartDate != "" {
+				card_footer.Div(item.StartDate + " - " + roadMap.Translations.Present)
+			} else {
+				card_footer.Div(roadMap.Translations.Present)
+			}
+		}
+
+		card_company.Div(item.Name)
+
+		card.Append(card_header, card_body, card_footer, card_company)
+	}
+
+	var css = delimitRoadMapCSS(roadMap) + `
+	.` + roadMap.classPrefix + `card-container {
+		position: relative;
+		width: 100%;
+	}
+	.` + roadMap.classPrefix + `card-container::before {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translateY(-50%) translateX(-50%);
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: ` + roadMap.DivisorColor + `;
+		z-index: 1;
+	}
+	.` + roadMap.classPrefix + `card {
+		position: relative;
+		width: calc(50% + calc(` + roadMap.DivisorWidth + ` / 2) - calc(` + roadMap.CardBorderWidth + ` * 2));
+		background: ` + roadMap.ItemBackground + `;
+		border-radius: 5px;
+		padding: 10px 0;
+		margin-bottom:` + roadMap.CardMargin + `;
+		color: ` + roadMap.Color + `;
+		border: ` + roadMap.CardBorderWidth + ` solid ` + roadMap.CardBorderColor + `;
+	}
+	.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `card {
+		left: 0;
+		text-align: left;
+		margin-right: auto;
+		box-shadow: 5px 5px 5px 0 rgb(0 0 0 / 20%)
+	}
+	.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `card {
+		right: 0;
+		text-align: right;
+		margin-left: auto;
+		box-shadow: 5px 5px 5px 0 rgb(0 0 0 / 20%)
+	}
+	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-header {
+		line-height: 22px;
+		font-size: 22px;
+		font-weight: bold;
+		color: ` + roadMap.TitleColor + `;
+		border-bottom: ` + roadMap.CardBorderWidth + ` solid ` + roadMap.CardBorderColor + `;
+		padding: 0 10px;
+		padding-bottom: 5px;
+	}
+	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-body {
+		padding: 0 10px;
+	}
+	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-footer {
+		line-height: 14px;
+		font-size: 14px;
+		font-weight: bold;
+		color: ` + roadMap.TitleColor + `;
+		margin-bottom: 0;
+		margin-top: auto;
+		padding: 0 10px;
+		padding-top: 5px;
+		border-top: ` + roadMap.CardBorderWidth + ` solid ` + roadMap.CardBorderColor + `;
+	}
+	.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `card-footer {
+		text-align: right;
+	}
+	.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `card-footer {
+		text-align: left;
+	}
+	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-name {
+		position: absolute;
+		font-size: 24px;
+		font-weight: bold;
+		top: 50%;
+		transform: translateY(-50%);
+		color: ` + roadMap.DivisorColor + `;
+		width: 100%;
+	}
+	.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `card-name {
+		left: calc(100% + ` + roadMap.DivisorWidth + ` + 10px);
+	}
+	.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `card-name {
+		right: calc(100% + ` + roadMap.DivisorWidth + ` + 10px);
+	}
+	`
+	timeline.StyleBlock(css)
 
 	return timeline
 }
