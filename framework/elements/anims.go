@@ -4,8 +4,6 @@
 package elements
 
 import (
-	"fmt"
-
 	"github.com/Nigel2392/jsext"
 )
 
@@ -18,25 +16,37 @@ type Animation struct {
 	WhenInViewport bool
 }
 
-// Predefined element animations.
-var (
-	FADEIN = Animation{WhenInViewport: true, Animations: []any{
+// Fade the element in once it is visible on screen.
+func (e *Element) FadeIn(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"opacity": "0", "offset": "0"},
 		map[string]interface{}{"opacity": "1", "offset": "1"},
 	}, Options: map[string]interface{}{
-		"duration":   500,
+		"duration":   timeMS,
 		"iterations": 1,
 		"fill":       "forwards",
 	}}
-	FADEOUT = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Fade the element out once it is visible on screen.
+func (e *Element) FadeOut(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"opacity": "1", "offset": "0"},
 		map[string]interface{}{"opacity": "0", "offset": "1"},
 	}, Options: map[string]interface{}{
-		"duration":   500,
+		"duration":   timeMS,
 		"iterations": 1,
 		"fill":       "forwards",
 	}}
-	BOUNCE = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Bounce the element once it is visible on screen.
+func (e *Element) Bounce(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"transform": "scale(1)", "offset": "0"},
 		map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
 		map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
@@ -44,29 +54,47 @@ var (
 		map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
 		map[string]interface{}{"transform": "scale(1)", "offset": "1"},
 	}, Options: map[string]interface{}{
-		"duration":   500,
+		"duration":   timeMS,
 		"iterations": 1,
 		"fill":       "forwards",
 	}}
-	FROMTOP = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Slide the element in from the top once it is visible on screen.
+func (e *Element) FromTop(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
 		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
 	}, Options: map[string]interface{}{
-		"duration":   500,
+		"duration":   timeMS,
 		"iterations": 1,
 		"fill":       "forwards",
 		"easing":     "ease-in",
 	}}
-	FROMLEFT = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Slide the element in from the left once it is visible on screen.
+func (e *Element) FromLeft(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
 		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
 	}, Options: map[string]interface{}{
-		"duration":   500,
+		"duration":   timeMS,
 		"iterations": 1,
 		"fill":       "forwards",
 		"easing":     "ease-in",
 	}}
-	FROMRIGHT = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Slide the element in from the right once it is visible on screen.
+func (e *Element) FromRight(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
 		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
 	}, Options: map[string]interface{}{
@@ -75,7 +103,13 @@ var (
 		"fill":       "forwards",
 		"easing":     "ease-in",
 	}}
-	FROMBOTTOM = Animation{WhenInViewport: true, Animations: []any{
+	e.Animate(anim)
+	return e
+}
+
+// Slide the element in from the bottom once it is visible on screen.
+func (e *Element) FromBottom(timeMS int) *Element {
+	var anim = Animation{WhenInViewport: true, Animations: []any{
 		map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
 		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
 	}, Options: map[string]interface{}{
@@ -84,83 +118,30 @@ var (
 		"fill":       "forwards",
 		"easing":     "ease-in",
 	}}
-)
-
-// Fade the element in once it is visible on screen.
-func (e *Element) FadeIn(timeMS int) *Element {
-	e.addAnim(FADEIN, timeMS)
-	return e
-}
-
-// Fade the element out once it is visible on screen.
-func (e *Element) FadeOut(timeMS int) *Element {
-	e.addAnim(FADEOUT, timeMS)
-	return e
-}
-
-// Bounce the element once it is visible on screen.
-func (e *Element) Bounce(timeMS int) *Element {
-	e.addAnim(BOUNCE, timeMS)
-	return e
-}
-
-// Slide the element in from the top once it is visible on screen.
-func (e *Element) FromTop(timeMS int) *Element {
-	e.addAnim(FROMTOP, timeMS)
-	return e
-}
-
-// Slide the element in from the left once it is visible on screen.
-func (e *Element) FromLeft(timeMS int) *Element {
-	e.addAnim(FROMLEFT, timeMS)
-	return e
-}
-
-// Slide the element in from the right once it is visible on screen.
-func (e *Element) FromRight(timeMS int) *Element {
-	e.addAnim(FROMRIGHT, timeMS)
-	return e
-}
-
-// Slide the element in from the bottom once it is visible on screen.
-func (e *Element) FromBottom(timeMS int) *Element {
-	e.addAnim(FROMBOTTOM, timeMS)
+	e.Animate(anim)
 	return e
 }
 
 func (e *Element) animate() {
 	for _, anim := range e.animations {
-		go e.runAnimation(anim)
+		go e.Animate(anim)
 	}
 }
 
 func (e *Element) Animate(a Animation) {
-	if e.value.IsUndefined() {
+	if e.value.IsUndefined() || e.value.IsNull() {
 		e.animations = append(e.animations, a)
 		return
 	}
-	e.runAnimation(a)
-}
-
-func (e *Element) runAnimation(a Animation) {
 	var jsArr = jsext.SliceToArray(a.Animations)
 	var jsOpts = jsext.MapToObject(a.Options)
 	if a.WhenInViewport {
 		InViewListener(e, func(this jsext.Value, event jsext.Event) {
-			fmt.Println(a, "is in viewport")
 			e.value.Call("animate", jsArr.Value(), jsOpts.Value())
 		})
 	} else {
-		fmt.Println(a, "is not in viewport")
 		e.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
-}
-
-func (e *Element) addAnim(a Animation, timeMS int) {
-	if timeMS > 0 {
-		a.Options["duration"] = timeMS
-	}
-	e.Animate(a)
 }
 
 func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
