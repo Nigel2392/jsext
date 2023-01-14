@@ -3,7 +3,7 @@
 This example shows how to use the JobTree component.
 
 ```go
-Application.Render(JobTree(&misc.Jobtree{
+Application.Render(misc.JobTree(&misc.Jobtree{
 	Items: []misc.JobtreeItem{
 		{
 			Company:   "Company 1",

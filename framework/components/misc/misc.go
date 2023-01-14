@@ -260,6 +260,13 @@ func (c *TimeCounter) Date(year int, month time.Month, day int, hour int, min in
 	c.Set(time.Now().Add(time.Since(time.Date(year, month, day, hour, min, sec, nsec, time.UTC)) * -1))
 }
 
+type JobTreeStyle int
+
+const (
+	JobTreeStyleOne JobTreeStyle = iota
+	JobTreeStyleTwo
+)
+
 type JobtreeItem struct {
 	Company   string
 	Title     string
@@ -280,6 +287,7 @@ type Jobtree struct {
 	Width               string
 	Items               []JobtreeItem
 	classPrefix         string
+	Style               JobTreeStyle
 }
 
 func (j *Jobtree) defaultOverrides() {
@@ -319,6 +327,35 @@ func (j *Jobtree) defaultOverrides() {
 func JobTree(jobTree *Jobtree) *elements.Element {
 	jobTree.defaultOverrides()
 
+	switch jobTree.Style {
+	case JobTreeStyleOne:
+		return jobTreeStyleOne(jobTree)
+	case JobTreeStyleTwo:
+		return jobTreeStyleTwo(jobTree)
+	default:
+		return jobTreeStyleOne(jobTree)
+	}
+}
+
+func delimitJobTreeCSS(jobTree *Jobtree) string {
+	return `.` + jobTree.classPrefix + `timeline {
+		position: relative;
+		width: ` + jobTree.Width + `;
+	  }
+	  
+	  .` + jobTree.classPrefix + `timeline::after {
+		content: '';
+		position: absolute;
+		width: ` + jobTree.DivisorWidth + `;
+		background: ` + jobTree.DivisorColor + `;
+		top: 0;
+		bottom: 0;
+		left: 50%;
+		margin-left: calc(` + jobTree.DivisorWidth + ` / -2);
+	  }`
+}
+
+func jobTreeStyleOne(jobTree *Jobtree) *elements.Element {
 	var timeline = elements.Div().AttrClass(jobTree.classPrefix + "timeline")
 
 	for i, item := range jobTree.Items {
@@ -341,37 +378,18 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 		}
 	}
 
-	var css = `
-	.` + jobTree.classPrefix + `timeline {
-	  position: relative;
-	  width: ` + jobTree.Width + `;
-	}
-	
-	.` + jobTree.classPrefix + `timeline::after {
-	  content: '';
-	  position: absolute;
-	  width: ` + jobTree.DivisorWidth + `;
-	  background: ` + jobTree.DivisorColor + `;
-	  top: 0;
-	  bottom: 0;
-	  left: 50%;
-	  margin-left: calc(` + jobTree.DivisorWidth + ` / -2);
-	}
-	
+	var css = delimitJobTreeCSS(jobTree) + `	
 	.` + jobTree.classPrefix + `container {
 	  position: relative;
 	  background: inherit;
 	  width: 50%;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left {
 	  left: 0;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right {
 	  left: 50%;
 	}
-	
 	.` + jobTree.classPrefix + `container::after {
 	  content: '';
 	  position: absolute;
@@ -385,12 +403,10 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 	  z-index: 1;
 	  transform: translateX(200%);
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::after {
 	  left: -8px;
 	  transform: translateX(-200%);
 	}
-	
 	.` + jobTree.classPrefix + `container::before {
 	  content: '';
 	  position: absolute;
@@ -402,12 +418,10 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 	  z-index: 1;
 	  transform: translateX(100%);
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::before {
 	  left: 8px;
 	  transform: translateX(-100%);
 	}
-	
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `date {
 	  position: absolute;
 	  display: inline-block;
@@ -420,15 +434,12 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 	  letter-spacing: 1px;
 	  z-index: 1;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
 		right:1em;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `date {
 	  	left: 1em;
 	}
-	
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `icon {
 	  position: absolute;
 	  display: inline-block;
@@ -444,15 +455,12 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 	  color: ` + jobTree.DivisorColor + `;
 	  z-index: 1;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `icon {
 	  right: 56px;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `icon {
 	  left: 56px;
 	}
-	
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content {
 	  color: ` + jobTree.Color + `;
 	  padding: 30px 90px 30px 30px;
@@ -460,34 +468,29 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 	  position: relative;
 	  border-radius: 0 500px 500px 0;
 	}
-	
 	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `content {
 	  padding: 30px 30px 30px 90px;
 	  border-radius: 500px 0 0 500px;
 	  text-align: right;
 	}
-	
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h1 {
 	  	margin: 0 0 10px 0;
 		font-size: 20px;
 		font-weight: bold;
 		color: ` + jobTree.TitleColor + `;
 	}
-
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h2 {
 	  margin: 0 0 10px 0;
 	  font-size: 18px;
 	  font-weight: normal;
 	  color: ` + jobTree.TitleColor + `;
 	}
-	
 	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content p {
 	  margin: 0;
 	  font-size: 16px;
 	  line-height: 22px;
 	  color: #000000;
 	}
-
 	.` + jobTree.classPrefix + "content-tag-item" + `{
 		display: inline-block;
 		padding: 2px 5px;
@@ -495,7 +498,6 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 		border-radius: 5px;
 		color: ` + jobTree.TagColor + `;
 	}
-	
 	@media (max-width: 767.98px) {
 	  	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
 			right: -100%;
@@ -505,7 +507,12 @@ func JobTree(jobTree *Jobtree) *elements.Element {
 		}
 	}
 	`
-
 	timeline.StyleBlock(css)
+	return timeline
+}
+
+func jobTreeStyleTwo(jobTree *Jobtree) *elements.Element {
+	var timeline = elements.Div().AttrClass(jobTree.classPrefix + "timeline")
+
 	return timeline
 }
