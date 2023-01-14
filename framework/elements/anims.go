@@ -4,9 +4,6 @@
 package elements
 
 import (
-	"strconv"
-	"time"
-
 	"github.com/Nigel2392/jsext"
 )
 
@@ -110,98 +107,124 @@ func (e *Element) addAnim(typ, duration int) {
 	}
 }
 
+func (e *Element) Animate(animations []any, opts map[string]interface{}) *Element {
+	var jsArr = jsext.SliceToArray(animations)
+	var jsOpts = jsext.MapToObject(opts)
+	e.value.Call("animate", jsArr.Value(), jsOpts.Value())
+	return e
+}
+
 func fadeIn(e *Element, timeMS int) {
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("opacity", "0")
-	e.value.Get("classList").Call("add", FADEIN_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("opacity", "1")
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"opacity": "0", "offset": "0"},
+		map[string]interface{}{"opacity": "1", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+	}
+
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
 func fadeOut(e *Element, timeMS int) {
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("opacity", "1")
-	e.value.Get("classList").Call("add", FADEOUT_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("opacity", "0")
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"opacity": "1", "offset": "0"},
+		map[string]interface{}{"opacity": "0", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
 func fromTop(e *Element, timeMS int) {
-	var transform = e.value.Get("style").Get("transform").String()
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("transform", "translateY(-100%)")
-	e.value.Get("classList").Call("add", FROMTOP_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("transform", transform)
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
 func fromLeft(e *Element, timeMS int) {
-	var transform = e.value.Get("style").Get("transform").String()
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("transform", "translateX(-100%)")
-	e.value.Get("classList").Call("add", FROMLEFT_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("transform", transform)
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
 func fromRight(e *Element, timeMS int) {
-	var transform = e.value.Get("style").Get("transform").String()
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("transform", "translateX(100%)")
-	e.value.Get("classList").Call("add", FROMRIGHT_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("transform", transform)
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
-
 }
 
 func fromBottom(e *Element, timeMS int) {
-	var transform = e.value.Get("style").Get("transform").String()
-	var transition = e.value.Get("style").Get("transition").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS)+"ms")
-	e.value.Get("style").Set("transform", "translateY(100%)")
-	e.value.Get("classList").Call("add", FROMBOTTOM_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("transform", "translateY(0)")
-		e.value.Get("style").Set("transform", transform)
-		time.Sleep(time.Duration(timeMS) * time.Millisecond)
-		e.value.Get("style").Set("transition", transition)
+	var arr = []any{
+		map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
+		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+		"easing":     "ease-in",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
 func bounce(e *Element, timeMS int) {
-	var transition = e.value.Get("style").Get("transition").String()
-	var transform = e.value.Get("style").Get("transform").String()
-	e.value.Get("style").Set("transition", "all "+strconv.Itoa(timeMS/2)+"ms ease-in-out")
-	e.value.Get("classList").Call("add", BOUNCE_CLASS)
-	InViewListener(e, func(this jsext.Value, event jsext.Event) {
-		e.value.Get("style").Set("transform", "scale(1.1)")
-		go func() {
-			time.Sleep(time.Duration(timeMS) * time.Millisecond / 2)
-			e.value.Get("style").Set("transform", "scale(1)")
-			time.Sleep(time.Duration(timeMS) * time.Millisecond)
-			e.value.Get("style").Set("transition", transition)
-			e.value.Get("style").Set("transform", transform)
-		}()
+	var arr = []any{
+		map[string]interface{}{"transform": "scale(1)", "offset": "0"},
+		map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
+		map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
+		map[string]interface{}{"transform": "scale(1.05)", "offset": "0.6"},
+		map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
+		map[string]interface{}{"transform": "scale(1)", "offset": "1"},
+	}
+	var opts = map[string]interface{}{
+		"duration":   timeMS,
+		"iterations": 1,
+		"fill":       "forwards",
+	}
+	InViewListenerSingleExecution(e, func(this jsext.Value, event jsext.Event) {
+		e.Animate(arr, opts)
 	})
 }
 
@@ -212,6 +235,24 @@ func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
 	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
 		if isInViewport(e) {
 			cb(this, event)
+		}
+	})
+}
+
+func InViewListenerSingleExecution(e *Element, cb func(this jsext.Value, event jsext.Event)) {
+	var ran = false
+	if isInViewport(e) {
+		if !ran {
+			cb(jsext.Value{}, jsext.Event{})
+			ran = true
+		}
+	}
+	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
+		if !ran {
+			if isInViewport(e) {
+				cb(this, event)
+				ran = true
+			}
 		}
 	})
 }

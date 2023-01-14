@@ -592,6 +592,8 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		card_company.Div(item.Name)
 
 		card.Append(card_header, card_body, card_footer, card_company)
+
+		card.FadeIn(500)
 	}
 
 	var css = delimitRoadMapCSS(roadMap) + `
