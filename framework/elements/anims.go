@@ -8,6 +8,65 @@ import (
 )
 
 // All animations get rendered in a separate goroutine.
+const Infinity = "Infinity"
+
+var fadeIn = Animation{Animations: []any{
+	map[string]interface{}{"opacity": "0", "offset": "0"},
+	map[string]interface{}{"opacity": "1", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var fadeOut = Animation{Animations: []any{
+	map[string]interface{}{"opacity": "1", "offset": "0"},
+	map[string]interface{}{"opacity": "0", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var bounce = Animation{Animations: []any{
+	map[string]interface{}{"transform": "scale(1)", "offset": "0"},
+	map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
+	map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
+	map[string]interface{}{"transform": "scale(1.05)", "offset": "0.6"},
+	map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
+	map[string]interface{}{"transform": "scale(1)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var fromTop = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
+	map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var fromLeft = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
+	map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var fromRight = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
+	map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var fromBottom = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
+	map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
 
 // Predefined element animations.
 type Animation struct {
@@ -23,7 +82,7 @@ func (e *Element) Rainbow(colorsPerSecond float64, colors ...string) *Element {
 	e.AttrStyle("color:" + colors[0])
 	var anim = Animation{WhenInViewport: true, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
 		"duration":   1000 / colorsPerSecond * float64(len(colors)),
-		"iterations": "Infinity",
+		"iterations": Infinity,
 	}}
 	for i, color := range colors {
 		anim.Animations[i] = map[string]interface{}{"color": color, "offset": float64(i) / float64(len(colors))}
@@ -32,108 +91,65 @@ func (e *Element) Rainbow(colorsPerSecond float64, colors ...string) *Element {
 	return e
 }
 
-// Fade the element in once it is visible on screen.
-func (e *Element) FadeIn(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"opacity": "0", "offset": "0"},
-		map[string]interface{}{"opacity": "1", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}}
+// Fade the element in
+func (e *Element) FadeIn(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fadeIn
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Fade the element out once it is visible on screen.
-func (e *Element) FadeOut(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"opacity": "1", "offset": "0"},
-		map[string]interface{}{"opacity": "0", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}}
+// Fade the element out
+func (e *Element) FadeOut(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fadeOut
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Bounce the element once it is visible on screen.
-func (e *Element) Bounce(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"transform": "scale(1)", "offset": "0"},
-		map[string]interface{}{"transform": "scale(1.1)", "offset": "0.2"},
-		map[string]interface{}{"transform": "scale(0.9)", "offset": "0.4"},
-		map[string]interface{}{"transform": "scale(1.05)", "offset": "0.6"},
-		map[string]interface{}{"transform": "scale(0.95)", "offset": "0.8"},
-		map[string]interface{}{"transform": "scale(1)", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-	}}
+// Bounce the element
+func (e *Element) Bounce(timeMS int, wheninViewport ...bool) *Element {
+	var anim = bounce
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Slide the element in from the top once it is visible on screen.
-func (e *Element) FromTop(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"transform": "translateY(-100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}}
+// Slide the element in from the top
+func (e *Element) FromTop(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fromTop
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Slide the element in from the left once it is visible on screen.
-func (e *Element) FromLeft(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"transform": "translateX(-100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   timeMS,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}}
+// Slide the element in from the left
+func (e *Element) FromLeft(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fromLeft
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Slide the element in from the right once it is visible on screen.
-func (e *Element) FromRight(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"transform": "translateX(100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateX(0)", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   500,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}}
+// Slide the element in from the right
+func (e *Element) FromRight(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fromRight
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
 
-// Slide the element in from the bottom once it is visible on screen.
-func (e *Element) FromBottom(timeMS int) *Element {
-	var anim = Animation{WhenInViewport: true, Animations: []any{
-		map[string]interface{}{"transform": "translateY(100%)", "offset": "0"},
-		map[string]interface{}{"transform": "translateY(0)", "offset": "1"},
-	}, Options: map[string]interface{}{
-		"duration":   500,
-		"iterations": 1,
-		"fill":       "forwards",
-		"easing":     "ease-in",
-	}}
+// Slide the element in from the bottom
+func (e *Element) FromBottom(timeMS int, wheninViewport ...bool) *Element {
+	var anim = fromBottom
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
 	e.Animate(anim)
 	return e
 }
