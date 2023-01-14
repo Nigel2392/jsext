@@ -605,8 +605,8 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		top: 50%;
 		left: 50%;
 		transform: translateY(-50%) translateX(-50%);
-		width: 20px;
-		height: 20px;
+		width: calc(20px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+		height: calc(20px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 		border-radius: 50%;
 		background: ` + roadMap.DivisorColor + `;
 		z-index: 1;
@@ -676,10 +676,10 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		width: 100%;
 	}
 	.` + roadMap.classPrefix + `left .` + roadMap.classPrefix + `card-name {
-		left: calc(100% + ` + roadMap.DivisorWidth + ` + 10px);
+		left: calc(100% + ` + roadMap.DivisorWidth + ` + calc(10px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `));
 	}
 	.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `card-name {
-		right: calc(100% + ` + roadMap.DivisorWidth + ` + 10px);
+		right: calc(100% + ` + roadMap.DivisorWidth + ` + calc(10px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `));
 	}
 	`
 	timeline.StyleBlock(css)
