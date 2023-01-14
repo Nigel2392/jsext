@@ -16,6 +16,22 @@ type Animation struct {
 	WhenInViewport bool
 }
 
+func (e *Element) Rainbow(colorsPerSecond float64, colors ...string) *Element {
+	if len(colors) == 0 {
+		colors = []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet"}
+	}
+	e.AttrStyle("color:" + colors[0])
+	var anim = Animation{WhenInViewport: true, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
+		"duration":   1000 / colorsPerSecond * float64(len(colors)),
+		"iterations": "Infinity",
+	}}
+	for i, color := range colors {
+		anim.Animations[i] = map[string]interface{}{"color": color, "offset": float64(i) / float64(len(colors))}
+	}
+	e.Animate(anim)
+	return e
+}
+
 // Fade the element in once it is visible on screen.
 func (e *Element) FadeIn(timeMS int) *Element {
 	var anim = Animation{WhenInViewport: true, Animations: []any{
