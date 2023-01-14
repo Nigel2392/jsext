@@ -298,7 +298,7 @@ type RoadMapOptions struct {
 	classPrefix         string
 	Style               RoadMapStyle
 	Translations        Translations
-	Scale               float64
+	FontScale           float64
 }
 
 func (r *RoadMapOptions) defaultOverrides() {
@@ -348,8 +348,8 @@ func (r *RoadMapOptions) defaultOverrides() {
 	if r.Translations.Present == "" {
 		r.Translations.Present = "Present"
 	}
-	if r.Scale == 0 {
-		r.Scale = 1
+	if r.FontScale == 0 {
+		r.FontScale = 1
 	}
 }
 
@@ -463,7 +463,7 @@ func roadMapStyleOne(roadMap *RoadMapOptions) *elements.Element {
 	  display: inline-block;
 	  top: calc(50% - 8px);
 	  text-align: center;
-	  font-size: 14px;
+	  font-size: calc(14px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  font-weight: bold;
 	  color: ` + roadMap.DivisorColor + `;
 	  text-transform: uppercase;
@@ -479,15 +479,15 @@ func roadMapStyleOne(roadMap *RoadMapOptions) *elements.Element {
 	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `icon {
 	  position: absolute;
 	  display: inline-block;
-	  width: 40px;
-	  height: 40px;
+	  width: calc(40px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+	  height: calc(40px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  padding: 9px 0;
-	  top: calc(50% - 20px);
+	  top: calc(50% - calc(calc(40px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) / 2));
 	  background: #F6D155;
 	  border: 2px solid ` + roadMap.DivisorColor + `;
-	  border-radius: 40px;
+	  border-radius: calc(40px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  text-align: center;
-	  font-size: 18px;
+	  font-size: calc(18px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);;
 	  color: ` + roadMap.DivisorColor + `;
 	  z-index: 1;
 	}
@@ -499,31 +499,31 @@ func roadMapStyleOne(roadMap *RoadMapOptions) *elements.Element {
 	}
 	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content {
 	  color: ` + roadMap.Color + `;
-	  padding: 30px 90px 30px 30px;
+	  padding: calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(90px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  background: ` + roadMap.ItemBackground + `;
 	  position: relative;
 	  border-radius: 0 500px 500px 0;
 	}
 	.` + roadMap.classPrefix + `container.` + roadMap.classPrefix + `right .` + roadMap.classPrefix + `content {
-	  padding: 30px 30px 30px 90px;
+	  padding: calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(30px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `) calc(90px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  border-radius: 500px 0 0 500px;
 	  text-align: right;
 	}
 	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content h1 {
 	  	margin: 0 0 10px 0;
-		font-size: 20px;
+		font-size: calc(20px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 		font-weight: bold;
 		color: ` + roadMap.TitleColor + `;
 	}
 	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content h2 {
 	  margin: 0 0 10px 0;
-	  font-size: 18px;
+	  font-size: calc(18px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  font-weight: normal;
 	  color: ` + roadMap.TitleColor + `;
 	}
 	.` + roadMap.classPrefix + `container .` + roadMap.classPrefix + `content p {
 	  margin: 0;
-	  font-size: 16px;
+	  font-size: calc(16px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 	  line-height: 22px;
 	  color: #000000;
 	}
@@ -598,7 +598,6 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 	.` + roadMap.classPrefix + `card-container {
 		position: relative;
 		width: 100%;
-		transform: scale(` + strconv.FormatFloat(roadMap.Scale, 'f', 2, 64) + `);
 	}
 	.` + roadMap.classPrefix + `card-container::before {
 		content: "";
@@ -635,8 +634,8 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		box-shadow: 5px 5px 5px 0 rgb(0 0 0 / 20%)
 	}
 	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-header {
-		line-height: 22px;
-		font-size: 22px;
+		line-height: calc(22px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+		font-size: calc(22px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 		font-weight: bold;
 		color: ` + roadMap.TitleColor + `;
 		border-bottom: ` + roadMap.CardBorderWidth + ` solid ` + roadMap.CardBorderColor + `;
@@ -646,9 +645,13 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-body {
 		padding: 0 10px;
 	}
+	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-body * {
+		line-height: calc(16px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+		font-size: calc(16px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+	}
 	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-footer {
-		line-height: 14px;
-		font-size: 14px;
+		line-height: calc(14px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
+		font-size: calc(14px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 		font-weight: bold;
 		color: ` + roadMap.TitleColor + `;
 		margin-bottom: 0;
@@ -665,7 +668,7 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 	}
 	.` + roadMap.classPrefix + `card .` + roadMap.classPrefix + `card-name {
 		position: absolute;
-		font-size: 24px;
+		font-size: calc(24px *` + strconv.FormatFloat(roadMap.FontScale, 'f', 2, 64) + `);
 		font-weight: bold;
 		top: 50%;
 		transform: translateY(-50%);
