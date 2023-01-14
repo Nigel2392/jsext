@@ -24,7 +24,7 @@ type HashRouter struct {
 	onLoad          func()
 	onPageChange    func(vars.Vars, *url.URL)
 	afterPageChange func(vars.Vars, *url.URL)
-	middlewares     []func(rterr.ErrorThrower) bool
+	middlewares     []func(vars.Vars, *url.URL, rterr.ErrorThrower) bool
 }
 
 // Initialize a new router.
@@ -33,9 +33,8 @@ func NewRouter() *HashRouter {
 }
 
 // Add a middleware to the router.
-func (r *HashRouter) Use(middleware func(rterr.ErrorThrower) bool) *HashRouter {
+func (r *HashRouter) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) {
 	r.middlewares = append(r.middlewares, middleware)
-	return r
 }
 
 // Decide what to do on errors.
@@ -115,7 +114,7 @@ func (r *HashRouter) Handle(hash string) {
 		r.onPageChange(nil, nil)
 	}
 	for _, middleware := range r.middlewares {
-		if !middleware(r) {
+		if !middleware(nil, nil, r) {
 			return
 		}
 	}
@@ -144,7 +143,7 @@ func (r *HashRouter) route() {
 			r.onPageChange(nil, nil)
 		}
 		for _, middleware := range r.middlewares {
-			if !middleware(r) {
+			if !middleware(nil, nil, r) {
 				return nil
 			}
 		}

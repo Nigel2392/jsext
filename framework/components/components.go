@@ -8,6 +8,7 @@ import (
 
 	"github.com/Nigel2392/jsext"
 	"github.com/Nigel2392/jsext/framework/router/routes"
+	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
 
@@ -46,4 +47,6 @@ type Router interface {
 	OnError(func(err error))
 	SkipTrailingSlash()
 	NameToTitle(bool)
+	Throw(int)
+	Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool)
 }
