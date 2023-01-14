@@ -298,6 +298,7 @@ type RoadMapOptions struct {
 	classPrefix         string
 	Style               RoadMapStyle
 	Translations        Translations
+	Scale               float64
 }
 
 func (r *RoadMapOptions) defaultOverrides() {
@@ -346,6 +347,9 @@ func (r *RoadMapOptions) defaultOverrides() {
 	}
 	if r.Translations.Present == "" {
 		r.Translations.Present = "Present"
+	}
+	if r.Scale == 0 {
+		r.Scale = 1
 	}
 }
 
@@ -594,6 +598,7 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 	.` + roadMap.classPrefix + `card-container {
 		position: relative;
 		width: 100%;
+		transform: scale(` + strconv.FormatFloat(roadMap.Scale, 'f', 2, 64) + `);
 	}
 	.` + roadMap.classPrefix + `card-container::before {
 		content: "";
