@@ -84,6 +84,17 @@ func (e *Element) TextAfter() *Element {
 	return e
 }
 
+// Set an attribute on the element, overwriting any previous value.
+func (e *Element) SetAttr(p string, v ...string) *Element {
+	if e.value.IsUndefined() {
+		e.Attributes_Normal[p] = v
+	} else {
+		e.value.Call("setAttribute", p, strings.Join(v, " "))
+	}
+	return e
+}
+
+// Set an attribute of the element.
 func (e *Element) Set(p string, v ...string) *Element {
 	if e.value.IsUndefined() {
 		var attrs = e.Attributes_Normal[p]

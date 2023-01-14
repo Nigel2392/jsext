@@ -162,6 +162,59 @@ func (u *URLs) FromElements(elems ...*Element) {
 	}
 }
 
+// Generate the urls from a slice of maps
+// Each map has the following attributes:
+//   - (string) name: the name of the url
+//   - (string) href: the href of the url
+//   - (string) text: the text of the url
+//   - (bool) external: whether the url is external or not
+//   - (bool) Hide: whether the url is hidden or not
+func (u *URLs) FromMap(maps ...map[string]interface{}) {
+	for _, v := range maps {
+		var name, href, text string
+		var external, hide bool
+		var classes []string
+		var id string
+		if v["name"] != nil {
+			name = v["name"].(string)
+		}
+		if v["href"] != nil {
+			href = v["href"].(string)
+		}
+		if v["text"] != nil {
+			text = v["text"].(string)
+		}
+		if v["external"] != nil {
+			external = v["external"].(bool)
+		}
+		if v["hide"] != nil {
+			hide = v["hide"].(bool)
+		}
+		if v["class"] != nil {
+			classes = v["classes"].([]string)
+		}
+		if v["id"] != nil {
+			id = v["id"].(string)
+		}
+		var elem = A(href, text)
+		if external {
+			elem.SetAttr("href", router.RT_PREFIX_EXTERNAL+href)
+		} else {
+			elem.SetAttr("href", router.RT_PREFIX+href)
+		}
+		if hide {
+			elem.AttrStyle("display:none")
+		}
+		if len(classes) > 0 {
+			elem.AttrClass(classes...)
+		}
+		if id != "" {
+			elem.SetAttr("id", id)
+		}
+		u.Set(name, elem, external)
+	}
+}
+
 // On click action for URLs
 // Takes a function that takes a URL element and the event.target | this
 func (u *URLs) OnClick(f func(*Element, jsext.Value)) {
