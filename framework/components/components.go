@@ -49,4 +49,5 @@ type Router interface {
 	NameToTitle(bool)
 	Throw(int)
 	Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool)
+	Error(code int, msg string) rterr.RouterError
 }
