@@ -55,6 +55,22 @@ func FNVHashString(s string) string {
 	return strconv.FormatUint(uint64(FNVHash(s)), 10)
 }
 
+//	var ct = 0
+//	for i, value := range opts.Values {
+//		var color string
+//		color, ct = getColor(opts.Colors, ct, "#5555ff")
+//
+// Get the color for a given chart index.
+func GetColor(colors []string, index int, def string) (string, int) {
+	if len(colors) > 0 {
+		if index >= len(colors) {
+			index = 0
+		}
+		return colors[index], index + 1
+	}
+	return def, index
+}
+
 func ValueToString(v reflect.Value) string {
 	switch v.Kind() {
 	case reflect.String:

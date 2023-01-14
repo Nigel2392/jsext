@@ -10,6 +10,7 @@ import (
 	"github.com/Nigel2392/jsext/canvas/context"
 	"github.com/Nigel2392/jsext/framework/graphs/labels"
 	"github.com/Nigel2392/jsext/framework/graphs/options"
+	"github.com/Nigel2392/jsext/framework/helpers"
 	"github.com/Nigel2392/jsext/framework/helpers/convert"
 )
 
@@ -75,8 +76,8 @@ func Bar(Canvas canvas.Canvas, opts options.GraphOptions) {
 		var ct = 0
 		for i, value := range opts.Values {
 			var color, borderColor string
-			color, ct = getColor(opts.Colors, ct, "#5555ff")
-			borderColor, ct = getColor(opts.BackgroundColors, ct, "#000000")
+			color, ct = helpers.GetColor(opts.Colors, ct, "#5555ff")
+			borderColor, ct = helpers.GetColor(opts.BackgroundColors, ct, "#000000")
 
 			var barHeight = (convert.ToFloat(value) / maxHeight) * float64(height-bottomMargin*2)
 			var barY = float64(height) - float64(barHeight)

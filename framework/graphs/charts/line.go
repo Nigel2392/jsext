@@ -11,6 +11,7 @@ import (
 	"github.com/Nigel2392/jsext/canvas/context"
 	"github.com/Nigel2392/jsext/framework/graphs/labels"
 	"github.com/Nigel2392/jsext/framework/graphs/options"
+	"github.com/Nigel2392/jsext/framework/helpers"
 	"github.com/Nigel2392/jsext/framework/helpers/convert"
 )
 
@@ -143,7 +144,7 @@ func Line(Canvas canvas.Canvas, opts options.GraphOptions) {
 				lastY = y
 			}
 
-			lineColor, ct = getColor(opts.BackgroundColors, ct, "#000000")
+			lineColor, ct = helpers.GetColor(opts.BackgroundColors, ct, "#000000")
 			drawLine(ctx, lastX, lastY, x, y, lineColor)
 			lastX = x
 			lastY = y
@@ -157,7 +158,7 @@ func Line(Canvas canvas.Canvas, opts options.GraphOptions) {
 				lastY = y
 			}
 
-			color, ct = getColor(opts.Colors, ct, "#9200ff")
+			color, ct = helpers.GetColor(opts.Colors, ct, "#9200ff")
 			ctx.BeginPath()
 			ctx.Arc(x, y, widthOfChart/75, 0, 2*3.14159)
 			ctx.FillStyle(color)

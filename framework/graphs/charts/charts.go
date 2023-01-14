@@ -10,22 +10,6 @@ import (
 	"github.com/Nigel2392/jsext/framework/graphs/options"
 )
 
-//	var ct = 0
-//	for i, value := range opts.Values {
-//		var color, borderColor string
-//		color, ct = getColor(opts.Colors, ct, "#5555ff")
-//
-// Get the color for a given chart index.
-func getColor(colors []string, index int, def string) (string, int) {
-	if len(colors) > 0 {
-		if index >= len(colors) {
-			index = 0
-		}
-		return colors[index], index + 1
-	}
-	return def, index
-}
-
 func writeTitle(ctx context.Context2D, width, topMargin int, opts options.GraphOptions) {
 	if opts.GraphTitle != "" {
 		// Draw Title

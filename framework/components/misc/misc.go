@@ -259,3 +259,253 @@ func (c *TimeCounter) Tracker() *convert.TimeTracker { return convert.NewTimeTra
 func (c *TimeCounter) Date(year int, month time.Month, day int, hour int, min int, sec int, nsec int) {
 	c.Set(time.Now().Add(time.Since(time.Date(year, month, day, hour, min, sec, nsec, time.UTC)) * -1))
 }
+
+type JobtreeItem struct {
+	Company   string
+	Title     string
+	Tags      []string
+	StartDate string
+	EndDate   string
+}
+
+type Jobtree struct {
+	Background          string
+	ItemBackground      string
+	TagBackgroundColors []string
+	Color               string
+	TitleColor          string
+	TagColor            string
+	DivisorColor        string
+	DivisorWidth        string
+	Width               string
+	Items               []JobtreeItem
+	classPrefix         string
+}
+
+func (j *Jobtree) defaultOverrides() {
+	if j.Background == "" {
+		j.Background = "#ffffff"
+	}
+	if j.ItemBackground == "" {
+		j.ItemBackground = `rgb(85,34,195);
+		background: linear-gradient(0deg, rgba(85,34,195,0.40940126050420167) 0%, rgba(113,49,172,1) 100%)`
+	}
+	if j.Color == "" {
+		j.Color = "#ffffff"
+	}
+	if j.TitleColor == "" {
+		j.TitleColor = "#ffffff"
+	}
+	if j.TagColor == "" {
+		j.TagColor = "#ffffff"
+	}
+	if j.TagBackgroundColors == nil {
+		j.TagBackgroundColors = []string{"#ffffff"}
+	}
+	if j.DivisorColor == "" {
+		j.DivisorColor = "#333333"
+	}
+	if j.DivisorWidth == "" {
+		j.DivisorWidth = "1px"
+	}
+	if j.Width == "" {
+		j.Width = "100%"
+	}
+	if j.classPrefix == "" {
+		j.classPrefix = "jsext-jobtree-"
+	}
+}
+
+func JobTree(jobTree *Jobtree) *elements.Element {
+	jobTree.defaultOverrides()
+
+	var timeline = elements.Div().AttrClass(jobTree.classPrefix + "timeline")
+
+	for i, item := range jobTree.Items {
+		var container = timeline.Div().AttrClass(jobTree.classPrefix + "container")
+		if i%2 == 0 {
+			container.AttrClass(jobTree.classPrefix + "right")
+		} else {
+			container.AttrClass(jobTree.classPrefix + "left")
+		}
+		container.Div(item.StartDate + " - " + item.EndDate).AttrClass(jobTree.classPrefix + "date")
+		var content = container.Div().AttrClass(jobTree.classPrefix + "content")
+		content.H1(item.Company)
+		content.H2(item.Title)
+		var paragraph = content.P()
+		var ct = 0
+		var color string
+		for _, tag := range item.Tags {
+			color, ct = helpers.GetColor(jobTree.TagBackgroundColors, ct, "#5555ff")
+			paragraph.Span(tag).AttrClass(jobTree.classPrefix + "content-tag-item").AttrStyle("background-color:" + color)
+		}
+	}
+
+	var css = `
+	.` + jobTree.classPrefix + `timeline {
+	  position: relative;
+	  width: ` + jobTree.Width + `;
+	}
+	
+	.` + jobTree.classPrefix + `timeline::after {
+	  content: '';
+	  position: absolute;
+	  width: ` + jobTree.DivisorWidth + `;
+	  background: ` + jobTree.DivisorColor + `;
+	  top: 0;
+	  bottom: 0;
+	  left: 50%;
+	  margin-left: calc(` + jobTree.DivisorWidth + ` / -2);
+	}
+	
+	.` + jobTree.classPrefix + `container {
+	  position: relative;
+	  background: inherit;
+	  width: 50%;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left {
+	  left: 0;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right {
+	  left: 50%;
+	}
+	
+	.` + jobTree.classPrefix + `container::after {
+	  content: '';
+	  position: absolute;
+	  width: 16px;
+	  height: 16px;
+	  top: calc(50% - 8px);
+	  right: -8px;
+	  background: #ffffff;
+	  border: 2px solid ` + jobTree.DivisorColor + `;
+	  border-radius: 16px;
+	  z-index: 1;
+	  transform: translateX(200%);
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::after {
+	  left: -8px;
+	  transform: translateX(-200%);
+	}
+	
+	.` + jobTree.classPrefix + `container::before {
+	  content: '';
+	  position: absolute;
+	  width: 50px;
+	  height: 2px;
+	  top: calc(50% - 1px);
+	  right: 8px;
+	  background: ` + jobTree.DivisorColor + `;
+	  z-index: 1;
+	  transform: translateX(100%);
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right::before {
+	  left: 8px;
+	  transform: translateX(-100%);
+	}
+	
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `date {
+	  position: absolute;
+	  display: inline-block;
+	  top: calc(50% - 8px);
+	  text-align: center;
+	  font-size: 14px;
+	  font-weight: bold;
+	  color: ` + jobTree.DivisorColor + `;
+	  text-transform: uppercase;
+	  letter-spacing: 1px;
+	  z-index: 1;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
+		right:1em;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `date {
+	  	left: 1em;
+	}
+	
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `icon {
+	  position: absolute;
+	  display: inline-block;
+	  width: 40px;
+	  height: 40px;
+	  padding: 9px 0;
+	  top: calc(50% - 20px);
+	  background: #F6D155;
+	  border: 2px solid ` + jobTree.DivisorColor + `;
+	  border-radius: 40px;
+	  text-align: center;
+	  font-size: 18px;
+	  color: ` + jobTree.DivisorColor + `;
+	  z-index: 1;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `icon {
+	  right: 56px;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `icon {
+	  left: 56px;
+	}
+	
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content {
+	  color: ` + jobTree.Color + `;
+	  padding: 30px 90px 30px 30px;
+	  background: ` + jobTree.ItemBackground + `;
+	  position: relative;
+	  border-radius: 0 500px 500px 0;
+	}
+	
+	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `content {
+	  padding: 30px 30px 30px 90px;
+	  border-radius: 500px 0 0 500px;
+	  text-align: right;
+	}
+	
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h1 {
+	  	margin: 0 0 10px 0;
+		font-size: 20px;
+		font-weight: bold;
+		color: ` + jobTree.TitleColor + `;
+	}
+
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content h2 {
+	  margin: 0 0 10px 0;
+	  font-size: 18px;
+	  font-weight: normal;
+	  color: ` + jobTree.TitleColor + `;
+	}
+	
+	.` + jobTree.classPrefix + `container .` + jobTree.classPrefix + `content p {
+	  margin: 0;
+	  font-size: 16px;
+	  line-height: 22px;
+	  color: #000000;
+	}
+
+	.` + jobTree.classPrefix + "content-tag-item" + `{
+		display: inline-block;
+		padding: 2px 5px;
+		margin: 0 5px 5px 0;
+		border-radius: 5px;
+		color: ` + jobTree.TagColor + `;
+	}
+	
+	@media (max-width: 767.98px) {
+	  	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `left .` + jobTree.classPrefix + `date {
+			right: -100%;
+	  	}
+	  	.` + jobTree.classPrefix + `container.` + jobTree.classPrefix + `right .` + jobTree.classPrefix + `date {
+			left: -100%;
+		}
+	}
+	`
+
+	timeline.StyleBlock(css)
+	return timeline
+}
