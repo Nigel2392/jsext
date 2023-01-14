@@ -169,11 +169,14 @@ func (u *URLs) FromElements(elems ...*Element) {
 //   - (string) text: the text of the url
 //   - (bool) external: whether the url is external or not
 //   - (bool) Hide: whether the url is hidden or not
+//   - ([]string) class: the classes of the url (optional)
+//   - (string) id: the id of the url (optional)
+//   - ([]string) style: the style of the url (optional)
 func (u *URLs) FromMap(maps ...map[string]interface{}) {
 	for _, v := range maps {
 		var name, href, text string
 		var external, hide bool
-		var classes []string
+		var classes, styles []string
 		var id string
 		if v["name"] != nil {
 			name = v["name"].(string)
@@ -196,12 +199,10 @@ func (u *URLs) FromMap(maps ...map[string]interface{}) {
 		if v["id"] != nil {
 			id = v["id"].(string)
 		}
-		var elem = A(href, text)
-		if external {
-			elem.SetAttr("href", router.RT_PREFIX_EXTERNAL+href)
-		} else {
-			elem.SetAttr("href", router.RT_PREFIX+href)
+		if v["style"] != nil {
+			styles = v["style"].([]string)
 		}
+		var elem = A(href, text)
 		if hide {
 			elem.AttrStyle("display:none")
 		}
@@ -210,6 +211,9 @@ func (u *URLs) FromMap(maps ...map[string]interface{}) {
 		}
 		if id != "" {
 			elem.SetAttr("id", id)
+		}
+		if len(styles) > 0 {
+			elem.AttrStyle(styles...)
 		}
 		u.Set(name, elem, external)
 	}

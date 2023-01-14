@@ -268,12 +268,13 @@ const (
 )
 
 type RoadMapItem struct {
-	Name        string
-	Title       string
-	Description string
-	Tags        []string
-	StartDate   string
-	EndDate     string
+	Name         string
+	Title        string
+	TitleElement *elements.Element
+	Description  string
+	Tags         []string
+	StartDate    string
+	EndDate      string
 }
 
 type Translations struct {
@@ -558,25 +559,33 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		} else {
 			container.AttrClass(roadMap.classPrefix + "right")
 		}
+
+		var card_header = card.Div().AttrClass(roadMap.classPrefix + "card-header")
+
+		if item.Description != "" && len(item.Tags) != 0 {
+			var card_body = card.Div().AttrClass(roadMap.classPrefix + "card-body")
+			if item.Description != "" {
+				card_body.P(item.Description)
+			}
+			var tagsParagraph = card_body.P()
+			for i, tag := range item.Tags {
+				var spacing = ""
+				if i < len(item.Tags)-1 {
+					spacing = ", "
+				}
+				tagsParagraph.Span(tag + spacing).AttrClass(roadMap.classPrefix + "content-tag-item")
+			}
+		}
+
 		var (
-			card_header  = elements.Div().AttrClass(roadMap.classPrefix + "card-header")
-			card_body    = elements.Div().AttrClass(roadMap.classPrefix + "card-body")
-			card_footer  = elements.Div().AttrClass(roadMap.classPrefix + "card-footer")
-			card_company = elements.Div().AttrClass(roadMap.classPrefix + "card-name")
+			card_footer  = card.Div().AttrClass(roadMap.classPrefix + "card-footer")
+			card_company = card.Div().AttrClass(roadMap.classPrefix + "card-name")
 		)
 
-		card_header.Div(item.Title)
-
-		if item.Description != "" {
-			card_body.P(item.Description)
-		}
-		var tagsParagraph = card_body.P()
-		for i, tag := range item.Tags {
-			var spacing = ""
-			if i < len(item.Tags)-1 {
-				spacing = ", "
-			}
-			tagsParagraph.Span(tag + spacing).AttrClass(roadMap.classPrefix + "content-tag-item")
+		if item.TitleElement != nil {
+			card_header.Append(item.TitleElement)
+		} else {
+			card_header.Div(item.Title)
 		}
 
 		if item.StartDate != "" || item.EndDate != "" {
@@ -590,9 +599,6 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		}
 
 		card_company.Div(item.Name)
-
-		card.Append(card_header, card_body, card_footer, card_company)
-
 		card.FadeIn(500, true)
 	}
 
@@ -687,4 +693,175 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 	timeline.StyleBlock(css)
 
 	return timeline
+}
+
+type Modal elements.Element
+
+func (m *Modal) e() *elements.Element {
+	return (*elements.Element)(m)
+}
+
+func (m *Modal) Show() {
+	if !m.e().Value().Truthy() {
+		m.Create()
+	}
+	m.e().AttrStyle("display:flex")
+}
+
+func (m *Modal) Hide() {
+	m.e().AttrStyle("display:none")
+}
+
+func (m *Modal) Render() jsext.Element {
+	return m.e().Render()
+}
+
+func (m *Modal) Create(appendToQuerySelector ...string) {
+	if len(appendToQuerySelector) > 0 && appendToQuerySelector[0] != "" {
+		jsext.QuerySelector(appendToQuerySelector[0]).Append(m.Render())
+	} else {
+		jsext.Body.Append(m.Render())
+	}
+}
+
+func (m *Modal) Delete() {
+	if m.e().Value().Truthy() {
+		m.e().Value().Remove()
+	}
+}
+
+type ModalOptions struct {
+	Header           *elements.Element
+	Body             *elements.Element
+	Footer           *elements.Element
+	Background       string
+	ModalBackground  string
+	BorderRadius     string
+	Border           string
+	Width            string
+	Height           string
+	ClassPrefix      string
+	CloseButton      bool
+	CloseButtonScale float64
+}
+
+func (opts *ModalOptions) SetDefaults() {
+	if opts.ClassPrefix == "" {
+		opts.ClassPrefix = "jsext-modal-"
+	}
+	if opts.Background == "" {
+		opts.Background = "rgba(0,0,0,0.5)"
+	}
+	if opts.ModalBackground == "" {
+		opts.ModalBackground = "#fff"
+	}
+	if opts.BorderRadius == "" {
+		opts.BorderRadius = "5px"
+	}
+	if opts.Border == "" {
+		opts.Border = "1px solid #ccc"
+	}
+	if opts.Width == "" {
+		opts.Width = "50%"
+	}
+	if opts.Height == "" {
+		opts.Height = "auto"
+	}
+	if opts.CloseButtonScale == 0 {
+		opts.CloseButtonScale = 1
+	}
+}
+
+func CreateModal(opts ModalOptions) *Modal {
+	opts.SetDefaults()
+	var modal_container *elements.Element = elements.Div().AttrClass(opts.ClassPrefix + "modal-container")
+	if opts.CloseButton {
+		var close_btn = modal_container.Div().AttrClass(opts.ClassPrefix + "close-btn")
+		close_btn.AddEventListener("click", func(this jsext.Value, e jsext.Event) {
+			(*Modal)(modal_container).Hide()
+		})
+	}
+	var modal = modal_container.Div().AttrClass(opts.ClassPrefix + "modal")
+	if opts.Header != nil {
+		modal.Append(opts.Header)
+	}
+	if opts.Body != nil {
+		modal.Append(opts.Body)
+	}
+	if opts.Footer != nil {
+		modal.Append(opts.Footer)
+	}
+
+	css := `
+		.` + opts.ClassPrefix + `modal-container {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: ` + opts.Background + `;
+			display: none;
+			justify-content: center;
+			align-items: center;
+		}
+		.` + opts.ClassPrefix + `close-btn {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 30px;
+			height: 30px;
+			background: #ff0000;
+			border-radius: 50%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			cursor: pointer;
+			transform: scale(` + strconv.FormatFloat(opts.CloseButtonScale, 'f', 2, 64) + `);
+			transition: background 0.2s ease-in-out;
+		}
+		.` + opts.ClassPrefix + `close-btn:hover {
+			background: #910c0c;
+		}
+		.` + opts.ClassPrefix + `close-btn::before {
+			position: absolute;
+			content: "";
+			width: 20px;
+			height: 2px;
+			background: #fff;
+			transform: rotate(45deg);
+		}
+		.` + opts.ClassPrefix + `close-btn::after {
+			position: absolute;
+			content: "";
+			width: 20px;
+			height: 2px;
+			background: #fff;
+			transform: rotate(-45deg);
+		}
+		
+		.` + opts.ClassPrefix + `modal {
+			background: ` + opts.ModalBackground + `;
+			border-radius: ` + opts.BorderRadius + `;
+			border: ` + opts.Border + `;
+			width: ` + opts.Width + `;
+			height: ` + opts.Height + `;
+			display: flex;
+			flex-direction: column;
+		}
+		.` + opts.ClassPrefix + `modal > * {
+			padding: 10px;
+		}
+		.` + opts.ClassPrefix + `modal > *:first-child {
+			border-bottom: 1px solid #ccc;
+		}
+		.` + opts.ClassPrefix + `modal > *:last-child {
+			border-top: 1px solid #ccc;
+		}
+		.` + opts.ClassPrefix + `modal > *:only-child {
+			border: none;
+		}
+		`
+
+	modal.StyleBlock(css)
+	return (*Modal)(modal_container)
 }
