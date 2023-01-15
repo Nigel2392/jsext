@@ -92,6 +92,7 @@ func MenuCurtainDrop(urls []components.URL, btnWidth int, curtainColor string, c
 			left: 10px;
 			font-size: ` + strconv.Itoa(btnWidth/4) + `px;
 			cursor: pointer;
+			z-index: 999;
 		}
 		#jsext-menu-open-btn {
 			color: ` + curtainColor + `;
