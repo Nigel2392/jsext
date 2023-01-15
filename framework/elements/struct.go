@@ -33,7 +33,7 @@ type Element struct {
 	Children             []*Element
 	value                js.Value
 	eventListeners       map[string][]func(this jsext.Value, event jsext.Event)
-	animations           []Animation
+	Animations           *Animations
 }
 
 func getText(t []string) string {
@@ -46,16 +46,17 @@ func getText(t []string) string {
 // NewElement creates a new element.
 // All normal HTML elements are predefined.
 func NewElement(tag string, text ...string) *Element {
-	return &Element{
+	var e = &Element{
 		Tag:                  tag,
 		Text:                 getText(text),
 		Attributes_Normal:    make(map[string][]string),
 		Attributes_Boolean:   make(map[string]bool),
 		Attributes_Semicolon: make(map[string][]string),
 		eventListeners:       make(map[string][]func(this jsext.Value, event jsext.Event)),
-		animations:           make([]Animation, 0),
 		Children:             make([]*Element, 0),
 	}
+	e.Animations = &Animations{element: e, animations: make([]Animation, 0)}
+	return e
 }
 
 // Return the js.Value of the element (if it has been rendered.)
@@ -474,7 +475,7 @@ func (e *Element) generate(parent js.Value) js.Value {
 		}
 	}
 
-	e.animate()
+	e.Animations.animate()
 
 	return e.value
 }

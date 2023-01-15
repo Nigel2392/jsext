@@ -39,6 +39,12 @@ type navbars_module struct {
 	Custom   func(logo *navbars.Logo, urls *elements.URLs, bg, fg string, middle ...*elements.Element) *elements.Element
 }
 
+type misc_module struct {
+	RoadMap     func(roadMap *misc.RoadMapOptions) *elements.Element
+	CreateModal func(opts misc.ModalOptions) *misc.Modal
+	SearchBar   func(classPrefix, foregroundHex, background, text string) []*elements.Element
+}
+
 var Carousels = carousels_module{
 	Plain: carousels.Plain,
 	Image: carousels.Image,
@@ -78,4 +84,8 @@ var Navbars = navbars_module{
 	Custom:   navbars.Custom,
 }
 
-var SearchBar = misc.SearchBar
+var Misc = misc_module{
+	RoadMap:     misc.RoadMap,
+	CreateModal: misc.CreateModal,
+	SearchBar:   misc.SearchBar,
+}

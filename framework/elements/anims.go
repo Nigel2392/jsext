@@ -10,6 +10,62 @@ import (
 // All animations get rendered in a separate goroutine.
 const Infinity = "Infinity"
 
+var scaleUp = Animation{Animations: []any{
+	map[string]interface{}{"transform": "scale(0)", "offset": "0"},
+	map[string]interface{}{"transform": "scale(1)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var scaleDown = Animation{Animations: []any{
+	map[string]interface{}{"transform": "scale(1)", "offset": "0"},
+	map[string]interface{}{"transform": "scale(0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var buzz = Animation{Animations: []any{
+	map[string]interface{}{"transform": "rotate(0deg)", "offset": "0"},
+	map[string]interface{}{"transform": "rotate(5deg)", "offset": "0.1"},
+	map[string]interface{}{"transform": "rotate(-5deg)", "offset": "0.2"},
+	map[string]interface{}{"transform": "rotate(5deg)", "offset": "0.3"},
+	map[string]interface{}{"transform": "rotate(-5deg)", "offset": "0.4"},
+	map[string]interface{}{"transform": "rotate(5deg)", "offset": "0.5"},
+	map[string]interface{}{"transform": "rotate(-5deg)", "offset": "0.6"},
+	map[string]interface{}{"transform": "rotate(5deg)", "offset": "0.7"},
+	map[string]interface{}{"transform": "rotate(-5deg)", "offset": "0.8"},
+	map[string]interface{}{"transform": "rotate(5deg)", "offset": "0.9"},
+	map[string]interface{}{"transform": "rotate(0deg)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var shake = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translate(0, 0)", "offset": "0"},
+	map[string]interface{}{"transform": "translate(-10px, 0)", "offset": "0.1"},
+	map[string]interface{}{"transform": "translate(10px, 0)", "offset": "0.2"},
+	map[string]interface{}{"transform": "translate(-10px, 0)", "offset": "0.3"},
+	map[string]interface{}{"transform": "translate(10px, 0)", "offset": "0.4"},
+	map[string]interface{}{"transform": "translate(-10px, 0)", "offset": "0.5"},
+	map[string]interface{}{"transform": "translate(10px, 0)", "offset": "0.6"},
+	map[string]interface{}{"transform": "translate(-10px, 0)", "offset": "0.7"},
+	map[string]interface{}{"transform": "translate(10px, 0)", "offset": "0.8"},
+	map[string]interface{}{"transform": "translate(-10px, 0)", "offset": "0.9"},
+	map[string]interface{}{"transform": "translate(0, 0)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
+var flash = Animation{Animations: []any{
+	map[string]interface{}{"opacity": "1", "offset": "0"},
+	map[string]interface{}{"opacity": "0", "offset": "0.25"},
+	map[string]interface{}{"opacity": "1", "offset": "0.5"},
+	map[string]interface{}{"opacity": "0", "offset": "0.75"},
+	map[string]interface{}{"opacity": "1", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+}}
 var fadeIn = Animation{Animations: []any{
 	map[string]interface{}{"opacity": "0", "offset": "0"},
 	map[string]interface{}{"opacity": "1", "offset": "1"},
@@ -68,6 +124,16 @@ var fromBottom = Animation{Animations: []any{
 	"easing":     "ease-in",
 }}
 
+type Animations struct {
+	animations []Animation
+	element    *Element
+}
+
+func (a *Animations) Add(anim Animation) *Animations {
+	a.animations = append(a.animations, anim)
+	return a
+}
+
 // Predefined element animations.
 type Animation struct {
 	Animations     []any
@@ -75,11 +141,15 @@ type Animation struct {
 	WhenInViewport bool
 }
 
-func (e *Element) Rainbow(colorsPerSecond float64, colors ...string) *Element {
+func (a *Animations) Element() *Element {
+	return a.element
+}
+
+func (a *Animations) Rainbow(colorsPerSecond float64, colors ...string) *Animations {
 	if len(colors) == 0 {
 		colors = []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet"}
 	}
-	e.AttrStyle("color:" + colors[0])
+	a.element.AttrStyle("color:" + colors[0])
 	var anim = Animation{WhenInViewport: true, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
 		"duration":   1000 / colorsPerSecond * float64(len(colors)),
 		"iterations": Infinity,
@@ -87,92 +157,137 @@ func (e *Element) Rainbow(colorsPerSecond float64, colors ...string) *Element {
 	for i, color := range colors {
 		anim.Animations[i] = map[string]interface{}{"color": color, "offset": float64(i) / float64(len(colors))}
 	}
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
+}
+
+// Scale the element up
+func (a *Animations) ScaleUp(timeMS int, wheninViewport ...bool) *Animations {
+	var anim = scaleUp
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	a.Animate(anim)
+	return a
+}
+
+// Scale the element down
+func (a *Animations) ScaleDown(timeMS int, wheninViewport ...bool) *Animations {
+	var anim = scaleDown
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	a.Animate(anim)
+	return a
+}
+
+// Buzz the element
+func (a *Animations) Buzz(timeMS int, wheninViewport ...bool) *Animations {
+	var anim = buzz
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	a.Animate(anim)
+	return a
+}
+
+// Shake the element
+func (a *Animations) Shake(timeMS int, wheninViewport ...bool) *Animations {
+	var anim = shake
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	a.Animate(anim)
+	return a
+}
+
+// Flash the element
+func (a *Animations) Flash(timeMS int, wheninViewport ...bool) *Animations {
+	var anim = flash
+	anim.Options["duration"] = timeMS
+	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	a.Animate(anim)
+	return a
 }
 
 // Fade the element in
-func (e *Element) FadeIn(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FadeIn(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fadeIn
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Fade the element out
-func (e *Element) FadeOut(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FadeOut(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fadeOut
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Bounce the element
-func (e *Element) Bounce(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) Bounce(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = bounce
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Slide the element in from the top
-func (e *Element) FromTop(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FromTop(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromTop
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Slide the element in from the left
-func (e *Element) FromLeft(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FromLeft(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromLeft
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Slide the element in from the right
-func (e *Element) FromRight(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FromRight(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromRight
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
 // Slide the element in from the bottom
-func (e *Element) FromBottom(timeMS int, wheninViewport ...bool) *Element {
+func (a *Animations) FromBottom(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromBottom
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	e.Animate(anim)
-	return e
+	a.Animate(anim)
+	return a
 }
 
-func (e *Element) animate() {
-	for _, anim := range e.animations {
-		go e.Animate(anim)
+func (a *Animations) animate() {
+	for _, anim := range a.animations {
+		go a.Animate(anim)
 	}
 }
 
-func (e *Element) Animate(a Animation) {
-	if e.value.IsUndefined() || e.value.IsNull() {
-		e.animations = append(e.animations, a)
+func (a *Animations) Animate(anim Animation) {
+	if a.element.value.IsUndefined() || a.element.value.IsNull() {
+		a.animations = append(a.animations, anim)
 		return
 	}
-	var jsArr = jsext.SliceToArray(a.Animations)
-	var jsOpts = jsext.MapToObject(a.Options)
-	if a.WhenInViewport {
-		InViewListener(e, func(this jsext.Value, event jsext.Event) {
-			e.value.Call("animate", jsArr.Value(), jsOpts.Value())
+	var jsArr = jsext.SliceToArray(anim.Animations)
+	var jsOpts = jsext.MapToObject(anim.Options)
+	if anim.WhenInViewport {
+		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
+			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
 		})
 	} else {
-		e.value.Call("animate", jsArr.Value(), jsOpts.Value())
+		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
 }
 

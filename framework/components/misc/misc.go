@@ -599,7 +599,7 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 		}
 
 		card_company.Div(item.Name)
-		card.FadeIn(500, true)
+		card.Animations.FadeIn(500, true)
 	}
 
 	var css = delimitRoadMapCSS(roadMap) + `
