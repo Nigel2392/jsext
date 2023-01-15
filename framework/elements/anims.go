@@ -138,7 +138,7 @@ func (a *Animations) Add(anim Animation) *Animations {
 type Animation struct {
 	Animations             []any
 	Options                map[string]interface{}
-	WhenInViewport         bool
+	whenInViewportAndReset bool
 	ResetWhenLeaveViewport bool
 }
 
@@ -151,7 +151,7 @@ func (a *Animations) Rainbow(colorsPerSecond float64, colors ...string) *Animati
 		colors = []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet"}
 	}
 	a.element.AttrStyle("color:" + colors[0])
-	var anim = Animation{WhenInViewport: true, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
+	var anim = Animation{whenInViewportAndReset: true, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
 		"duration":   1000 / colorsPerSecond * float64(len(colors)),
 		"iterations": Infinity,
 	}}
@@ -163,121 +163,121 @@ func (a *Animations) Rainbow(colorsPerSecond float64, colors ...string) *Animati
 }
 
 // Scale the element up
-func (a *Animations) ScaleUp(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) ScaleUp(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = scaleUp
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Scale the element down
-func (a *Animations) ScaleDown(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) ScaleDown(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = scaleDown
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Buzz the element
-func (a *Animations) Buzz(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) Buzz(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = buzz
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Shake the element
-func (a *Animations) Shake(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) Shake(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = shake
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Flash the element
-func (a *Animations) Flash(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) Flash(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = flash
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Fade the element in
-func (a *Animations) FadeIn(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FadeIn(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fadeIn
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Fade the element out
-func (a *Animations) FadeOut(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FadeOut(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fadeOut
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Bounce the element
-func (a *Animations) Bounce(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) Bounce(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = bounce
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Slide the element in from the top
-func (a *Animations) FromTop(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FromTop(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fromTop
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Slide the element in from the left
-func (a *Animations) FromLeft(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FromLeft(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fromLeft
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Slide the element in from the right
-func (a *Animations) FromRight(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FromRight(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fromRight
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
 
 // Slide the element in from the bottom
-func (a *Animations) FromBottom(timeMS int, wheninViewport ...bool) *Animations {
+func (a *Animations) FromBottom(timeMS int, whenInViewportAndReset ...bool) *Animations {
 	var anim = fromBottom
 	anim.Options["duration"] = timeMS
-	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
-	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
+	anim.whenInViewportAndReset = len(whenInViewportAndReset) > 0 && whenInViewportAndReset[0]
+	anim.ResetWhenLeaveViewport = len(whenInViewportAndReset) > 1 && whenInViewportAndReset[1]
 	a.Animate(anim)
 	return a
 }
@@ -295,10 +295,10 @@ func (a *Animations) Animate(anim Animation) {
 	}
 	var jsArr = jsext.SliceToArray(anim.Animations)
 	var jsOpts = jsext.MapToObject(anim.Options)
-	if anim.WhenInViewport {
+	if anim.whenInViewportAndReset {
 		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
 			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-		}, anim.WhenInViewport)
+		}, anim.ResetWhenLeaveViewport)
 	} else {
 		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
