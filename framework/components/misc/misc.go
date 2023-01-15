@@ -724,6 +724,26 @@ func (m *Modal) Create(appendToQuerySelector ...string) {
 	}
 }
 
+func (m *Modal) OpenOnClickOf(e *elements.Element) {
+	e.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+		var preventDefault = event.Get("preventDefault")
+		if preventDefault.Truthy() {
+			event.PreventDefault()
+		}
+		m.Show()
+	})
+}
+
+func (m *Modal) CloseOnClickOf(e *elements.Element) {
+	e.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
+		var preventDefault = event.Get("preventDefault")
+		if preventDefault.Truthy() {
+			event.PreventDefault()
+		}
+		m.Delete()
+	})
+}
+
 type ButtonType int
 
 const (
@@ -731,24 +751,15 @@ const (
 	Button ButtonType = 1
 )
 
-func (m *Modal) Button(tag ButtonType, innerText string, url ...string) *elements.Element {
+func (m *Modal) Button(tag ButtonType, innerText string) *elements.Element {
 	var btn *elements.Element
 	switch tag {
 	case Anchor:
-		btn = elements.A("", innerText)
-		if len(url) > 0 {
-			btn.AttrHref(url[0])
-		}
+		btn = elements.A("javascript:void(0)", innerText)
 	case Button:
-		btn = elements.Button("", innerText)
+		btn = elements.Button(innerText)
 	}
-	btn.AddEventListener("click", func(this jsext.Value, event jsext.Event) {
-		var preventDefault = event.Get("preventDefault")
-		if preventDefault.Truthy() {
-			preventDefault.Invoke()
-		}
-		m.Show()
-	})
+	m.OpenOnClickOf(btn)
 	return btn
 }
 
