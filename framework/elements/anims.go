@@ -136,9 +136,10 @@ func (a *Animations) Add(anim Animation) *Animations {
 
 // Predefined element animations.
 type Animation struct {
-	Animations     []any
-	Options        map[string]interface{}
-	WhenInViewport bool
+	Animations             []any
+	Options                map[string]interface{}
+	WhenInViewport         bool
+	ResetWhenLeaveViewport bool
 }
 
 func (a *Animations) Element() *Element {
@@ -166,6 +167,7 @@ func (a *Animations) ScaleUp(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = scaleUp
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -175,6 +177,7 @@ func (a *Animations) ScaleDown(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = scaleDown
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -184,6 +187,7 @@ func (a *Animations) Buzz(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = buzz
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -193,6 +197,7 @@ func (a *Animations) Shake(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = shake
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -202,6 +207,7 @@ func (a *Animations) Flash(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = flash
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -211,6 +217,7 @@ func (a *Animations) FadeIn(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fadeIn
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -220,6 +227,7 @@ func (a *Animations) FadeOut(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fadeOut
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -229,6 +237,7 @@ func (a *Animations) Bounce(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = bounce
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -238,6 +247,7 @@ func (a *Animations) FromTop(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromTop
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -247,6 +257,7 @@ func (a *Animations) FromLeft(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromLeft
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -256,6 +267,7 @@ func (a *Animations) FromRight(timeMS int, wheninViewport ...bool) *Animations {
 	var anim = fromRight
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -265,6 +277,7 @@ func (a *Animations) FromBottom(timeMS int, wheninViewport ...bool) *Animations 
 	var anim = fromBottom
 	anim.Options["duration"] = timeMS
 	anim.WhenInViewport = len(wheninViewport) > 0 && wheninViewport[0]
+	anim.ResetWhenLeaveViewport = len(wheninViewport) > 1 && wheninViewport[1]
 	a.Animate(anim)
 	return a
 }
@@ -285,13 +298,13 @@ func (a *Animations) Animate(anim Animation) {
 	if anim.WhenInViewport {
 		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
 			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-		})
+		}, anim.WhenInViewport)
 	} else {
 		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
 }
 
-func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
+func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event), resetOnLeave bool) {
 	var ran = false
 	if isInViewport(e) {
 		if !ran {
@@ -300,11 +313,12 @@ func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event)) {
 		}
 	}
 	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
-		if !ran {
-			if isInViewport(e) {
-				cb(this, event)
-				ran = true
-			}
+		var isInView = isInViewport(e)
+		if !ran && isInView {
+			cb(this, event)
+			ran = true
+		} else if ran && !isInView && resetOnLeave {
+			ran = false
 		}
 	})
 }
