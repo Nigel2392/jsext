@@ -882,10 +882,10 @@ func CreateModal(opts ModalOptions) *Modal {
 			background: ` + opts.ModalBackground + `;
 			border-radius: ` + opts.BorderRadius + `;
 			border: ` + opts.Border + `;
-			max-width: 80%;
+			max-width: 95%;
 			overflow-x: auto;
 			width: ` + opts.Width + `;
-			max-height: 80%;
+			max-height: 95%;
 			overflow-y: auto;
 			height: ` + opts.Height + `;
 			display: flex;
