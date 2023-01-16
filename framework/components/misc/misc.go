@@ -850,6 +850,7 @@ func CreateModal(opts ModalOptions) *Modal {
 			display: none;
 			justify-content: center;
 			align-items: center;
+			z-index: ` + strconv.Itoa(opts.ZIndex) + `;
 		}
 		.` + opts.ClassPrefix + `close-btn {
 			position: absolute;
