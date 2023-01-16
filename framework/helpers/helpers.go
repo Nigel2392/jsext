@@ -76,7 +76,7 @@ func SplitWords(s string) []string {
 	var words []string
 	var word string
 	for _, c := range s {
-		if c == ' ' || c == '\t' {
+		if c == ' ' || c == '\t' || c == '\r' || c == '\n' {
 			words = append(words, word)
 			word = ""
 		} else {
