@@ -164,7 +164,7 @@ func (r *Router) Handle(u *url.URL) {
 		if rt.Callable != nil {
 			go func() {
 				for _, m := range r.middlewares {
-					if !m(vars, u, r) {
+					if !m(vars, u, rt, r) {
 						return
 					}
 				}

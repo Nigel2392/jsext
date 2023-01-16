@@ -24,7 +24,7 @@ type HashRouter struct {
 	onLoad          func()
 	onPageChange    func(vars.Vars, *url.URL)
 	afterPageChange func(vars.Vars, *url.URL)
-	middlewares     []func(vars.Vars, *url.URL, rterr.ErrorThrower) bool
+	middlewares     []func(vars.Vars, *url.URL, *routes.Route, rterr.ErrorThrower) bool
 }
 
 // Initialize a new router.
@@ -33,7 +33,7 @@ func NewRouter() *HashRouter {
 }
 
 // Add a middleware to the router.
-func (r *HashRouter) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) {
+func (r *HashRouter) Use(middleware func(vars.Vars, *url.URL, *routes.Route, rterr.ErrorThrower) bool) {
 	r.middlewares = append(r.middlewares, middleware)
 }
 
@@ -114,7 +114,7 @@ func (r *HashRouter) Handle(hash string) {
 		r.onPageChange(nil, nil)
 	}
 	for _, middleware := range r.middlewares {
-		if !middleware(nil, nil, r) {
+		if !middleware(nil, nil, rt, r) {
 			return
 		}
 	}
@@ -139,18 +139,7 @@ func (r *HashRouter) Redirect(hash string) {
 func (r *HashRouter) route() {
 	jsext.Element(jsext.Document).AddEventListener("click", r.changePage)
 	js.Global().Get("window").Set("onhashchange", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		if r.onPageChange != nil {
-			r.onPageChange(nil, nil)
-		}
-		for _, middleware := range r.middlewares {
-			if !middleware(nil, nil, r) {
-				return nil
-			}
-		}
 		r.Handle(js.Global().Get("window").Get("location").Get("hash").String())
-		if r.afterPageChange != nil {
-			r.afterPageChange(nil, nil)
-		}
 		return nil
 	}))
 	js.Global().Get("window").Call("addEventListener", "popstate", js.FuncOf(func(this js.Value, args []js.Value) interface{} {

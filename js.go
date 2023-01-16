@@ -136,39 +136,69 @@ func WrapFunc(f func()) js.Func {
 }
 
 // Get an element by id.
-func GetElementById(id string) Element {
-	return Element(Document.Call("getElementById", id))
+func GetElementById(id string) (Element, error) {
+	var v = Document.Call("getElementById", id)
+	if v.IsUndefined() || v.IsNull() {
+		return Element(Undefined()), errors.New("value is undefined || null")
+	}
+	return Element(v), nil
 }
 
 // Get an element by tag name.
-func GetElementByTagName(tag string) Element {
-	return Element(Document.Call("getElementsByTagName", tag))
+func GetElementsByTagName(tag string) (Elements, error) {
+	var v = Document.Call("getElementsByTagName", tag)
+	if v.IsUndefined() || v.IsNull() {
+		return nil, errors.New("value is undefined || null")
+	}
+	var elements = UnpackArray[Element](v)
+	return elements, nil
 }
 
 // Get an element by class name.
-func GetElementByClassName(class string) Element {
-	return Element(Document.Call("getElementsByClassName", class))
+func GetElementsByClassName(class string) (Elements, error) {
+	var v = Document.Call("getElementsByClassName", class)
+	if v.IsUndefined() || v.IsNull() {
+		return nil, errors.New("value is undefined || null")
+	}
+	var elements = UnpackArray[Element](v)
+	return elements, nil
 }
 
 // QuerySelector returns the first element that matches the specified selector.
-func QuerySelector(selector string) Element {
-	return Element(Document.Call("querySelector", selector))
+func QuerySelector(selector string) (Element, error) {
+	var v = Document.Call("querySelector", selector)
+	if v.IsUndefined() || v.IsNull() {
+		return Element(Undefined()), errors.New("value is undefined || null")
+	}
+	return Element(v), nil
 }
 
 // QuerySelectorAll returns all elements that match the specified selector.
-func QuerySelectorAll(selector string) Elements {
-	var els = Document.Call("querySelectorAll", selector)
-	var elements []Element = make([]Element, els.Length())
-	for i := 0; i < els.Length(); i++ {
-		elements[i] = Element(els.Index(i))
+func QuerySelectorAll(selector string) (Elements, error) {
+	var v = Document.Call("querySelectorAll", selector)
+	if v.IsUndefined() || v.IsNull() {
+		return nil, errors.New("value is undefined || null")
 	}
-	return elements
+	var elements = UnpackArray[Element](v)
+	return elements, nil
+}
+
+// Unpack a js.value array to a slice.
+func UnpackArray[T Value | js.Value | Element | Style | Event](v js.Value) []T {
+	var slice []T = make([]T, v.Length())
+	for i := 0; i < v.Length(); i++ {
+		slice[i] = T(v.Index(i))
+	}
+	return slice
 }
 
 // Set a favicon for the document.
-func SetFavicon(url string) {
+func SetFavicon(url string) error {
 	// Get the first link element in the head
-	var link = QuerySelector("link[rel='icon']")
+	var link, err = QuerySelector("link[rel='icon']")
+	if err != nil {
+		return err
+	}
 	var t string
 	if url[len(url)-3:] == "ico" {
 		t = "image/x-icon"
@@ -178,28 +208,19 @@ func SetFavicon(url string) {
 	if link.Value().Truthy() {
 		link.SetAttribute("href", url)
 		link.SetAttribute("type", t)
-		return
+		return nil
 	}
 	Head.AppendChild(CreateLink(map[string]string{
 		"rel":  "icon",
 		"type": t,
 		"href": url,
 	}))
+	return nil
 }
 
 // Eval evaluates raw javascript code, returns the result as a js.Value.
 func Eval(script string) Value {
 	return Value(js.Global().Call("eval", script))
-}
-
-// Add an event listener to an element by it's id.
-func AddEventListenerById(id, event string, listener func(this Value, event Event)) {
-	GetElementById(id).AddEventListener(event, listener)
-}
-
-// Remove an event listener from an element by it's id.
-func RemoveEventListenerById(id, event string, listener func(this Value, event Event)) {
-	GetElementById(id).RemoveEventListener(event, listener)
 }
 
 // Set a timeout on a function.

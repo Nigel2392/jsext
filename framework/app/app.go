@@ -78,10 +78,14 @@ func (a *Application) SetClientFunc(f func() *requester.APIClient) *Application 
 func App(querySelector string, rt ...components.Router) *Application {
 	// Get the application body
 	var elem jsext.Element
+	var err error
 	if querySelector == "" {
 		elem = jsext.Body
 	} else {
-		elem = jsext.QuerySelector(querySelector)
+		elem, err = jsext.QuerySelector(querySelector)
+		if err != nil {
+			panic(err)
+		}
 	}
 	// Get the application router
 	var r components.Router
@@ -206,7 +210,7 @@ func (a *Application) run() int {
 		a.onLoad()
 	}
 	// Get the preloader, remove it if it exists
-	if preloader := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); preloader.Value().Truthy() {
+	if preloader, err := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); err == nil {
 		preloader.Remove()
 	}
 	<-WAITER

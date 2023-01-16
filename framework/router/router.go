@@ -19,7 +19,7 @@ type Router struct {
 	onLoad            func()
 	onPageChange      func(vars.Vars, *url.URL)
 	afterPageChange   func(vars.Vars, *url.URL)
-	middlewares       []func(vars.Vars, *url.URL, rterr.ErrorThrower) bool
+	middlewares       []func(vars.Vars, *url.URL, *routes.Route, rterr.ErrorThrower) bool
 }
 
 // Initialize a new router.
@@ -33,7 +33,7 @@ func (r *Router) SkipTrailingSlash() {
 }
 
 // Add a middleware to the router.
-func (r *Router) Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool) {
+func (r *Router) Use(middleware func(vars.Vars, *url.URL, *routes.Route, rterr.ErrorThrower) bool) {
 	r.middlewares = append(r.middlewares, middleware)
 }
 

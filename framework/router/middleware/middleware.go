@@ -4,11 +4,12 @@ import (
 	"net/url"
 	"runtime/debug"
 
+	"github.com/Nigel2392/jsext/framework/router/routes"
 	"github.com/Nigel2392/jsext/framework/router/rterr"
 	"github.com/Nigel2392/jsext/framework/router/vars"
 )
 
-func Recoverer(varMap vars.Vars, path *url.URL, err rterr.ErrorThrower) bool {
+func Recoverer(varMap vars.Vars, path *url.URL, rt *routes.Route, err rterr.ErrorThrower) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			println(string(debug.Stack()))

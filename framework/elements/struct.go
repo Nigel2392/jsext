@@ -34,6 +34,7 @@ type Element struct {
 	value                js.Value
 	eventListeners       map[string][]func(this jsext.Value, event jsext.Event)
 	Animations           *Animations
+	onRender             []func(this jsext.Element)
 }
 
 func getText(t []string) string {
@@ -41,6 +42,10 @@ func getText(t []string) string {
 		return t[0]
 	}
 	return ""
+}
+
+func (e *Element) OnRender(f func(this jsext.Element)) {
+	e.onRender = append(e.onRender, f)
 }
 
 // NewElement creates a new element.
@@ -54,6 +59,7 @@ func NewElement(tag string, text ...string) *Element {
 		Attributes_Semicolon: make(map[string][]string),
 		eventListeners:       make(map[string][]func(this jsext.Value, event jsext.Event)),
 		Children:             make([]*Element, 0),
+		onRender:             make([]func(this jsext.Element), 0),
 	}
 	e.Animations = &Animations{element: e, animations: make([]Animation, 0)}
 	return e
@@ -475,6 +481,14 @@ func (e *Element) generate(parent js.Value) js.Value {
 		}
 	}
 
+	// OnRender
+	if len(e.onRender) > 0 {
+		for _, fn := range e.onRender {
+			fn(jsext.Element(e.value))
+		}
+	}
+
+	// Animate
 	e.Animations.animate()
 
 	return e.value

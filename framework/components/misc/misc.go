@@ -718,7 +718,11 @@ func (m *Modal) Render() jsext.Element {
 
 func (m *Modal) Create(appendToQuerySelector ...string) {
 	if len(appendToQuerySelector) > 0 && appendToQuerySelector[0] != "" {
-		jsext.QuerySelector(appendToQuerySelector[0]).Append(m.Render())
+		var e, err = jsext.QuerySelector(appendToQuerySelector[0])
+		if err != nil {
+			panic(err)
+		}
+		e.Append(m.Render())
 	} else {
 		jsext.Body.Append(m.Render())
 	}

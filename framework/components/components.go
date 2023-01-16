@@ -48,6 +48,6 @@ type Router interface {
 	SkipTrailingSlash()
 	NameToTitle(bool)
 	Throw(int)
-	Use(middleware func(vars.Vars, *url.URL, rterr.ErrorThrower) bool)
+	Use(middleware func(vars.Vars, *url.URL, *routes.Route, rterr.ErrorThrower) bool)
 	Error(code int, msg string) rterr.RouterError
 }

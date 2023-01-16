@@ -4,6 +4,7 @@
 package jsext
 
 import (
+	"strings"
 	"syscall/js"
 )
 
@@ -57,7 +58,33 @@ func ImportLink(name, src, typ, rel string) Import {
 func StyleBlock(name, code string) Import {
 	var style = CreateElement("style")
 	style.Set("type", "text/css")
-	style.Set("innerText", code)
+	style.Set("innerHTML", code)
+	var i = Import{
+		name,
+		style,
+	}
+	i.run()
+	return i
+}
+
+// Import a single css block into the Global jsext style element.
+func ImportCSS(name, selector string, src ...string) Import {
+	var css = strings.Join(src, ";")
+	var style Element
+	var err error
+	style, err = GetElementById("jsext-main-style")
+	if err == nil {
+		style.Set("innerHTML", style.Get("innerHTML").String()+"\n"+selector+" { "+css+" }")
+		return Import{
+			name,
+			style,
+		}
+	} else {
+		style = CreateElement("style")
+	}
+	style.Set("type", "text/css")
+	style.Set("id", "jsext-main-style")
+	style.Set("innerHTML", selector+" { "+css+" }")
 	var i = Import{
 		name,
 		style,
