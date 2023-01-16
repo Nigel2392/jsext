@@ -71,6 +71,22 @@ func GetColor(colors []string, index int, def string) (string, int) {
 	return def, index
 }
 
+// Split words by spaces and tabs.
+func SplitWords(s string) []string {
+	var words []string
+	var word string
+	for _, c := range s {
+		if c == ' ' || c == '\t' {
+			words = append(words, word)
+			word = ""
+		} else {
+			word += string(c)
+		}
+	}
+	words = append(words, word)
+	return words
+}
+
 func ValueToString(v reflect.Value) string {
 	switch v.Kind() {
 	case reflect.String:

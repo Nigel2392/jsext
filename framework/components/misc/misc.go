@@ -912,3 +912,109 @@ func CreateModal(opts ModalOptions) *Modal {
 	modal.StyleBlock(css)
 	return (*Modal)(modal_container)
 }
+
+type JiggleOptions struct {
+	ChangeColor string
+	ClassPrefix string
+	Words       bool
+}
+
+func (opts *JiggleOptions) SetDefaults() {
+	if opts.ChangeColor == "" {
+		opts.ChangeColor = "red"
+	}
+	if opts.ClassPrefix == "" {
+		opts.ClassPrefix = "jsext"
+	}
+}
+
+func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
+	var options = *opts
+	options.SetDefaults()
+	var jiggle = elements.Animation{
+		Options: map[string]interface{}{
+			"duration":   200,
+			"iterations": 1,
+			"fill":       "forwards",
+			"easing":     "ease-out",
+		},
+	}
+	var textLen int
+	var split []string
+	var extra = ""
+	if options.Words {
+		// Extra css
+		extra = "padding: 0px 0.15em;"
+		// Split the words
+		split = helpers.SplitWords(text)
+		textLen = len(split)
+		jiggle.Animations = []any{
+			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "0.0"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.125"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(-3deg)", "offset": "0.25"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.25)", "offset": "0.375"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(3deg)", "offset": "0.75"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.875"},
+			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "1.0"},
+		}
+	} else {
+		// Extra css
+		extra = "white-space: pre;"
+		// Get the length of the text
+		textLen = len(text)
+		jiggle.Animations = []any{
+			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "0.0"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.125"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(-8deg)", "offset": "0.25"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.25)", "offset": "0.375"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(8deg)", "offset": "0.75"},
+			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.875"},
+			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "1.0"},
+		}
+	}
+	// Create the main element
+	var hash = helpers.FNVHashString(options.ChangeColor)
+	var main = elements.NewElement(tag).AttrClass(options.ClassPrefix + "-jiggle-" + hash)
+	// Initialize a slice large enough to hold all the characters/words
+	main.Children = make([]*elements.Element, textLen)
+	// Add the spans of characters/words
+	for i := 0; i < textLen; i++ {
+		switch options.Words {
+		case true:
+			main.Children[i] = elements.Span(split[i] + " ")
+		default:
+			main.Children[i] = elements.Span(string(text[i]))
+		}
+		main.Children[i].AttrClass(options.ClassPrefix + "-jiggle-text-" + hash)
+	}
+
+	// Set up the eventlisteners
+	go func(j *elements.Animation) {
+		for i := 0; i < len(main.Children); i++ {
+			main.Children[i].AddEventListener("mouseover", func(this jsext.Value, event jsext.Event) {
+				this.Call("animate", jsext.SliceToArray(jiggle.Animations).Value(), jsext.MapToObject(jiggle.Options).Value())
+			})
+		}
+	}(&jiggle)
+
+	jsext.StyleBlock(hash, `
+	.`+options.ClassPrefix+`-jiggle-`+hash+` {
+		pointer-events: none;
+		display: flex;
+		margin: 1em 0px;
+		flex-wrap: wrap;
+	}
+	.`+options.ClassPrefix+`-jiggle-text-`+hash+` {
+		display: inline;
+		pointer-events: all;
+		transform-origin: center;
+		transition: 0.2s;
+		`+extra+`
+	}
+	.`+options.ClassPrefix+`-jiggle-text-`+hash+`:hover {
+		color: `+options.ChangeColor+`;
+	}
+	`)
+
+	return main
+}
