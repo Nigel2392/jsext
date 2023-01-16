@@ -786,6 +786,7 @@ type ModalOptions struct {
 	ClassPrefix      string
 	CloseButton      bool
 	CloseButtonScale float64
+	ZIndex           int
 }
 
 func (opts *ModalOptions) SetDefaults() {
@@ -812,6 +813,9 @@ func (opts *ModalOptions) SetDefaults() {
 	}
 	if opts.CloseButtonScale == 0 {
 		opts.CloseButtonScale = 1
+	}
+	if opts.ZIndex == 0 {
+		opts.ZIndex = 9999
 	}
 }
 
