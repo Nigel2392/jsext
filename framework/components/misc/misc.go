@@ -96,45 +96,6 @@ func SearchBar(classPrefix, foregroundHex, background, text string) []*elements.
 	return []*elements.Element{searchContainer, searchbar, searchBarSubmit}
 }
 
-var spacing = " "
-var jsextPrefix = "jsext-"
-
-// Provide a grid based on a pattern.
-// Example: "$$$ ## $214" will create a grid with 3 columns.
-// Column 1 will be 3fr, column 2 will be 2fr, column 3 will be 4fr.
-func Grid(gridPattern string) (*elements.Element, []*elements.Element, error) {
-	var className = jsextPrefix + helpers.FNVHashString(gridPattern)
-	var grid = elements.Div().AttrClass(className + "-grid")
-	var splitGrid = strings.Split(gridPattern, spacing)
-	var fractionSlice = make([]string, len(splitGrid))
-	if len(splitGrid) == 0 {
-		return nil, nil, errors.New("Grid pattern is empty")
-	}
-	for i, v := range splitGrid {
-		fractionSlice[i] = strconv.Itoa(len(v)) + "fr"
-	}
-	var gridItems = make([]*elements.Element, len(splitGrid))
-	for i := 0; i < len(splitGrid); i++ {
-		var gridItem = grid.Div().AttrClass(className + "-grid-item")
-		gridItems[i] = gridItem
-	}
-	var fractionString = strings.Join(fractionSlice, " ")
-	var css = `
-		.` + className + `-grid {
-			display: grid;
-			grid-template-columns: ` + fractionString + `;
-			grid-template-rows: auto;
-			grid-gap: 1%;
-			width: 100%;
-		}
-		.` + className + `-grid-item {
-			width: 100%;
-		}
-		`
-	jsext.StyleBlock(className, css)
-	return grid, gridItems, nil
-}
-
 func NewCounter(elem *elements.Element) *Counter {
 	return &Counter{
 		count:   0,
@@ -1022,4 +983,286 @@ func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
 	`)
 
 	return main
+}
+
+type Grid interface {
+	Columns() []*elements.Element
+	Rows() []*elements.Element
+	Element() *elements.Element
+	Render() jsext.Element
+}
+
+var spacing = " "
+var jsextPrefix = "jsext-"
+
+type gridFromPattern elements.Element
+
+// Returns the rows of the grid.
+func (g *gridFromPattern) Rows() []*elements.Element {
+	var grid = elements.Element(*g)
+	return grid.Children
+}
+
+// Returns the columns of the grid.
+func (g *gridFromPattern) Columns() []*elements.Element {
+	var grid = elements.Element(*g)
+	var columns = make([]*elements.Element, 0)
+	for _, row := range grid.Children {
+		columns = append(columns, row.Children...)
+	}
+	return columns
+}
+
+// Returns the inner element of the grid.
+func (g *gridFromPattern) Element() *elements.Element {
+	var grid = elements.Element(*g)
+	return &grid
+}
+
+// Renders the grid.
+// Adheres to the component interface.
+func (g *gridFromPattern) Render() jsext.Element {
+	return g.Element().Render()
+}
+
+// Provide a grid based on a pattern.
+// Returns the rows and columns of the grid.
+func GridFromPattern(gridItemCallback func(row int, column int, index int) []*elements.Element, gridPattern ...string) Grid {
+	var gridContainer = elements.Div().AttrClass(jsextPrefix + "grid-container")
+	gridContainer.Children = make([]*elements.Element, len(gridPattern))
+	var index = 0
+	for i, pattern := range gridPattern {
+		var className = jsextPrefix + helpers.FNVHashString(pattern)
+		gridContainer.Children[i] = elements.Div().AttrClass(className + "grid-row")
+
+		// If the pattern is the same as the previous pattern, then we can just copy the previous row.
+		if i != 0 && gridPattern[i-1] == pattern {
+			var gridColumnPtr = gridContainer.Children[i-1].Children[0]
+			var gridColumn = *gridColumnPtr
+			var newColumn = &gridColumn
+			gridContainer.Children[i].Children = append(gridContainer.Children[i].Children, newColumn)
+			continue
+		}
+
+		var splitGrid = strings.Split(pattern, spacing)
+		var fractionSlice = make([]string, len(splitGrid))
+		if len(splitGrid) == 0 {
+			return nil
+		}
+
+		for j, v := range splitGrid {
+			fractionSlice[j] = strconv.Itoa(len(v)) + "fr"
+			gridContainer.Children[i].Div().AttrClass(className + "-grid-item")
+			if gridItemCallback != nil {
+				var elems = gridItemCallback(i, j, index)
+				if len(elems) > 0 {
+					gridContainer.Children[i].Children[j].Children = elems
+				}
+				index++
+			}
+		}
+		go func() {
+			var fractionString = strings.Join(fractionSlice, " ")
+			var css = `
+			.` + className + `grid-row {
+				display: grid;
+				grid-template-columns: ` + fractionString + `;
+				grid-template-rows: auto;
+				grid-gap: 1em;
+				width: 100%;
+			}
+			.` + className + `-grid-item {
+				width: 100%;
+			}`
+			jsext.StyleBlock(className, css)
+		}()
+	}
+	var gridCSS = `
+		.` + jsextPrefix + `grid-container {
+			display: grid;
+			grid-template-rows: auto;
+			grid-gap: 1em;
+			width: 100%;
+		}
+		.` + jsextPrefix + `grid-row {
+			width: 100%;
+		}
+	`
+	jsext.StyleBlock(jsextPrefix+"grid", gridCSS)
+	var gridElement = gridFromPattern(*gridContainer)
+	return &gridElement
+}
+
+type GridItem struct {
+	Header *elements.Element
+	Body   *elements.Element
+	Footer *elements.Element
+}
+
+func (g *GridItem) Container(className string) *elements.Element {
+	var container = elements.Div().AttrClass(className)
+	if g.Header != nil {
+		container.Append(g.Header)
+	}
+	if g.Body != nil {
+		container.Append(g.Body)
+	}
+	if g.Footer != nil {
+		container.Append(g.Footer)
+	}
+	return container
+}
+
+type GridOptions struct {
+	// The grid items to display inside of the grid.
+	GridItems []*GridItem
+	// Grid width, 100%, etc.
+	Width string
+	// GridItemWidth grid width, 1fr, etc.
+	GridItemWidth string
+	// Amount of rows and columns in the grid.
+	Columns int
+	Rows    int
+	// Column fractions
+	GridColumnWidth []string
+	// If there are too many grid items supplied, and ElementOnOverflow is not nil,
+	// the last grid item will be replaced with the ElementOnOverflow when used in a supportive function.
+	ElementOnOverflow *GridItem
+	// ExtraCSS is a map with the following keys, to edit their respective elements css styles.
+	// 	- grid
+	// 	- grid-item
+	ExtraCSS map[string]string
+	// Class prefix for the grid, and its elements.
+	ClassPrefix string
+	// Function to be called for adding extra CSS.
+	CSSFunc func(gridClass, itemClass, itemHeaderClass, itemBodyClass, itemFooterClass string) string
+}
+
+var GridDelimiter = " "
+
+func (c *GridOptions) Fractions(fr ...string) {
+	if len(fr) != c.Columns {
+		panic(errors.New("the amount of fractions must be equal to the amount of columns"))
+	}
+	c.GridColumnWidth = fr
+}
+
+func (c *GridOptions) setDefaults() {
+	if c.Width == "" {
+		c.Width = "100%"
+	}
+	if c.GridItemWidth == "" {
+		c.GridItemWidth = "1fr"
+	}
+	if c.ClassPrefix == "" {
+		c.ClassPrefix = "jsext"
+	}
+	if c.Columns == 1 && c.Rows == 1 {
+		panic("Cannot have 1 column and 1 row. You do not need a grid.")
+	}
+	if c.Columns == 0 {
+		c.Columns = 2
+	}
+	if c.Rows == 0 {
+		c.Rows = 1
+	}
+	if c.ExtraCSS == nil {
+		c.ExtraCSS = make(map[string]string)
+	}
+}
+
+func GridNoOverflow(opts *GridOptions) *elements.Element {
+	var options = *opts
+	options.setDefaults()
+	var (
+		GridItemClass       = options.ClassPrefix + `-grid-item`
+		GridItemHeaderClass = options.ClassPrefix + `-grid-item-header`
+		GridItemBodyClass   = options.ClassPrefix + `-grid-item-body`
+		GridItemFooterClass = options.ClassPrefix + `-grid-item-footer`
+	)
+	var isGreater = len(options.GridItems) > options.Columns*options.Rows
+	if isGreater {
+		if options.ElementOnOverflow != nil {
+			// Remove the last grid item and replace it with the overflow element.
+			options.GridItems = options.GridItems[:options.Columns*options.Rows-1]
+		} else {
+			options.GridItems = options.GridItems[:options.Columns*options.Rows]
+		}
+	}
+
+	var mainGrid = NewGrid(&options)
+
+	if options.ElementOnOverflow != nil && isGreater {
+		var gridItem = elements.Div().AttrClass(GridItemClass)
+		gridItem.Append(
+			options.ElementOnOverflow.Header.AttrClass(GridItemHeaderClass),
+			options.ElementOnOverflow.Body.AttrClass(GridItemBodyClass),
+			options.ElementOnOverflow.Footer.AttrClass(GridItemFooterClass),
+		)
+		mainGrid.Append(gridItem)
+	}
+
+	return mainGrid
+}
+
+func NewGrid(opts *GridOptions) *elements.Element {
+	var options = *opts
+	options.setDefaults()
+	var (
+		GridClass           = options.ClassPrefix + `-grid`
+		gridItemClass       = options.ClassPrefix + `-grid-item`
+		gridItemHeaderClass = options.ClassPrefix + `-grid-item-header`
+		gridItemBodyClass   = options.ClassPrefix + `-grid-item-body`
+		gridItemFooterClass = options.ClassPrefix + `-grid-item-footer`
+	)
+
+	var mainGrid = elements.Div().AttrClass(GridClass)
+	mainGrid.Children = make([]*elements.Element, len(options.GridItems))
+	for i, gridItem := range options.GridItems {
+		var gridItemContainer = elements.Div().AttrClass(gridItemClass)
+		if gridItem.Header != nil {
+			gridItemContainer.Append(gridItem.Header.AttrClass(gridItemHeaderClass))
+		}
+		if gridItem.Body != nil {
+			gridItemContainer.Append(gridItem.Body.AttrClass(gridItemBodyClass))
+		}
+		if gridItem.Footer != nil {
+			gridItemContainer.Append(gridItem.Footer.AttrClass(gridItemFooterClass))
+		}
+		mainGrid.Children[i] = gridItemContainer
+	}
+
+	var colFracs = `repeat(` + strconv.Itoa(options.Columns) + `, ` + options.GridItemWidth + `)`
+	if len(options.GridColumnWidth) > 0 {
+		colFracs = strings.Join(options.GridColumnWidth, " ")
+	}
+
+	var css = `
+		.` + GridClass + `{
+			display: grid;
+			grid-template-columns: ` + colFracs + `;
+			grid-template-rows: repeat(` + strconv.Itoa(options.Rows) + `, auto);
+			grid-gap: 1rem;
+			width: ` + options.Width + `;
+			` + options.ExtraCSS["grid"] + `
+		}
+		.` + gridItemClass + `{
+			width: 100%;
+			` + options.ExtraCSS["grid-item"] + `
+		}
+	`
+
+	if options.CSSFunc != nil {
+		css += options.CSSFunc(
+			GridClass,
+			gridItemClass,
+			gridItemHeaderClass,
+			gridItemBodyClass,
+			gridItemFooterClass,
+		)
+	}
+
+	mainGrid.StyleBlock(css)
+
+	return mainGrid
 }
