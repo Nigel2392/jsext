@@ -316,13 +316,34 @@ func DeleteCookie(name string) {
 	SetCookie(name, "", -1)
 }
 
-// Convert a js.Value to a map[string]string.
-func ObjectToMapString(obj js.Value) map[string]string {
-	var m = make(map[string]string)
+// Convert a js.Value to a map[string]T.
+func ObjectToMapT[T any](obj js.Value) map[string]T {
+	var m = make(map[string]T)
 	var keys = obj.Call("keys")
 	for i := 0; i < keys.Length(); i++ {
 		var key = keys.Index(i).String()
-		m[key] = obj.Get(key).String()
+		switch any(*new(T)).(type) {
+		case string:
+			m[key] = any(obj.Get(key).String()).(T)
+		case int, int8, int16, int32, int64:
+			m[key] = any(obj.Get(key).Int()).(T)
+		case float64, float32:
+			m[key] = any(obj.Get(key).Float()).(T)
+		case bool:
+			m[key] = any(obj.Get(key).Bool()).(T)
+		case js.Value, Value, Element, Event:
+			m[key] = any(obj.Get(key)).(T)
+		case []byte:
+			var b = make([]byte, obj.Get(key).Length())
+			js.CopyBytesToGo(b, obj.Get(key))
+			m[key] = any(b).(T)
+		case []any:
+			m[key] = any(ArrayToSlice(obj.Get(key))).(T)
+		case map[string]any:
+			m[key] = any(ObjectToMap(obj.Get(key))).(T)
+		default:
+			panic("unsupported type")
+		}
 	}
 	return m
 }

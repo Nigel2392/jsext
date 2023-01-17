@@ -916,11 +916,11 @@ func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
 		textLen = len(split)
 		jiggle.Animations = []any{
 			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "0.0"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.125"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(-3deg)", "offset": "0.25"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.25)", "offset": "0.375"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(3deg)", "offset": "0.75"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.875"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.1)", "offset": "0.125"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.15) rotate(-3deg)", "offset": "0.25"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.25)", "offset": "0.375"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.15) rotate(3deg)", "offset": "0.75"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.1)", "offset": "0.875"},
 			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "1.0"},
 		}
 	} else {
@@ -930,11 +930,11 @@ func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
 		textLen = len(text)
 		jiggle.Animations = []any{
 			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "0.0"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.125"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(-8deg)", "offset": "0.25"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.25)", "offset": "0.375"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.15) rotate(8deg)", "offset": "0.75"},
-			map[string]interface{}{"color": options.ChangeColor, "font-weight": "bold", "transform": "scale(1.1)", "offset": "0.875"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.1)", "offset": "0.125"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.15) rotate(-8deg)", "offset": "0.25"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.25)", "offset": "0.375"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.15) rotate(8deg)", "offset": "0.75"},
+			map[string]interface{}{"color": options.ChangeColor, "transform": "scale(1.1)", "offset": "0.875"},
 			map[string]interface{}{"transform": "scale(1) rotate(0deg)", "offset": "1.0"},
 		}
 	}

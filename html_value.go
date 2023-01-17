@@ -327,7 +327,7 @@ func (e Element) Dataset() Value {
 // Return the element's dataset as map
 func (e Element) MapDataset() map[string]string {
 	var dataset = e.Dataset()
-	return ObjectToMapString(dataset.Value())
+	return ObjectToMapT[string](dataset.Value())
 }
 
 // Get the element's first child.
@@ -386,4 +386,9 @@ func (e Element) ReplaceChild(element, before Element) {
 // Remove the element.
 func (e Element) Remove() {
 	e.JSValue().Call("remove")
+}
+
+// Animate the element.
+func (e Element) Animate(keyframes []interface{}, options map[string]interface{}) Value {
+	return Value(e.JSValue().Call("animate", SliceToArray(keyframes).Value(), MapToObject(options).Value()))
 }
