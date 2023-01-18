@@ -23,6 +23,12 @@ type ComponentWithEventListener interface {
 	AddEventListener(event string, fn func(this jsext.Value, event jsext.Event))
 }
 
+// Component with value interface
+type ComponentWithValue interface {
+	Component
+	Value() jsext.Value
+}
+
 // Loader component
 type Loader interface {
 	Stop()        // Stop the loader.
