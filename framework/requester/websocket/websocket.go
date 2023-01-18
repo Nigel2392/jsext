@@ -119,12 +119,12 @@ func (w *WebSocket) Send(data interface{}) error {
 		w.value.Call("send", buffer)
 	case js.Value:
 		w.value.Call("send", data)
-	case map[string]any:
-		var json = encoders.MarshalMap(data)
-		w.value.Call("send", json)
+	case map[string]interface{}:
+		var d = string(encoders.MarshalMap(data))
+		w.value.Call("send", d)
 	case []any:
-		var json = encoders.MarshalList(data)
-		w.value.Call("send", json)
+		var d = string(encoders.MarshalList(data))
+		w.value.Call("send", d)
 	case interface{ String() string }:
 		w.value.Call("send", data.String())
 	default:
