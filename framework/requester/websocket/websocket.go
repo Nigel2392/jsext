@@ -6,6 +6,8 @@ package websocket
 import (
 	"errors"
 	"syscall/js"
+
+	"github.com/Nigel2392/jsext/framework/requester/encoders"
 )
 
 type WebSocket struct {
@@ -110,6 +112,14 @@ func (w *WebSocket) Send(data interface{}) error {
 		w.value.Call("send", buffer)
 	case js.Value:
 		w.value.Call("send", data)
+	case map[string]any:
+		var json = encoders.MarshalMap(data)
+		w.value.Call("send", json)
+	case []any:
+		var json = encoders.MarshalList(data)
+		w.value.Call("send", json)
+	case interface{ String() string }:
+		w.value.Call("send", data.String())
 	default:
 		w.value.Call("send", data)
 	}
