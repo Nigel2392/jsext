@@ -96,6 +96,13 @@ func (w *WebSocket) CloseReasoned(code int, reason string) {
 	w.value.Call("close", code, reason)
 }
 
+// Allowed inputs:
+//   - string
+//   - []byte
+//   - js.Value
+//   - map[string]any
+//   - []any
+//   - interface{ String() string }
 func (w *WebSocket) Send(data interface{}) error {
 	if !w.open {
 		return errors.New("websocket: not open")
