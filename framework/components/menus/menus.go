@@ -45,7 +45,7 @@ const (
 
 type MenuOptions struct {
 	URLs             *elements.URLs
-	cssMap           map[CSSField]string
+	CSSMap           map[CSSField]string
 	ClassPrefix      string
 	ElementTag       string
 	URLFunc          func(e *elements.Element) *elements.Element
@@ -56,7 +56,7 @@ type MenuOptions struct {
 func NewMenuOptions(overlay OverlayDirection) *MenuOptions {
 	return &MenuOptions{
 		URLs:             elements.NewURLs(),
-		cssMap:           make(map[CSSField]string),
+		CSSMap:           make(map[CSSField]string),
 		ClassPrefix:      "jsext",
 		OverlayDirection: overlay,
 	}
@@ -76,50 +76,50 @@ func (m *MenuOptions) setDefaults() {
 			return li
 		}
 	}
-	if m.cssMap[OpenBtnColor] == "" {
-		m.cssMap[OpenBtnColor] = "white"
+	if m.CSSMap[OpenBtnColor] == "" {
+		m.CSSMap[OpenBtnColor] = "white"
 	}
-	if m.cssMap[OverlayBackgroundColor] == "" {
-		m.cssMap[OverlayBackgroundColor] = "rgba(0,0,0,0.5)"
+	if m.CSSMap[OverlayBackgroundColor] == "" {
+		m.CSSMap[OverlayBackgroundColor] = "rgba(0,0,0,0.5)"
 	}
-	if m.cssMap[TransitionDuration] == "" {
-		m.cssMap[TransitionDuration] = "0.5s"
+	if m.CSSMap[TransitionDuration] == "" {
+		m.CSSMap[TransitionDuration] = "0.5s"
 	}
-	if m.cssMap[OpenBtnBg] == "" {
-		m.cssMap[OpenBtnBg] = "rgba(0,0,0,0.5)"
+	if m.CSSMap[OpenBtnBg] == "" {
+		m.CSSMap[OpenBtnBg] = "rgba(0,0,0,0.5)"
 	}
-	if m.cssMap[CloseBtnBg] == "" {
-		m.cssMap[CloseBtnBg] = "red"
+	if m.CSSMap[CloseBtnBg] == "" {
+		m.CSSMap[CloseBtnBg] = "red"
 	}
-	if m.cssMap[CloseBtnColor] == "" {
-		m.cssMap[CloseBtnColor] = "white"
+	if m.CSSMap[CloseBtnColor] == "" {
+		m.CSSMap[CloseBtnColor] = "white"
 	}
-	if m.cssMap[ControlBtnSize] == "" {
-		m.cssMap[ControlBtnSize] = "50px"
+	if m.CSSMap[ControlBtnSize] == "" {
+		m.CSSMap[ControlBtnSize] = "50px"
 	}
-	if m.cssMap[MenuContainerCSSBlock] == "" {
-		m.cssMap[MenuContainerCSSBlock] = `flex-direction: row; align-items: center; justify-content: center;`
+	if m.CSSMap[MenuContainerCSSBlock] == "" {
+		m.CSSMap[MenuContainerCSSBlock] = `flex-direction: row; align-items: center; justify-content: center;`
 	}
-	if m.cssMap[MenuCssBlock] == "" {
-		m.cssMap[MenuCssBlock] = `display:flex;flex-direction: row;`
+	if m.CSSMap[MenuCssBlock] == "" {
+		m.CSSMap[MenuCssBlock] = `display:flex;flex-direction: row;`
 	}
-	if m.cssMap[MenuItemCSSBlock] == "" {
-		m.cssMap[MenuItemCSSBlock] = ``
+	if m.CSSMap[MenuItemCSSBlock] == "" {
+		m.CSSMap[MenuItemCSSBlock] = ``
 	}
-	if m.cssMap[TextColor] == "" {
-		m.cssMap[TextColor] = "white"
+	if m.CSSMap[TextColor] == "" {
+		m.CSSMap[TextColor] = "white"
 	}
-	if m.cssMap[TextColorActive] == "" {
-		m.cssMap[TextColorActive] = "white"
+	if m.CSSMap[TextColorActive] == "" {
+		m.CSSMap[TextColorActive] = "white"
 	}
-	if m.cssMap[BackgroundColor] == "" {
-		m.cssMap[BackgroundColor] = "rgba(0,0,0,0.5)"
+	if m.CSSMap[BackgroundColor] == "" {
+		m.CSSMap[BackgroundColor] = "rgba(0,0,0,0.5)"
 	}
-	if m.cssMap[BackgroundActive] == "" {
-		m.cssMap[BackgroundActive] = "#9200ff"
+	if m.CSSMap[BackgroundActive] == "" {
+		m.CSSMap[BackgroundActive] = "#9200ff"
 	}
-	if m.cssMap[ButtonWidth] == "" {
-		m.cssMap[ButtonWidth] = "200px"
+	if m.CSSMap[ButtonWidth] == "" {
+		m.CSSMap[ButtonWidth] = "200px"
 	}
 
 }
@@ -223,43 +223,43 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: ` + options.cssMap[OverlayBackgroundColor] + `;
-		transition: transform ` + options.cssMap[TransitionDuration] + `, border-radius ` + options.cssMap[TransitionDuration] + ` ease-in-out;
+		background: ` + options.CSSMap[OverlayBackgroundColor] + `;
+		transition: transform ` + options.CSSMap[TransitionDuration] + `, border-radius ` + options.CSSMap[TransitionDuration] + ` ease-in-out;
 		border-radius: ` + BorderRadiusStart + `;
 		transform: ` + translateStart + `;
 		display: flex;
-		` + options.cssMap[MenuContainerCSSBlock] + `
+		` + options.CSSMap[MenuContainerCSSBlock] + `
 	}
 	.` + menuClass + ` {
 		list-style: none;
 		margin: 0;
 		padding: 0;
-		` + options.cssMap[MenuCssBlock] + `
+		` + options.CSSMap[MenuCssBlock] + `
 	}
 	.` + menuItemClass + ` {
-		` + options.cssMap[MenuItemCSSBlock] + `
+		` + options.CSSMap[MenuItemCSSBlock] + `
 	}
 	.` + buttonClassOpen + ` {
 		position: fixed;
 		` + ButtonCss + `
-		height: ` + options.cssMap[ControlBtnSize] + `;
-		width: ` + options.cssMap[ControlBtnSize] + `;
-		font-size: calc(` + options.cssMap[ControlBtnSize] + ` / 1.5);
-		line-height: ` + options.cssMap[ControlBtnSize] + `;
+		height: ` + options.CSSMap[ControlBtnSize] + `;
+		width: ` + options.CSSMap[ControlBtnSize] + `;
+		font-size: calc(` + options.CSSMap[ControlBtnSize] + ` / 1.5);
+		line-height: ` + options.CSSMap[ControlBtnSize] + `;
 		text-align: center;
-		background-color: ` + options.cssMap[OpenBtnBg] + `;
-		color: ` + options.cssMap[OpenBtnColor] + `;
+		background-color: ` + options.CSSMap[OpenBtnBg] + `;
+		color: ` + options.CSSMap[OpenBtnColor] + `;
 		border-radius: 5px;
 		cursor: pointer;
-		transition: all ` + options.cssMap[TransitionDuration] + `;
+		transition: all ` + options.CSSMap[TransitionDuration] + `;
 		z-index: 999;
 	}
 	.` + buttonClassClose + ` {
 		position: absolute;
 		` + ButtonCss + `
-		height: ` + options.cssMap[ControlBtnSize] + `;
-		width: ` + options.cssMap[ControlBtnSize] + `;
-		background-color: ` + options.cssMap[CloseBtnBg] + `;
+		height: ` + options.CSSMap[ControlBtnSize] + `;
+		width: ` + options.CSSMap[ControlBtnSize] + `;
+		background-color: ` + options.CSSMap[CloseBtnBg] + `;
 		border-radius: 5px;
 		cursor: pointer;
 	}
@@ -269,9 +269,9 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%) rotate(45deg);
-		height: calc(` + options.cssMap[ControlBtnSize] + ` / 1.5);
-		width: calc(` + options.cssMap[ControlBtnSize] + ` / 10);
-		background-color: ` + options.cssMap[CloseBtnColor] + `
+		height: calc(` + options.CSSMap[ControlBtnSize] + ` / 1.5);
+		width: calc(` + options.CSSMap[ControlBtnSize] + ` / 10);
+		background-color: ` + options.CSSMap[CloseBtnColor] + `
 	}
 	.` + buttonClassClose + `:before {
 		content: "";
@@ -279,9 +279,9 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%) rotate(-45deg);
-		height: calc(` + options.cssMap[ControlBtnSize] + ` / 1.5);
-		width: calc(` + options.cssMap[ControlBtnSize] + ` / 10);
-		background-color: ` + options.cssMap[CloseBtnColor] + `
+		height: calc(` + options.CSSMap[ControlBtnSize] + ` / 1.5);
+		width: calc(` + options.CSSMap[ControlBtnSize] + ` / 10);
+		background-color: ` + options.CSSMap[CloseBtnColor] + `
 	}
 	`
 	if options.CssFunc != nil {
@@ -300,9 +300,9 @@ func Blurry(menu *MenuOptions) *elements.Element {
 		li.Append(e)
 		return li
 	}
-	var btnWidth = menu.cssMap[ButtonWidth]
+	var btnWidth = menu.CSSMap[ButtonWidth]
 	var btnHeight = "calc(" + btnWidth + " / 2.5)"
-	menu.cssMap[MenuCssBlock] = `display: flex;`
+	menu.CSSMap[MenuCssBlock] = `display: flex;`
 	menu.CssFunc = func(containerClass, manuContainerClass, menuClass, menuItemClass string) string {
 		return `.` + menuClass + ` li {
 			list-style: none;
@@ -316,7 +316,7 @@ func Blurry(menu *MenuOptions) *elements.Element {
 			font-size: calc(` + btnHeight + ` / 2);
 			line-height: ` + btnHeight + `;
 			text-align: center;
-			color: ` + menu.cssMap[TextColor] + `;
+			color: ` + menu.CSSMap[TextColor] + `;
 			text-transform: uppercase;
 			transition: all 0.3s;
 			z-index: 1;
@@ -335,7 +335,7 @@ func Blurry(menu *MenuOptions) *elements.Element {
 			left: 0;
 			width: 100%;
 			height: 100%;
-			background: ` + menu.cssMap[BackgroundActive] + `;
+			background: ` + menu.CSSMap[BackgroundActive] + `;
 			transition: 0.3s;
 			transform: scale(0);
 			z-index: -1;
@@ -366,12 +366,12 @@ func Curtains(menu *MenuOptions) *elements.Element {
 		return li
 	}
 	menu.CssFunc = func(containerClass, manuContainerClass, menuClass, menuItemClass string) string {
-		var btnWidth = menu.cssMap[ButtonWidth]
+		var btnWidth = menu.CSSMap[ButtonWidth]
 		var btnHeight = "calc(" + btnWidth + " / 2.5)"
-		var backgroundColor = menu.cssMap[BackgroundColor]
-		var backgroundColorActive = menu.cssMap[BackgroundActive]
-		var textColor = menu.cssMap[TextColor]
-		var textColorActive = menu.cssMap[TextColorActive]
+		var backgroundColor = menu.CSSMap[BackgroundColor]
+		var backgroundColorActive = menu.CSSMap[BackgroundActive]
+		var textColor = menu.CSSMap[TextColor]
+		var textColorActive = menu.CSSMap[TextColorActive]
 		var padding = 50
 		for i := 0; i < menu.URLs.Len(); i++ {
 			if padding == 0 {
