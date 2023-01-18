@@ -51,6 +51,17 @@ func (u *URLs) Set(key string, value *Element, external ...bool) {
 	// u.mu.Unlock()
 }
 
+func (u *URLs) SetRaw(key string, value *Element) {
+	key = strings.ToUpper(key)
+	if _, ok := u.urls[key]; ok {
+		panic("URL already exists: " + key)
+	}
+	// u.mu.Lock()
+	u.urls[key] = value
+	u.order = append(u.order, key)
+	// u.mu.Unlock()
+}
+
 // Delete a url element from the map, and remove it from the DOM
 func (u *URLs) Delete(key string) {
 	var ok bool
@@ -149,7 +160,13 @@ func (u *URLs) Keys() []string {
 }
 
 // Fill up the URLs map from a slice of Elements
-func (u *URLs) FromElements(elems ...*Element) {
+func (u *URLs) FromElements(raw bool, elems ...*Element) {
+	if raw {
+		for _, v := range elems {
+			u.SetRaw(v.Text, v)
+		}
+		return
+	}
 	for _, v := range elems {
 		var href = v.GetAttr("href")
 		if strings.HasPrefix(href, router.RT_PREFIX_EXTERNAL) {
