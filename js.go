@@ -5,6 +5,7 @@ package jsext
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"syscall/js"
 	"time"
@@ -314,6 +315,20 @@ func GetCookie(name string) string {
 // Delete a document cookie
 func DeleteCookie(name string) {
 	SetCookie(name, "", -1)
+}
+
+// Check if the user agent is mobile.
+func IsMobile() bool {
+	var ua string
+	if Window.Get("navigator").IsUndefined() || Window.Get("navigator").IsNull() {
+		ua = Global.Get("navigator").Get("userAgent").String()
+	} else {
+		ua = Window.Get("navigator").Get("userAgent").String()
+	}
+	// var regex string = "(Android|webOS|iP(home|od|ad)|BlackBerry|IEMobile|Opera Mini)"
+	var regex = `/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/`
+	var re = regexp.MustCompile(regex)
+	return re.MatchString(ua)
 }
 
 // Convert a js.Value to a map[string]T.

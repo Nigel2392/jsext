@@ -224,7 +224,7 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		right: 0;
 		bottom: 0;
 		background: ` + options.cssMap[OverlayBackgroundColor] + `;
-		transition: transform ` + options.cssMap[TransitionDuration] + `, border-radius ` + options.cssMap[TransitionDuration] + `;
+		transition: transform ` + options.cssMap[TransitionDuration] + `, border-radius ` + options.cssMap[TransitionDuration] + ` ease-in-out;
 		border-radius: ` + BorderRadiusStart + `;
 		transform: ` + translateStart + `;
 		display: flex;
