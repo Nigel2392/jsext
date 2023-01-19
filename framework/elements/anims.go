@@ -4,6 +4,8 @@
 package elements
 
 import (
+	"syscall/js"
+
 	"github.com/Nigel2392/jsext"
 )
 
@@ -296,47 +298,66 @@ func (a *Animations) Animate(anim Animation) {
 	var jsArr = jsext.SliceToArray(anim.Animations)
 	var jsOpts = jsext.MapToObject(anim.Options)
 	if anim.whenInViewportAndReset {
-		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
-			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-		}, anim.ResetWhenLeaveViewport)
+		var observer = jsext.Get("IntersectionObserver")
+		var observerInstance jsext.Value
+		observerInstance = observer.New(js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			var entries = args[0]
+			var entry = entries.Index(0)
+			var isIntersecting = entry.Get("isIntersecting").Bool()
+			if isIntersecting {
+				a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
+				if !anim.ResetWhenLeaveViewport {
+					observerInstance.Call("unobserve", entry.Get("target"))
+				}
+			}
+			return nil
+		}), jsext.MapToObject(map[string]interface{}{
+			"root":       nil,
+			"rootMargin": "0px",
+			"threshold":  0.5,
+		}).Value())
+
+		observerInstance.Call("observe", a.element.value)
+
 	} else {
 		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
 	}
 }
 
-func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event), resetOnLeave bool) {
-	var ran = false
-	if isInViewport(e) {
-		if !ran {
-			cb(jsext.Value{}, jsext.Event{})
-			ran = true
-		}
-	}
-	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
-		var isInView = isInViewport(e)
-		if !ran && isInView {
-			cb(this, event)
-			ran = true
-		} else if ran && !isInView && resetOnLeave {
-			ran = false
-		}
-	})
-}
-
-// isInViewport checks if the element is in the viewport
-func isInViewport(e *Element) bool {
-	var (
-		bounding   = e.value.Call("getBoundingClientRect")
-		elemHeight = e.value.Get("offsetHeight").Int()
-		elemWidth  = e.value.Get("offsetWidth").Int()
-	)
-
-	if bounding.Get("top").Int() >= -elemHeight &&
-		bounding.Get("left").Int() >= -elemWidth &&
-		bounding.Get("bottom").Int() <= (jsext.Window.Get("innerHeight").Int()+elemHeight) &&
-		bounding.Get("right").Int() <= (jsext.Window.Get("innerWidth").Int()+elemWidth) {
-		return true
-	}
-
-	return false
-}
+//	func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event), resetOnLeave bool) {
+//		var ran = false
+//		if isInViewport(e) {
+//			if !ran {
+//				cb(jsext.Value{}, jsext.Event{})
+//				ran = true
+//			}
+//		}
+//		jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
+//			var isInView = isInViewport(e)
+//			if !ran && isInView {
+//				cb(this, event)
+//				ran = true
+//			} else if ran && !isInView && resetOnLeave {
+//				ran = false
+//			}
+//		})
+//	}
+//
+//	// isInViewport checks if the element is in the viewport
+//	func isInViewport(e *Element) bool {
+//		var (
+//			bounding   = e.value.Call("getBoundingClientRect")
+//			elemHeight = e.value.Get("offsetHeight").Int()
+//			elemWidth  = e.value.Get("offsetWidth").Int()
+//		)
+//
+//		if bounding.Get("top").Int() >= -elemHeight &&
+//			bounding.Get("left").Int() >= -elemWidth &&
+//			bounding.Get("bottom").Int() <= (jsext.Window.Get("innerHeight").Int()+elemHeight) &&
+//			bounding.Get("right").Int() <= (jsext.Window.Get("innerWidth").Int()+elemWidth) {
+//			return true
+//		}
+//
+//		return false
+//	}
+//

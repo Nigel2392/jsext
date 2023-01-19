@@ -387,6 +387,12 @@ func (a *Application) Client() *requester.APIClient {
 	return a.client
 }
 
+// Set the client function.
+func (a *Application) SetClientFunc(f func() *requester.APIClient) *Application {
+	a.clientFunc = f
+	return a
+}
+
 func makeSlug(s string) string {
 	s = strings.ToLower(s)
 	var b strings.Builder
