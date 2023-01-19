@@ -895,8 +895,9 @@ func (opts *JiggleOptions) SetDefaults() {
 }
 
 func (opts *JiggleOptions) MainElementClass() string {
+	opts.SetDefaults()
 	var hash = helpers.FNVHashString(opts.ChangeColor)
-	return opts.ClassPrefix + "jiggle-" + hash
+	return opts.ClassPrefix + "-jiggle-" + hash
 }
 
 func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
