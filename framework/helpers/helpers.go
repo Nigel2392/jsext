@@ -61,7 +61,7 @@ func FNVHashString(s string) string {
 //		color, ct = getColor(opts.Colors, ct, "#5555ff")
 //
 // Get the color for a given chart index.
-func GetColor(colors []string, index int, def string) (string, int) {
+func GetColor[T any](colors []T, index int, def T) (T, int) {
 	if len(colors) > 0 {
 		if index >= len(colors) {
 			index = 0
