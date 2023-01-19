@@ -13,27 +13,8 @@ import (
 	"github.com/Nigel2392/jsext/framework/requester"
 )
 
-// Supported background types for the scrollable app.
-type BackgroundType int8
-
-// Type of gradient to use.
-type GradientType int8
-
 // Axis to scroll on.
 type Axis int8
-
-// Supported background types for the scrollable app.
-const (
-	BackgroundTypeImage BackgroundType = 1
-	BackgroundTypeColor BackgroundType = 2
-	BackgroundTypeStyle BackgroundType = 3
-)
-
-// Type of gradient to use.
-const (
-	GradientTypeLinear GradientType = 1
-	GradientTypeRadial GradientType = 2
-)
 
 // Axis to scroll on.
 const (
@@ -69,7 +50,6 @@ func (p *Page) OnHide(cb func()) *Page {
 // Application options
 type Options struct {
 	ScrollAxis        Axis
-	GradientType      GradientType
 	ClassPrefix       string
 	ScrollThrough     bool
 	GradientDirection string
@@ -84,9 +64,6 @@ func (o *Options) setDefaults() {
 	}
 	if o.ScrollAxis == 0 {
 		o.ScrollAxis = ScrollAxisY
-	}
-	if o.GradientType == 0 {
-		o.GradientType = GradientTypeLinear
 	}
 }
 
@@ -141,7 +118,7 @@ func (s *Application) Backgrounds(t BackgroundType, b ...string) Backgrounds {
 		backgrounds[i] = &Background{
 			BackgroundType: t,
 			Background:     background,
-			gradients:      make([]string, 0),
+			Gradient:       nil,
 		}
 	}
 	s.backgrounds = append(s.backgrounds, backgrounds...)
@@ -253,13 +230,13 @@ func (s *Application) Run() {
 			var backup = s.backgrounds[0]
 			for _, page := range s.pages {
 				bg, ct = helpers.GetColor(s.backgrounds, ct, backup)
-				css += bg.CSS(`#`+page.hash, s.Options.GradientDirection, s.Options.GradientType)
+				css += bg.CSS(`#`+page.hash, s.Options.GradientDirection)
 			}
 		} else {
 			css += (&Background{
 				BackgroundType: BackgroundTypeColor,
 				Background:     "#333333",
-			}).CSS(`.`+s.Options.ClassPrefix+`-page`, s.Options.GradientDirection, s.Options.GradientType)
+			}).CSS(`.`+s.Options.ClassPrefix+`-page`, s.Options.GradientDirection)
 		}
 
 		return css
