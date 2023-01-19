@@ -411,6 +411,7 @@ func makeSlug(s string) string {
 			if lastLetter {
 				b.WriteRune('-')
 			}
+			lastLetter = false
 		}
 	}
 	return b.String()
