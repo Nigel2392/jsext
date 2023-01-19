@@ -13,6 +13,16 @@ import (
 	"github.com/Nigel2392/jsext/framework/requester"
 )
 
+type PageDirection int8
+
+const (
+	Initial PageDirection = 0
+	Up      PageDirection = 1
+	Down    PageDirection = 2
+	Left    PageDirection = 3
+	Right   PageDirection = 4
+)
+
 // Axis to scroll on.
 type Axis int8
 
@@ -31,18 +41,18 @@ type Page struct {
 	title  string
 	hash   string
 	c      components.ComponentWithValue
-	onShow func(element components.ComponentWithValue)
-	onHide func(element components.ComponentWithValue)
+	onShow func(element components.ComponentWithValue, p PageDirection)
+	onHide func(element components.ComponentWithValue, p PageDirection)
 }
 
 // Callback for when the page is being viewed.
-func (p *Page) OnShow(cb func(element components.ComponentWithValue)) *Page {
+func (p *Page) OnShow(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
 	p.onShow = cb
 	return p
 }
 
 // Callback for when the page is being hidden.
-func (p *Page) OnHide(cb func(element components.ComponentWithValue)) *Page {
+func (p *Page) OnHide(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
 	p.onHide = cb
 	return p
 }
@@ -310,7 +320,7 @@ func (s *Application) Run() {
 		}
 	}
 
-	s.updatePage()
+	s.updatePage(Initial)
 	<-waiter
 }
 
@@ -326,26 +336,42 @@ func (s *Application) Close() {
 
 // Go to the next page
 func (s *Application) NextPage() {
-	var page = s.pages[s.currentPage]
-	if page.onHide != nil {
-		page.onHide(page.c)
+	var p PageDirection
+	switch s.Options.ScrollAxis {
+	case ScrollAxisX:
+		p = Right
+	case ScrollAxisY:
+		p = Down
 	}
-	s.currentPage++
-	s.updatePage()
+	s.updatePage(p)
 }
 
 // Go to the previous page
 func (s *Application) PreviousPage() {
-	var page = s.pages[s.currentPage]
-	if page.onHide != nil {
-		page.onHide(page.c)
+	var p PageDirection
+	switch s.Options.ScrollAxis {
+	case ScrollAxisX:
+		p = Left
+	case ScrollAxisY:
+		p = Up
 	}
-	s.currentPage--
-	s.updatePage()
+	s.updatePage(p)
 }
 
 // Update the page
-func (s *Application) updatePage() {
+func (s *Application) updatePage(p PageDirection) {
+	var currentPage = s.pages[s.currentPage]
+	if currentPage.onHide != nil {
+		currentPage.onHide(currentPage.c, p)
+	}
+	switch p {
+	case Down, Right:
+		s.currentPage++
+	case Up, Left:
+		s.currentPage--
+	case Initial:
+		s.currentPage = 0
+	}
 	if s.Options.ScrollThrough {
 		if s.currentPage >= len(s.pages) {
 			s.currentPage = 0
@@ -365,7 +391,7 @@ func (s *Application) updatePage() {
 	js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
 	s.containerByIndex(s.currentPage).ScrollIntoView(true)
 	if page.onShow != nil {
-		page.onShow(page.c)
+		page.onShow(page.c, p)
 	}
 	if s.onPageChange != nil {
 		s.onPageChange(s.currentPage)

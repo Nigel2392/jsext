@@ -20,6 +20,285 @@ const (
 // All animations get rendered in a separate goroutine.
 const Infinity = "Infinity"
 
+type Animations struct {
+	animations []Animation
+	element    *Element
+}
+
+func (a *Animations) Add(anim Animation) *Animations {
+	a.animations = append(a.animations, anim)
+	return a
+}
+
+// Predefined element animations.
+type Animation struct {
+	Animations             []any
+	Options                map[string]interface{}
+	ObserverOption         ObserverOption
+	ResetWhenLeaveViewport bool
+}
+
+func (a *Animations) Element() *Element {
+	return a.element
+}
+
+func (a *Animations) Rainbow(colorsPerSecond float64, colors ...string) *Animations {
+	if len(colors) == 0 {
+		colors = []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet"}
+	}
+	a.element.AttrStyle("color:" + colors[0])
+	var anim = Animation{ObserverOption: UseIntersectionObserver, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
+		"duration":   1000 / colorsPerSecond * float64(len(colors)),
+		"iterations": Infinity,
+	}}
+	for i, color := range colors {
+		anim.Animations[i] = map[string]interface{}{"color": color, "offset": float64(i) / float64(len(colors))}
+	}
+	a.Animate(anim)
+	return a
+}
+
+// Scale the element up
+func (a *Animations) ScaleUp(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = scaleUp
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Scale the element down
+func (a *Animations) ScaleDown(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = scaleDown
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Buzz the element
+func (a *Animations) Buzz(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = buzz
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Shake the element
+func (a *Animations) Shake(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = shake
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Flash the element
+func (a *Animations) Flash(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = flash
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Fade the element in
+func (a *Animations) FadeIn(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fadeIn
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Fade the element out
+func (a *Animations) FadeOut(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fadeOut
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Bounce the element
+func (a *Animations) Bounce(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = bounce
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element in from the top
+func (a *Animations) FromTop(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fromTop
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element in from the left
+func (a *Animations) FromLeft(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fromLeft
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element in from the right
+func (a *Animations) FromRight(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fromRight
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element in from the bottom
+func (a *Animations) FromBottom(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = fromBottom
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element out to the top
+func (a *Animations) ToTop(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = toTop
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element out to the left
+func (a *Animations) ToLeft(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = toLeft
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element out to the right
+func (a *Animations) ToRight(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = toRight
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Slide the element out to the bottom
+func (a *Animations) ToBottom(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
+	var anim = toBottom
+	anim.Options["duration"] = timeMS
+	anim.ObserverOption = observerOption
+	anim.ResetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
+	a.Animate(anim)
+	return a
+}
+
+// Run all animations
+func (a *Animations) animate() {
+	for _, anim := range a.animations {
+		go a.Animate(anim)
+	}
+}
+
+func (a *Animations) Animate(anim Animation) {
+	if a.element.value.IsUndefined() || a.element.value.IsNull() {
+		a.animations = append(a.animations, anim)
+		return
+	}
+	var jsArr = jsext.SliceToArray(anim.Animations)
+	var jsOpts = jsext.MapToObject(anim.Options)
+	switch anim.ObserverOption {
+	case UseNone:
+		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
+	case UseIntersectionObserver:
+		var observer = jsext.Get("IntersectionObserver")
+		var observerInstance jsext.Value
+		observerInstance = observer.New(js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			var entries = args[0]
+			var entry = entries.Index(0)
+			var isIntersecting = entry.Get("isIntersecting").Bool()
+			if isIntersecting {
+				a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
+				if !anim.ResetWhenLeaveViewport {
+					observerInstance.Call("unobserve", a.element.value)
+				}
+			}
+			return nil
+		}), jsext.MapToObject(map[string]interface{}{
+			"root":       nil,
+			"rootMargin": "0px",
+			"threshold":  0.5,
+		}).Value())
+		observerInstance.Call("observe", a.element.value)
+	case UseScrollObserver:
+		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
+			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
+		}, anim.ResetWhenLeaveViewport)
+	}
+}
+
+func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event), resetOnLeave bool) {
+	var ran = false
+	if isInViewport(e) {
+		if !ran {
+			cb(jsext.Value{}, jsext.Event{})
+			ran = true
+		}
+	}
+	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
+		var isInView = isInViewport(e)
+		if !ran && isInView {
+			cb(this, event)
+			ran = true
+		} else if ran && !isInView && resetOnLeave {
+			ran = false
+		}
+	})
+}
+
+// isInViewport checks if the element is in the viewport
+func isInViewport(e *Element) bool {
+	var (
+		bounding   = e.value.Call("getBoundingClientRect")
+		elemHeight = e.value.Get("offsetHeight").Int()
+		elemWidth  = e.value.Get("offsetWidth").Int()
+	)
+
+	if bounding.Get("top").Int() >= -elemHeight &&
+		bounding.Get("left").Int() >= -elemWidth &&
+		bounding.Get("bottom").Int() <= (jsext.Window.Get("innerHeight").Int()+elemHeight) &&
+		bounding.Get("right").Int() <= (jsext.Window.Get("innerWidth").Int()+elemWidth) {
+		return true
+	}
+
+	return false
+}
+
 var scaleUp = Animation{Animations: []any{
 	map[string]interface{}{"transform": "scale(0)", "offset": "0"},
 	map[string]interface{}{"transform": "scale(1)", "offset": "1"},
@@ -133,241 +412,35 @@ var fromBottom = Animation{Animations: []any{
 	"fill":       "forwards",
 	"easing":     "ease-in",
 }}
-
-type Animations struct {
-	animations []Animation
-	element    *Element
-}
-
-func (a *Animations) Add(anim Animation) *Animations {
-	a.animations = append(a.animations, anim)
-	return a
-}
-
-// Predefined element animations.
-type Animation struct {
-	Animations             []any
-	Options                map[string]interface{}
-	ObserverOption         ObserverOption
-	resetWhenLeaveViewport bool
-}
-
-func (a *Animations) Element() *Element {
-	return a.element
-}
-
-func (a *Animations) Rainbow(colorsPerSecond float64, colors ...string) *Animations {
-	if len(colors) == 0 {
-		colors = []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet"}
-	}
-	a.element.AttrStyle("color:" + colors[0])
-	var anim = Animation{ObserverOption: UseIntersectionObserver, Animations: make([]any, len(colors)+1), Options: map[string]interface{}{
-		"duration":   1000 / colorsPerSecond * float64(len(colors)),
-		"iterations": Infinity,
-	}}
-	for i, color := range colors {
-		anim.Animations[i] = map[string]interface{}{"color": color, "offset": float64(i) / float64(len(colors))}
-	}
-	a.Animate(anim)
-	return a
-}
-
-// Scale the element up
-func (a *Animations) ScaleUp(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = scaleUp
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Scale the element down
-func (a *Animations) ScaleDown(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = scaleDown
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Buzz the element
-func (a *Animations) Buzz(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = buzz
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Shake the element
-func (a *Animations) Shake(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = shake
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Flash the element
-func (a *Animations) Flash(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = flash
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Fade the element in
-func (a *Animations) FadeIn(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fadeIn
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Fade the element out
-func (a *Animations) FadeOut(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fadeOut
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Bounce the element
-func (a *Animations) Bounce(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = bounce
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Slide the element in from the top
-func (a *Animations) FromTop(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fromTop
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Slide the element in from the left
-func (a *Animations) FromLeft(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fromLeft
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Slide the element in from the right
-func (a *Animations) FromRight(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fromRight
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-// Slide the element in from the bottom
-func (a *Animations) FromBottom(timeMS int, observerOption ObserverOption, resetOnLeave ...bool) *Animations {
-	var anim = fromBottom
-	anim.Options["duration"] = timeMS
-	anim.ObserverOption = observerOption
-	anim.resetWhenLeaveViewport = len(resetOnLeave) > 0 && resetOnLeave[0]
-	a.Animate(anim)
-	return a
-}
-
-func (a *Animations) animate() {
-	for _, anim := range a.animations {
-		go a.Animate(anim)
-	}
-}
-
-func (a *Animations) Animate(anim Animation) {
-	if a.element.value.IsUndefined() || a.element.value.IsNull() {
-		a.animations = append(a.animations, anim)
-		return
-	}
-	var jsArr = jsext.SliceToArray(anim.Animations)
-	var jsOpts = jsext.MapToObject(anim.Options)
-	switch anim.ObserverOption {
-	case UseNone:
-		a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-	case UseIntersectionObserver:
-		var observer = jsext.Get("IntersectionObserver")
-		var observerInstance jsext.Value
-		observerInstance = observer.New(js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			var entries = args[0]
-			var entry = entries.Index(0)
-			var isIntersecting = entry.Get("isIntersecting").Bool()
-			if isIntersecting {
-				a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-				if !anim.resetWhenLeaveViewport {
-					observerInstance.Call("unobserve", a.element.value)
-				}
-			}
-			return nil
-		}), jsext.MapToObject(map[string]interface{}{
-			"root":       nil,
-			"rootMargin": "0px",
-			"threshold":  0.5,
-		}).Value())
-		observerInstance.Call("observe", a.element.value)
-	case UseScrollObserver:
-		InViewListener(a.element, func(this jsext.Value, event jsext.Event) {
-			a.element.value.Call("animate", jsArr.Value(), jsOpts.Value())
-		}, anim.resetWhenLeaveViewport)
-	}
-}
-
-func InViewListener(e *Element, cb func(this jsext.Value, event jsext.Event), resetOnLeave bool) {
-	var ran = false
-	if isInViewport(e) {
-		if !ran {
-			cb(jsext.Value{}, jsext.Event{})
-			ran = true
-		}
-	}
-	jsext.Element(jsext.Window).AddEventListener("scroll", func(this jsext.Value, event jsext.Event) {
-		var isInView = isInViewport(e)
-		if !ran && isInView {
-			cb(this, event)
-			ran = true
-		} else if ran && !isInView && resetOnLeave {
-			ran = false
-		}
-	})
-}
-
-// isInViewport checks if the element is in the viewport
-func isInViewport(e *Element) bool {
-	var (
-		bounding   = e.value.Call("getBoundingClientRect")
-		elemHeight = e.value.Get("offsetHeight").Int()
-		elemWidth  = e.value.Get("offsetWidth").Int()
-	)
-
-	if bounding.Get("top").Int() >= -elemHeight &&
-		bounding.Get("left").Int() >= -elemWidth &&
-		bounding.Get("bottom").Int() <= (jsext.Window.Get("innerHeight").Int()+elemHeight) &&
-		bounding.Get("right").Int() <= (jsext.Window.Get("innerWidth").Int()+elemWidth) {
-		return true
-	}
-
-	return false
-}
+var toTop = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateY(0)", "offset": "0"},
+	map[string]interface{}{"transform": "translateY(-100%)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var toLeft = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateX(0)", "offset": "0"},
+	map[string]interface{}{"transform": "translateX(-100%)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var toRight = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateX(0)", "offset": "0"},
+	map[string]interface{}{"transform": "translateX(100%)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
+var toBottom = Animation{Animations: []any{
+	map[string]interface{}{"transform": "translateY(0)", "offset": "0"},
+	map[string]interface{}{"transform": "translateY(100%)", "offset": "1"},
+}, Options: map[string]interface{}{
+	"iterations": 1,
+	"fill":       "forwards",
+	"easing":     "ease-in",
+}}
