@@ -49,18 +49,14 @@ func (p *Page) OnHide(cb func()) *Page {
 
 // Application options
 type Options struct {
-	ScrollAxis        Axis
-	ClassPrefix       string
-	ScrollThrough     bool
-	GradientDirection string
+	ScrollAxis    Axis
+	ClassPrefix   string
+	ScrollThrough bool
 }
 
 func (o *Options) setDefaults() {
 	if o.ClassPrefix == "" {
 		o.ClassPrefix = "jsext-scrollable-app"
-	}
-	if o.GradientDirection == "" {
-		o.GradientDirection = "to top"
 	}
 	if o.ScrollAxis == 0 {
 		o.ScrollAxis = ScrollAxisY
@@ -118,7 +114,9 @@ func (s *Application) Backgrounds(t BackgroundType, b ...string) Backgrounds {
 		backgrounds[i] = &Background{
 			BackgroundType: t,
 			Background:     background,
-			Gradient:       nil,
+			Gradient: &Gradient{
+				Gradients: make([]string, 0),
+			},
 		}
 	}
 	s.backgrounds = append(s.backgrounds, backgrounds...)
@@ -230,13 +228,13 @@ func (s *Application) Run() {
 			var backup = s.backgrounds[0]
 			for _, page := range s.pages {
 				bg, ct = helpers.GetColor(s.backgrounds, ct, backup)
-				css += bg.CSS(`#`+page.hash, s.Options.GradientDirection)
+				css += bg.CSS(`#` + page.hash)
 			}
 		} else {
 			css += (&Background{
 				BackgroundType: BackgroundTypeColor,
 				Background:     "#333333",
-			}).CSS(`.`+s.Options.ClassPrefix+`-page`, s.Options.GradientDirection)
+			}).CSS(`.` + s.Options.ClassPrefix + `-page`)
 		}
 
 		return css
