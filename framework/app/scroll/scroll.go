@@ -31,18 +31,18 @@ type Page struct {
 	title  string
 	hash   string
 	c      components.ComponentWithValue
-	onShow func()
-	onHide func()
+	onShow func(element components.ComponentWithValue)
+	onHide func(element components.ComponentWithValue)
 }
 
 // Callback for when the page is being viewed.
-func (p *Page) OnShow(cb func()) *Page {
+func (p *Page) OnShow(cb func(element components.ComponentWithValue)) *Page {
 	p.onShow = cb
 	return p
 }
 
 // Callback for when the page is being hidden.
-func (p *Page) OnHide(cb func()) *Page {
+func (p *Page) OnHide(cb func(element components.ComponentWithValue)) *Page {
 	p.onHide = cb
 	return p
 }
@@ -328,7 +328,7 @@ func (s *Application) Close() {
 func (s *Application) NextPage() {
 	var page = s.pages[s.currentPage]
 	if page.onHide != nil {
-		page.onHide()
+		page.onHide(page.c)
 	}
 	s.currentPage++
 	s.updatePage()
@@ -338,7 +338,7 @@ func (s *Application) NextPage() {
 func (s *Application) PreviousPage() {
 	var page = s.pages[s.currentPage]
 	if page.onHide != nil {
-		page.onHide()
+		page.onHide(page.c)
 	}
 	s.currentPage--
 	s.updatePage()
@@ -365,7 +365,7 @@ func (s *Application) updatePage() {
 	js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
 	s.containerByIndex(s.currentPage).ScrollIntoView(true)
 	if page.onShow != nil {
-		page.onShow()
+		page.onShow(page.c)
 	}
 	if s.onPageChange != nil {
 		s.onPageChange(s.currentPage)
