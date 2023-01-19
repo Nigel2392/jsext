@@ -41,19 +41,19 @@ type Page struct {
 	title  string
 	hash   string
 	c      components.ComponentWithValue
-	onShow func(element components.ComponentWithValue, p PageDirection)
-	onHide func(element components.ComponentWithValue, p PageDirection)
+	OnShow func(element components.ComponentWithValue, p PageDirection)
+	OnHide func(element components.ComponentWithValue, p PageDirection)
 }
 
 // Callback for when the page is being viewed.
-func (p *Page) OnShow(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
-	p.onShow = cb
+func (p *Page) SetOnShow(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
+	p.OnShow = cb
 	return p
 }
 
 // Callback for when the page is being hidden.
-func (p *Page) OnHide(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
-	p.onHide = cb
+func (p *Page) SetOnHide(cb func(element components.ComponentWithValue, p PageDirection)) *Page {
+	p.OnHide = cb
 	return p
 }
 
@@ -275,9 +275,9 @@ func (s *Application) Run() {
 
 	// Add the application eventlistener for the arrow keys
 	jsext.Document.Call("addEventListener", "keydown", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		if args[0].Get("key").String() == "ArrowRight" {
+		if args[0].Get("key").String() == "ArrowRight" || args[0].Get("key").String() == "ArrowDown" {
 			s.NextPage()
-		} else if args[0].Get("key").String() == "ArrowLeft" {
+		} else if args[0].Get("key").String() == "ArrowLeft" || args[0].Get("key").String() == "ArrowUp" {
 			s.PreviousPage()
 		}
 		return nil
@@ -361,8 +361,8 @@ func (s *Application) PreviousPage() {
 // Update the page
 func (s *Application) updatePage(p PageDirection) {
 	var currentPage = s.pages[s.currentPage]
-	if currentPage.onHide != nil {
-		currentPage.onHide(currentPage.c, p)
+	if currentPage.OnHide != nil {
+		currentPage.OnHide(currentPage.c, p)
 	}
 	switch p {
 	case Down, Right:
@@ -390,8 +390,8 @@ func (s *Application) updatePage(p PageDirection) {
 	// always push state to /#hash
 	js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
 	s.containerByIndex(s.currentPage).ScrollIntoView(true)
-	if page.onShow != nil {
-		page.onShow(page.c, p)
+	if page.OnShow != nil {
+		page.OnShow(page.c, p)
 	}
 	if s.onPageChange != nil {
 		s.onPageChange(s.currentPage)
@@ -435,4 +435,24 @@ func makeSlug(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// containerByName returns the page's container by name.
+func (s *Application) ContainerByName(name string) jsext.Element {
+	for i, page := range s.pages {
+		if page.title == name {
+			return s.containerByIndex(i)
+		}
+	}
+	return jsext.Undefined().ToElement()
+}
+
+// PageByName returns the page by name.
+func (s *Application) PageByName(name string) *Page {
+	for _, page := range s.pages {
+		if page.title == name {
+			return page
+		}
+	}
+	return nil
 }

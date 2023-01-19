@@ -144,49 +144,49 @@ func Unstyled(options *MenuOptions) *elements.Element {
 	var menu_container = container.Div().AttrClass(manuContainerClass)
 	var menu = elements.NewElement(options.ElementTag).AttrClass(menuClass)
 
-	var translateStart = "translateX(-100%)"
+	var translateStart = "translateX(-400%)"
 	var translateEnd = "translateX(0)"
 	var BorderRadiusStart = "0 50% 50% 0"
 	var BorderRadiusEnd = "0 0 0 0"
 	var ButtonCss = "top: 10px; left: 10px;"
 	switch options.OverlayDirection {
 	case Left:
-		translateStart = "translateX(-100%)"
+		translateStart = "translateX(-400%)"
 		translateEnd = "translateX(0)"
 		ButtonCss = "top: 10px; left: 10px;"
 		BorderRadiusStart = "0 50% 50% 0"
 	case Right:
-		translateStart = "translateX(100%)"
+		translateStart = "translateX(400%)"
 		translateEnd = "translateX(0)"
 		ButtonCss = "top: 10px; right: 10px;"
 		BorderRadiusStart = "50% 0 0 50%"
 	case Top:
-		translateStart = "translateY(-100%)"
+		translateStart = "translateY(-400%)"
 		translateEnd = "translateY(0)"
 		ButtonCss = "top: 10px; left: 10px;"
 		BorderRadiusStart = "0 0 50% 50%"
 	case Bottom:
-		translateStart = "translateY(100%)"
+		translateStart = "translateY(400%)"
 		translateEnd = "translateY(0)"
 		ButtonCss = "bottom: 10px; left: 10px;"
 		BorderRadiusStart = "50% 50% 0 0"
 	case TopLeft:
-		translateStart = "translate(-100%, -100%)"
+		translateStart = "translate(-400%, -400%)"
 		translateEnd = "translate(0, 0)"
 		ButtonCss = "top: 10px; left: 10px;"
 		BorderRadiusStart = "0 0 50% 0"
 	case TopRight:
-		translateStart = "translate(100%, -100%)"
+		translateStart = "translate(400%, -400%)"
 		translateEnd = "translate(0, 0)"
 		ButtonCss = "top: 10px; right: 10px;"
 		BorderRadiusStart = "0 0 0 50%"
 	case BottomLeft:
-		translateStart = "translate(-100%, 100%)"
+		translateStart = "translate(-400%, 400%)"
 		translateEnd = "translate(0, 0)"
 		ButtonCss = "bottom: 10px; left: 10px;"
 		BorderRadiusStart = "0 50% 0 0"
 	case BottomRight:
-		translateStart = "translate(100%, 100%)"
+		translateStart = "translate(400%, 400%)"
 		translateEnd = "translate(0, 0)"
 		ButtonCss = "bottom: 10px; right: 10px;"
 		BorderRadiusStart = "50% 0 0 0"
@@ -224,7 +224,7 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		right: 0;
 		bottom: 0;
 		background: ` + options.CSSMap[OverlayBackgroundColor] + `;
-		transition: transform ` + options.CSSMap[TransitionDuration] + `, border-radius ` + options.CSSMap[TransitionDuration] + ` ease-in-out;
+		transition: transform ` + options.CSSMap[TransitionDuration] + `, border-radius calc(` + options.CSSMap[TransitionDuration] + ` * 1.5);
 		border-radius: ` + BorderRadiusStart + `;
 		transform: ` + translateStart + `;
 		display: flex;
