@@ -456,3 +456,7 @@ func (s *Application) PageByName(name string) *Page {
 	}
 	return nil
 }
+
+func (s *Application) CurrentPage() *Page {
+	return s.pages[s.currentPage]
+}
