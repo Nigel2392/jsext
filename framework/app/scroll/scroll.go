@@ -38,11 +38,11 @@ var waiter = make(chan struct{})
 // Page struct.
 // Mostly used internally.
 type Page struct {
-	title  string
-	hash   string
-	c      components.ComponentWithValue
-	OnShow func(element components.ComponentWithValue, p PageDirection)
-	OnHide func(element components.ComponentWithValue, p PageDirection)
+	title     string
+	hash      string
+	Component components.ComponentWithValue
+	OnShow    func(element components.ComponentWithValue, p PageDirection)
+	OnHide    func(element components.ComponentWithValue, p PageDirection)
 }
 
 // Callback for when the page is being viewed.
@@ -136,9 +136,9 @@ func (s *Application) Backgrounds(t BackgroundType, b ...string) Backgrounds {
 // Add a page
 func (s *Application) AddPage(title string, c components.ComponentWithValue) *Page {
 	var page = &Page{
-		title: title,
-		hash:  makeSlug(title),
-		c:     c,
+		title:     title,
+		hash:      makeSlug(title),
+		Component: c,
 	}
 	s.pages = append(s.pages, page)
 	return page
@@ -258,7 +258,7 @@ func (s *Application) Run() {
 		var section = jsext.CreateElement("section")
 		section.ClassList().Add(s.Options.ClassPrefix + "-page")
 		section.Set("id", page.hash)
-		var p = page.c.Render()
+		var p = page.Component.Render()
 		p.ClassList().Add(s.Options.ClassPrefix + "-page-content")
 		section.AppendChild(p)
 		scrollablePage.AppendChild(section)
@@ -362,7 +362,7 @@ func (s *Application) PreviousPage() {
 func (s *Application) updatePage(p PageDirection) {
 	var currentPage = s.pages[s.currentPage]
 	if currentPage.OnHide != nil {
-		currentPage.OnHide(currentPage.c, p)
+		currentPage.OnHide(currentPage.Component, p)
 	}
 	switch p {
 	case Down, Right:
@@ -391,7 +391,7 @@ func (s *Application) updatePage(p PageDirection) {
 	js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
 	s.containerByIndex(s.currentPage).ScrollIntoView(true)
 	if page.OnShow != nil {
-		page.OnShow(page.c, p)
+		page.OnShow(page.Component, p)
 	}
 	if s.onPageChange != nil {
 		s.onPageChange(s.currentPage)
