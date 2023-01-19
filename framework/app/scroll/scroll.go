@@ -14,26 +14,35 @@ import (
 )
 
 // Supported background types for the scrollable app.
-type BackgroundType int
+type BackgroundType int8
+
+// Type of gradient to use.
+type GradientType int8
+
+// Axis to scroll on.
+type Axis int8
 
 // Supported background types for the scrollable app.
 const (
-	BackgroundTypeImage BackgroundType = iota
-	BackgroundTypeColor
-	BackgroundTypeStyle
+	BackgroundTypeImage BackgroundType = 1
+	BackgroundTypeColor BackgroundType = 2
+	BackgroundTypeStyle BackgroundType = 3
+)
+
+// Type of gradient to use.
+const (
+	GradientTypeLinear GradientType = 1
+	GradientTypeRadial GradientType = 2
+)
+
+// Axis to scroll on.
+const (
+	ScrollAxisX Axis = 1
+	ScrollAxisY Axis = 2
 )
 
 // Waiter to lock the main thread.
 var waiter = make(chan struct{})
-
-// Axis to scroll on.
-type Axis int
-
-// Axis to scroll on.
-const (
-	ScrollAxisX Axis = iota
-	ScrollAxisY
-)
 
 // Page struct.
 // Mostly used internally.
@@ -59,21 +68,25 @@ func (p *Page) OnHide(cb func()) *Page {
 
 // Application options
 type Options struct {
-	ClassPrefix   string
-	ScrollAxis    Axis
-	ScrollThrough bool
-	GradientTo    string
+	ScrollAxis        Axis
+	GradientType      GradientType
+	ClassPrefix       string
+	ScrollThrough     bool
+	GradientDirection string
 }
 
 func (o *Options) setDefaults() {
 	if o.ClassPrefix == "" {
 		o.ClassPrefix = "jsext-scrollable-app"
 	}
-	if o.GradientTo == "" {
-		o.GradientTo = "to top"
+	if o.GradientDirection == "" {
+		o.GradientDirection = "to top"
 	}
 	if o.ScrollAxis == 0 {
 		o.ScrollAxis = ScrollAxisY
+	}
+	if o.GradientType == 0 {
+		o.GradientType = GradientTypeLinear
 	}
 }
 
@@ -240,13 +253,13 @@ func (s *Application) Run() {
 			var backup = s.backgrounds[0]
 			for _, page := range s.pages {
 				bg, ct = helpers.GetColor(s.backgrounds, ct, backup)
-				css += bg.CSS(`#`+page.hash, s.Options.GradientTo)
+				css += bg.CSS(`#`+page.hash, s.Options.GradientDirection, s.Options.GradientType)
 			}
 		} else {
 			css += (&Background{
 				BackgroundType: BackgroundTypeColor,
 				Background:     "#333333",
-			}).CSS(`.`+s.Options.ClassPrefix+`-page`, s.Options.GradientTo)
+			}).CSS(`.`+s.Options.ClassPrefix+`-page`, s.Options.GradientDirection, s.Options.GradientType)
 		}
 
 		return css

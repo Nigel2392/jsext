@@ -27,12 +27,19 @@ func (b *Background) AddGradient(g ...string) {
 	b.gradients = append(b.gradients, g...)
 }
 
-func (bg *Background) CSS(selector string, gradientTo string) string {
+func (bg *Background) CSS(selector string, gradientTo string, gradientType GradientType) string {
 	var css string
+	var gradientTyp string = "linear"
+	switch gradientType {
+	case GradientTypeLinear:
+		gradientTyp = "linear"
+	case GradientTypeRadial:
+		gradientTyp = "radial"
+	}
 	switch bg.BackgroundType {
 	case BackgroundTypeImage:
 		css += selector + ` {
-			background-image: linear-gradient(` + gradientTo + `, ` + bg.gradient() + `), url('` + bg.Background + `');
+			background-image: ` + gradientTyp + `-gradient(` + gradientTo + `, ` + bg.gradient() + `), url('` + bg.Background + `');
 			background-repeat: no-repeat;
 			background-position: center;
 			background-size: cover;
@@ -43,7 +50,7 @@ func (bg *Background) CSS(selector string, gradientTo string) string {
 			bg.Background = "rgba(0,0,0,0)"
 		}
 		css += selector + ` {
-				background: linear-gradient(` + gradientTo + `, ` + bg.gradient() + `), ` + bg.Background + `;
+				background: ` + gradientTyp + `-gradient(` + gradientTo + `, ` + bg.gradient() + `), ` + bg.Background + `;
 				` + bg.ExtraCSS + `
 			}`
 	case BackgroundTypeStyle:
