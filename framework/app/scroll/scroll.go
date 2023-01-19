@@ -307,29 +307,8 @@ func (s *Application) Run() {
 		var hash = jsext.Window.Get("location").Get("hash").String()
 		var page, index = s.PageByName(strings.Split(hash, "#")[1])
 		if page != nil {
-			var p PageDirection = Initial
-			if s.currentPage < index {
-				switch s.Options.ScrollAxis {
-				case ScrollAxisX:
-					p = Right
-				case ScrollAxisY:
-					p = Down
-				}
-			}
-			if s.currentPage > index {
-				switch s.Options.ScrollAxis {
-				case ScrollAxisX:
-					p = Left
-				case ScrollAxisY:
-					p = Up
-				}
-			}
-			var oldPage = s.pages[s.currentPage]
-			if oldPage.OnHide != nil {
-				oldPage.OnHide(oldPage.Component, p)
-			}
-			s.currentPage = index
 			if page.OnShow != nil {
+				var p PageDirection = Initial
 				page.OnShow(page.Component, p)
 			}
 		}
