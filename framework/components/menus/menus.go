@@ -229,6 +229,7 @@ func Unstyled(options *MenuOptions) *elements.Element {
 		transform: ` + translateStart + `;
 		display: flex;
 		` + options.CSSMap[MenuContainerCSSBlock] + `
+		z-index: 9999;
 	}
 	.` + menuClass + ` {
 		list-style: none;
@@ -313,7 +314,7 @@ func Blurry(menu *MenuOptions) *elements.Element {
 			display: block;
 			position: relative;
 			text-decoration: none;
-			font-size: calc(` + btnHeight + ` / 2);
+			font-size: calc(` + btnHeight + ` / 3);
 			line-height: ` + btnHeight + `;
 			text-align: center;
 			color: ` + menu.CSSMap[TextColor] + `;
@@ -386,7 +387,7 @@ func Curtains(menu *MenuOptions) *elements.Element {
 			width: ` + btnWidth + `;
 			height: ` + btnHeight + `;
 			line-height: ` + btnHeight + `;
-			font-size: calc(` + btnHeight + ` / 2);
+			font-size: calc(` + btnHeight + ` / 3);
 			text-align: center;
 			color: ` + textColor + `;
 			text-decoration: none;
@@ -398,7 +399,7 @@ func Curtains(menu *MenuOptions) *elements.Element {
 			letter-spacing: calc(` + btnWidth + ` * 2 / 120);
     		font-weight: 800;
 			margin: 0 !important;
-			padding: calc(` + btnWidth + ` / ` + paddingDivisor + `) calc(` + btnWidth + ` / ` + paddingDivisor + `) calc(` + btnWidth + ` / ` + paddingDivisor + `) calc(` + btnWidth + ` / ` + paddingDivisor + `) !important;
+			padding: 0 calc(` + btnWidth + ` / ` + paddingDivisor + `) 0 calc(` + btnWidth + ` / ` + paddingDivisor + `) !important;
 			background: ` + backgroundColor + ` ;
 			z-index: 1;
 		}
