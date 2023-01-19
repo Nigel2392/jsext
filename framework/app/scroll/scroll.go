@@ -303,6 +303,38 @@ func (s *Application) Run() {
 		return nil
 	}), jsext.MapToObject(map[string]any{"passive": false}).Value())
 
+	jsext.Element(jsext.Window).AddEventListener("hashchange", func(this jsext.Value, event jsext.Event) {
+		var hash = jsext.Window.Get("location").Get("hash").String()
+		var page, index = s.PageByName(strings.Split(hash, "#")[1])
+		if page != nil {
+			var p PageDirection = Initial
+			if s.currentPage < index {
+				switch s.Options.ScrollAxis {
+				case ScrollAxisX:
+					p = Right
+				case ScrollAxisY:
+					p = Down
+				}
+			}
+			if s.currentPage > index {
+				switch s.Options.ScrollAxis {
+				case ScrollAxisX:
+					p = Left
+				case ScrollAxisY:
+					p = Up
+				}
+			}
+			var oldPage = s.pages[s.currentPage]
+			if oldPage.OnHide != nil {
+				oldPage.OnHide(oldPage.Component, p)
+			}
+			s.currentPage = index
+			if page.OnShow != nil {
+				page.OnShow(page.Component, p)
+			}
+		}
+	})
+
 	// Remove the preloader
 	const JSEXT_PRELOADER_ID = "jsext-preload-container"
 	if preloader, err := jsext.QuerySelector("#" + JSEXT_PRELOADER_ID); err == nil {
@@ -448,13 +480,13 @@ func (s *Application) ContainerByName(name string) jsext.Element {
 }
 
 // PageByName returns the page by name.
-func (s *Application) PageByName(name string) *Page {
-	for _, page := range s.pages {
+func (s *Application) PageByName(name string) (*Page, int) {
+	for i, page := range s.pages {
 		if page.title == name {
-			return page
+			return page, i
 		}
 	}
-	return nil
+	return nil, 0
 }
 
 func (s *Application) CurrentPage() *Page {
