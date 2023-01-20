@@ -306,29 +306,28 @@ func (s *Application) Run() {
 	jsext.Element(jsext.Window).AddEventListener("hashchange", func(this jsext.Value, event jsext.Event) {
 		var hash = jsext.Window.Get("location").Get("hash").String()
 		var page, index = s.PageByHash(strings.Split(hash, "#")[1])
-
-		var direction PageDirection
-		if index > s.currentPage {
-			switch s.Options.ScrollAxis {
-			case ScrollAxisX:
-				direction = Right
-			case ScrollAxisY:
-				direction = Down
-			}
-		} else if index < s.currentPage {
-			switch s.Options.ScrollAxis {
-			case ScrollAxisX:
-				direction = Left
-			case ScrollAxisY:
-				direction = Up
-			}
-		}
-		var oldPage = s.pages[s.currentPage]
-		if oldPage.OnHide != nil {
-			oldPage.OnHide(oldPage.Component, direction)
-		}
-		s.currentPage = index
 		if page != nil {
+			var direction PageDirection
+			if index > s.currentPage {
+				switch s.Options.ScrollAxis {
+				case ScrollAxisX:
+					direction = Right
+				case ScrollAxisY:
+					direction = Down
+				}
+			} else if index < s.currentPage {
+				switch s.Options.ScrollAxis {
+				case ScrollAxisX:
+					direction = Left
+				case ScrollAxisY:
+					direction = Up
+				}
+			}
+			var oldPage = s.pages[s.currentPage]
+			if oldPage.OnHide != nil {
+				oldPage.OnHide(oldPage.Component, direction)
+			}
+			s.currentPage = index
 			if page.OnShow != nil {
 				page.OnShow(page.Component, direction)
 			}
@@ -344,15 +343,16 @@ func (s *Application) Run() {
 	// Set the initial page
 	var hash = jsext.Document.Get("location").Get("hash").String()
 	if hash != "" {
-		for i, page := range s.pages {
-			if page.hash == hash[1:] {
-				s.currentPage = i
-				break
-			}
+		var page, index = s.PageByHash(hash[1:])
+		if page.OnShow != nil {
+			s.currentPage = index
+			jsext.Document.Call("getElementById", page.hash).Call("scrollIntoView", jsext.MapToObject(map[string]any{
+				"behavior": "smooth",
+			}).Value())
+			page.OnShow(page.Component, Initial)
 		}
 	}
 
-	s.updatePage(Initial)
 	<-waiter
 }
 

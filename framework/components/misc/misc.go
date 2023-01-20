@@ -523,18 +523,20 @@ func roadMapStyleTwo(roadMap *RoadMapOptions) *elements.Element {
 
 		var card_header = card.Div().AttrClass(roadMap.classPrefix + "card-header")
 
-		if item.Description != "" && len(item.Tags) != 0 {
+		if item.Description != "" {
 			var card_body = card.Div().AttrClass(roadMap.classPrefix + "card-body")
 			if item.Description != "" {
 				card_body.P(item.Description)
 			}
 			var tagsParagraph = card_body.P()
-			for i, tag := range item.Tags {
-				var spacing = ""
-				if i < len(item.Tags)-1 {
-					spacing = ", "
+			if len(item.Tags) > 0 {
+				for i, tag := range item.Tags {
+					var spacing = ""
+					if i < len(item.Tags)-1 {
+						spacing = ", "
+					}
+					tagsParagraph.Span(tag + spacing).AttrClass(roadMap.classPrefix + "content-tag-item")
 				}
-				tagsParagraph.Span(tag + spacing).AttrClass(roadMap.classPrefix + "content-tag-item")
 			}
 		}
 
