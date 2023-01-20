@@ -305,10 +305,32 @@ func (s *Application) Run() {
 
 	jsext.Element(jsext.Window).AddEventListener("hashchange", func(this jsext.Value, event jsext.Event) {
 		var hash = jsext.Window.Get("location").Get("hash").String()
-		var page, _ = s.PageByName(strings.Split(hash, "#")[1])
+		var page, index = s.PageByName(strings.Split(hash, "#")[1])
+
+		var direction PageDirection
+		if index > s.currentPage {
+			switch s.Options.ScrollAxis {
+			case ScrollAxisX:
+				direction = Right
+			case ScrollAxisY:
+				direction = Down
+			}
+		} else if index < s.currentPage {
+			switch s.Options.ScrollAxis {
+			case ScrollAxisX:
+				direction = Left
+			case ScrollAxisY:
+				direction = Up
+			}
+		}
+		var oldPage = s.pages[s.currentPage]
+		if oldPage.OnHide != nil {
+			oldPage.OnHide(oldPage.Component, direction)
+		}
+		s.currentPage = index
 		if page != nil {
 			if page.OnShow != nil {
-				page.OnShow(page.Component, Initial)
+				page.OnShow(page.Component, direction)
 			}
 		}
 	})
