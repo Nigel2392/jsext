@@ -305,7 +305,7 @@ func (s *Application) Run() {
 
 	jsext.Element(jsext.Window).AddEventListener("hashchange", func(this jsext.Value, event jsext.Event) {
 		var hash = jsext.Window.Get("location").Get("hash").String()
-		var page, index = s.PageByName(strings.Split(hash, "#")[1])
+		var page, index = s.PageByHash(strings.Split(hash, "#")[1])
 
 		var direction PageDirection
 		if index > s.currentPage {
@@ -479,8 +479,18 @@ func (s *Application) ContainerByName(name string) jsext.Element {
 	return jsext.Undefined().ToElement()
 }
 
-// PageByName returns the page by name.
-func (s *Application) PageByName(name string) (*Page, int) {
+// PageByHash returns the page by the hash value.
+func (s *Application) PageByHash(name string) (*Page, int) {
+	for i, page := range s.pages {
+		if page.hash == name {
+			return page, i
+		}
+	}
+	return nil, 0
+}
+
+// PageByTitle returns the page by the title.
+func (s *Application) PageByTitle(name string) (*Page, int) {
 	for i, page := range s.pages {
 		if page.title == name {
 			return page, i
