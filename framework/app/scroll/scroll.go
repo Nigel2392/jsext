@@ -305,11 +305,10 @@ func (s *Application) Run() {
 
 	jsext.Element(jsext.Window).AddEventListener("hashchange", func(this jsext.Value, event jsext.Event) {
 		var hash = jsext.Window.Get("location").Get("hash").String()
-		var page, index = s.PageByName(strings.Split(hash, "#")[1])
+		var page, _ = s.PageByName(strings.Split(hash, "#")[1])
 		if page != nil {
 			if page.OnShow != nil {
-				var p PageDirection = Initial
-				page.OnShow(page.Component, p)
+				page.OnShow(page.Component, Initial)
 			}
 		}
 	})
