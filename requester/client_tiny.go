@@ -27,36 +27,42 @@ func NewAPIClient() *APIClient {
 	}
 }
 
+// Get request for the specified url
 func (c *APIClient) Get(url string) *APIClient {
 	c.Request.Method = "GET"
 	c.Request.URL = url
 	return c
 }
 
+// Post request for the specified url
 func (c *APIClient) Post(url string) *APIClient {
 	c.Request.Method = "POST"
 	c.Request.URL = url
 	return c
 }
 
+// Put request for the specified url
 func (c *APIClient) Put(url string) *APIClient {
 	c.Request.Method = "PUT"
 	c.Request.URL = url
 	return c
 }
 
+// Patch request for the specified url
 func (c *APIClient) Patch(url string) *APIClient {
 	c.Request.Method = "PATCH"
 	c.Request.URL = url
 	return c
 }
 
+// Delete request for the specified url
 func (c *APIClient) Delete(url string) *APIClient {
 	c.Request.Method = "DELETE"
 	c.Request.URL = url
 	return c
 }
 
+// Head request for the specified url
 func (c *APIClient) Head(url string) *APIClient {
 	c.Request.Method = "HEAD"
 	c.Request.URL = url
