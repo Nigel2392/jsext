@@ -5,7 +5,7 @@ import (
 	"strings"
 	"syscall/js"
 
-	"github.com/tidwall/gjson"
+	"github.com/Nigel2392/jsext/requester/decoder"
 )
 
 type Request struct {
@@ -149,11 +149,11 @@ func fetch(options Request) (*Response, error) {
 }
 
 func (r *Response) JSONMap() (map[string]interface{}, bool) {
-	data, ok := gjson.ParseBytes(r.Body).Value().(map[string]interface{})
+	data, ok := decoder.ParseBytes(r.Body).Value().(map[string]interface{})
 	return data, ok
 }
 
 func (r *Response) JSONList() ([]interface{}, bool) {
-	data, ok := gjson.ParseBytes(r.Body).Value().([]interface{})
+	data, ok := decoder.ParseBytes(r.Body).Value().([]interface{})
 	return data, ok
 }
