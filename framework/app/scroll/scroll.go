@@ -392,10 +392,7 @@ func (s *Application) PreviousPage() {
 
 // Update the page
 func (s *Application) updatePage(p PageDirection) {
-	var currentPage = s.pages[s.currentPage]
-	if currentPage.OnHide != nil {
-		currentPage.OnHide(currentPage.Component, p)
-	}
+	var lastPage = s.currentPage
 	switch p {
 	case Down, Right:
 		s.currentPage++
@@ -417,16 +414,22 @@ func (s *Application) updatePage(p PageDirection) {
 			s.currentPage = 0
 		}
 	}
-	var page = s.pages[s.currentPage]
-	jsext.Document.Set("title", page.title)
-	// always push state to /#hash
-	js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
-	s.containerByIndex(s.currentPage).ScrollIntoView(true)
-	if page.OnShow != nil {
-		page.OnShow(page.Component, p)
-	}
-	if s.onPageChange != nil {
-		s.onPageChange(s.currentPage)
+	if lastPage != s.currentPage {
+		var currentPage = s.pages[lastPage]
+		if currentPage.OnHide != nil {
+			currentPage.OnHide(currentPage.Component, p)
+		}
+		var page = s.pages[s.currentPage]
+		jsext.Document.Set("title", page.title)
+		// always push state to /#hash
+		js.Global().Get("history").Call("pushState", nil, nil, "#"+page.hash)
+		s.containerByIndex(s.currentPage).ScrollIntoView(true)
+		if page.OnShow != nil {
+			page.OnShow(page.Component, p)
+		}
+		if s.onPageChange != nil {
+			s.onPageChange(s.currentPage)
+		}
 	}
 }
 

@@ -984,6 +984,14 @@ func JiggleText(tag, text string, opts *JiggleOptions) *elements.Element {
 		transition: 0.2s;
 		`+extra+`
 	}
+	.`+options.ClassPrefix+`-jiggle-text-`+hash+`:first-child {
+		padding-left: 0px !important;
+		margin-left: 0px !important;
+	}
+	.`+options.ClassPrefix+`-jiggle-text-`+hash+`:last-child {
+		padding-right: 0px !important;
+		margin-right: 0px !important;
+	}
 	.`+options.ClassPrefix+`-jiggle-text-`+hash+`:hover {
 		color: `+options.ChangeColor+`;
 	}

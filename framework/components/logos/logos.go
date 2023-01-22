@@ -5,7 +5,7 @@ import (
 	"github.com/Nigel2392/jsext/framework/helpers"
 )
 
-func GoLogo(fontSize string) *elements.Element {
+func Go(fontSize string) *elements.Element {
 	var hash = helpers.FNVHashString("golang" + fontSize)
 	var css = `	.golang-logo-go` + hash + `{
 		display: inline-block;
@@ -51,7 +51,7 @@ func GoLogo(fontSize string) *elements.Element {
 	return goSpan
 }
 
-func DjangoLogo(elementSize string) *elements.Element {
+func Django(elementSize string) *elements.Element {
 	var hash = helpers.FNVHashString("django" + elementSize)
 	var css = `	.django-logo-dj` + hash + `{
 		display: inline-block;
@@ -76,7 +76,7 @@ func DjangoLogo(elementSize string) *elements.Element {
 	return djSPan
 }
 
-func JSLogo(elementSize string) *elements.Element {
+func Javascript(elementSize string) *elements.Element {
 	var hash = helpers.FNVHashString("javascript" + elementSize)
 	var css = `	.js-logo-js` + hash + `{
 		display: inline-block;
@@ -96,7 +96,7 @@ func JSLogo(elementSize string) *elements.Element {
 	return jsSpan
 }
 
-func WasmLogo(elementSize string) *elements.Element {
+func WebAssembly(elementSize string) *elements.Element {
 	var hash = helpers.FNVHashString("wasm" + elementSize)
 	var css = `
 	.wasm-logo-wa` + hash + `{
@@ -126,7 +126,7 @@ func WasmLogo(elementSize string) *elements.Element {
 	return waContainer
 }
 
-func NginxLogo(elementSize string) *elements.Element {
+func Nginx(elementSize string) *elements.Element {
 	var hash = helpers.FNVHashString("nginx" + elementSize)
 	var css = `
 	.nginx-logo-n` + hash + `{
@@ -145,7 +145,7 @@ func NginxLogo(elementSize string) *elements.Element {
 	return nContainer
 }
 
-func SQLLogo(elementSize string) *elements.Element {
+func SQL(elementSize string) *elements.Element {
 	var hash = helpers.FNVHashString("sql" + elementSize)
 	var css = `
 	.sql-logo` + hash + `{
