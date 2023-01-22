@@ -13,8 +13,9 @@ import (
 	"net/url"
 	"reflect"
 	"runtime/debug"
+	"strconv"
+	"time"
 
-	"github.com/Nigel2392/jsext/framework/helpers"
 	"github.com/Nigel2392/jsext/requester/encoders"
 )
 
@@ -113,7 +114,7 @@ func (c *APIClient) WithData(formData map[string]any, encoding Encoding, file ..
 			if val.Kind() == reflect.Ptr {
 				val = val.Elem()
 			}
-			retVal = helpers.ValueToString(val)
+			retVal = ValueToString(val)
 			formValues.Add(k, retVal)
 		}
 		c.request.Body = io.NopCloser(bytes.NewBufferString(formValues.Encode()))
@@ -127,7 +128,7 @@ func (c *APIClient) WithData(formData map[string]any, encoding Encoding, file ..
 			if val.Kind() == reflect.Ptr {
 				val = val.Elem()
 			}
-			retVal = helpers.ValueToString(val)
+			retVal = ValueToString(val)
 			writer.WriteField(k, retVal)
 		}
 		for _, f := range file {
@@ -266,5 +267,28 @@ func HTTPRequest(fetchURL, method string, requestChanger func(rq *http.Request),
 			onError(err)
 			return
 		}
+	}
+}
+
+func ValueToString(v reflect.Value) string {
+	switch v.Kind() {
+	case reflect.String:
+		return v.String()
+	case reflect.Bool:
+		return strconv.FormatBool(v.Bool())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return strconv.FormatInt(v.Int(), 10)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return strconv.FormatUint(v.Uint(), 10)
+	case reflect.Float32, reflect.Float64:
+		return strconv.FormatFloat(v.Float(), 'f', -1, 64)
+	case reflect.Complex64, reflect.Complex128:
+		return strconv.FormatComplex(v.Complex(), 'f', -1, 64)
+	default:
+		// Time
+		if v.Type().String() == "time.Time" {
+			return v.Interface().(time.Time).Format("2006-01-02T15:04")
+		}
+		return ""
 	}
 }
