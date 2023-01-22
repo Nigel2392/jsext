@@ -440,7 +440,7 @@ func (e *Element) Remove() {
 func (e *Element) ClearInnerHTML() {
 	e.Text = ""
 	e.Children = make([]*Element, 0)
-	if e.value.IsUndefined() {
+	if !e.value.IsUndefined() {
 		e.value.Set("innerHTML", "")
 	}
 }
@@ -448,7 +448,7 @@ func (e *Element) ClearInnerHTML() {
 // Clear the inner text of the element.
 func (e *Element) ClearInnerText() {
 	e.Text = ""
-	if e.value.IsUndefined() {
+	if !e.value.IsUndefined() {
 		e.value.Set("innerText", "")
 	}
 }
