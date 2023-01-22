@@ -1281,3 +1281,89 @@ func NewGrid(opts *GridOptions) *elements.Element {
 
 	return mainGrid
 }
+
+type HR struct {
+	// Width and height of the HR
+	Width, Height string
+	// Main colors to use.
+	BackCol, FadeCol string
+	// Margin top and bottom.
+	MarginTopBottom string
+	// Border radius
+	BorderRadius string
+	// Fade direction, can be "left", "right", "top", "bottom"
+	FadeDir string
+	// Format strings for the colors
+	// Example: "rgba(%d, %d, %d, 1)"
+	BackColFormat string
+	// Format strings for the colors
+	// Example: "rgba(%d, %d, %d, 0.1)"
+	FadeColFormat string
+	// Animate
+	Animate bool
+}
+
+func (h *HR) setDefaults() {
+	if h.Width == "" {
+		h.Width = "100%"
+	}
+	if h.Height == "" {
+		h.Height = "1px"
+	}
+	if h.BackCol == "" {
+		h.BackCol = "#000000"
+	}
+	if h.BackColFormat == "" {
+		h.BackColFormat = "rgba(%d, %d, %d, 1)"
+	}
+	if h.FadeColFormat == "" {
+		h.FadeColFormat = "rgba(%d, %d, %d, 0.1)"
+	}
+	if h.FadeCol == "" {
+		h.FadeCol = "#ffffff"
+	}
+	if h.MarginTopBottom == "" {
+		h.MarginTopBottom = "0"
+	}
+	if h.FadeDir == "" {
+		h.FadeDir = "right"
+	}
+	if h.BorderRadius == "" {
+		h.BorderRadius = "0"
+	}
+}
+
+func FancyHR(opts *HR) *elements.Element {
+	opts.setDefaults()
+	var mainColor = csshelpers.FormatRGBA(opts.BackCol, opts.BackColFormat)
+	var fadeColor = csshelpers.FormatRGBA(opts.FadeCol, opts.FadeColFormat)
+	var hash = helpers.FNVHashString(opts.Width + opts.Height + opts.BackCol + opts.FadeCol + opts.MarginTopBottom + opts.FadeDir)
+	var hr = elements.NewElement("hr")
+	hr.AttrClass("fancy-hr" + hash)
+
+	var animation string
+	if opts.Animate {
+		animation = `@keyframes gradientAnimation` + hash + ` {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}`
+	}
+	var animation_css string
+	if opts.Animate {
+		animation_css = `animation: gradientAnimation` + hash + ` 5s ease infinite;`
+	}
+
+	jsext.StyleBlock(hash, `
+		.fancy-hr`+hash+` {
+			width: `+opts.Width+`;
+			border: 0;
+			height: `+opts.Height+`;
+			background: linear-gradient(to `+opts.FadeDir+`, `+fadeColor+` 10%, `+mainColor+` 50%, `+fadeColor+` 90%);
+			margin: `+opts.MarginTopBottom+` 0;
+			background-size: 200% 200%;
+			border-radius: `+opts.BorderRadius+`;
+			`+animation_css+`
+		}`+animation)
+	return hr
+}

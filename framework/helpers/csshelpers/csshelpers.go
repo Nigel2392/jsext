@@ -341,3 +341,16 @@ func SeenColor(col Color) string {
 		}
 	}
 }
+
+// If the right format is not given, we will return the color as is.
+func FormatRGBA(color, format string) string {
+	var ret string
+	var col, err = Hex(color)
+	if err == nil {
+		var r, g, b = col.RGB255()
+		ret = fmt.Sprintf(format, r, g, b)
+	} else {
+		ret = color
+	}
+	return ret
+}
