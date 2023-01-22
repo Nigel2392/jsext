@@ -485,5 +485,3 @@ func squash(json string) string {
 	}
 	return json
 }
-
-// Fixes
