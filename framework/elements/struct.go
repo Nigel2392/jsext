@@ -4,12 +4,15 @@
 package elements
 
 import (
+	"strconv"
 	"strings"
 	"sync"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext"
 )
+
+const SPACING string = "    "
 
 // https://github.com/golang/go/blob/master/src/html/escape.go
 var htmlEscaper = strings.NewReplacer(
@@ -24,17 +27,40 @@ type Elements []*Element
 
 // Element to be rendered in the DOM.
 type Element struct {
-	Tag                  string
-	Text                 string
-	textAfter            bool
+	// Element tag.
+	Tag string
+
+	// Text to be rendered in the element.
+	Text string
+
+	// Render the text after the children.
+	textAfter bool
+
+	// Element attributes.
 	Attributes_Normal    map[string][]string
 	Attributes_Boolean   map[string]bool
 	Attributes_Semicolon map[string][]string
-	Children             []*Element
-	value                js.Value
-	eventListeners       map[string][]func(this jsext.Value, event jsext.Event)
-	Animations           *Animations
-	onRender             []func(this jsext.Element)
+
+	// Children of the element.
+	Children []*Element
+
+	// Underlying javascript element.
+	value js.Value
+
+	// Eventlisteners for the element.
+	// These are only filled when the element is not rendered.
+	eventListeners map[string][]func(this jsext.Value, event jsext.Event)
+
+	// Element animations.
+	// These are only filled when the element is not rendered.
+	Animations *Animations
+
+	// Function to call when the javascript element is ready.
+	onRender []func(this jsext.Element)
+
+	// Wether to render the end tag or not.
+	// This is only used for rendering the element as a string.
+	noEnd bool
 }
 
 func getText(t []string) string {
@@ -42,6 +68,11 @@ func getText(t []string) string {
 		return t[0]
 	}
 	return ""
+}
+
+// Do not render the end tag.
+func (e *Element) NoEnd() {
+	e.noEnd = true
 }
 
 func (e *Element) OnRender(f func(this jsext.Element)) {
@@ -113,6 +144,7 @@ func (e *Element) Set(p string, v ...string) *Element {
 	return e
 }
 
+// Set a boolean attribute on the element.
 func (e *Element) SetBool(p string, v bool) *Element {
 	if e.value.IsUndefined() {
 		e.Attributes_Boolean[p] = v
@@ -122,6 +154,7 @@ func (e *Element) SetBool(p string, v bool) *Element {
 	return e
 }
 
+// Add a semicolon separated attribute on the element.
 func (e *Element) SetSemicolon(p string, v ...string) *Element {
 	if e.value.IsUndefined() {
 		var attrs = e.Attributes_Semicolon[p]
@@ -133,6 +166,7 @@ func (e *Element) SetSemicolon(p string, v ...string) *Element {
 	return e
 }
 
+// Delete an attribute from the element.
 func (e *Element) Delete(p string) *Element {
 	delete(e.Attributes_Normal, p)
 	delete(e.Attributes_Boolean, p)
@@ -143,6 +177,7 @@ func (e *Element) Delete(p string) *Element {
 	return e
 }
 
+// Add an attribute to the element.
 func (e *Element) Add(p string, v ...string) *Element {
 	if e.value.IsUndefined() {
 		var attrs = e.Attributes_Normal[p]
@@ -154,7 +189,6 @@ func (e *Element) Add(p string, v ...string) *Element {
 	if attr.IsUndefined() {
 		e.value.Call("setAttribute", p, strings.Join(v, " "))
 	} else {
-
 		var attrs = strings.Split(attr.String(), " ")
 		var attrSlice = make([]string, 0)
 
@@ -174,6 +208,7 @@ func (e *Element) Add(p string, v ...string) *Element {
 	return e
 }
 
+// Get an attribute of the element.
 func (e *Element) GetAttr(p string) string {
 	if e.value.IsUndefined() {
 		attr, ok := e.Attributes_Normal[p]
@@ -195,6 +230,7 @@ func (e *Element) GetAttr(p string) string {
 	return attr.String()
 }
 
+// Get a boolean attribute of the element.
 func (e *Element) GetBoolAttr(p string) bool {
 	if e.value.IsUndefined() {
 		var attr, ok = e.Attributes_Boolean[p]
@@ -212,6 +248,7 @@ func (e *Element) GetBoolAttr(p string) bool {
 	return attr.Bool()
 }
 
+// Append appends children to the elements children.
 func (e *Element) Append(children ...*Element) *Element {
 	if e.value.IsUndefined() || e.value.IsNull() {
 		e.Children = append(e.Children, children...)
@@ -223,6 +260,7 @@ func (e *Element) Append(children ...*Element) *Element {
 	return e
 }
 
+// Prepend prepends children to the elements children.
 func (e *Element) Prepend(children ...*Element) *Element {
 	if e.value.IsUndefined() {
 		e.Children = append(children, e.Children...)
@@ -234,6 +272,7 @@ func (e *Element) Prepend(children ...*Element) *Element {
 	return e
 }
 
+// AppendAfter appends children after the given element by id.
 func (e *Element) AppendAfter(id string, children ...*Element) *Element {
 	if e.value.IsUndefined() {
 		for i, child := range e.Children {
@@ -254,6 +293,7 @@ func (e *Element) AppendAfter(id string, children ...*Element) *Element {
 	return e
 }
 
+// AppendBefore appends children before the given element by id.
 func (e *Element) AppendBefore(id string, children ...*Element) *Element {
 	if e.value.IsUndefined() {
 		for i, child := range e.Children {
@@ -274,6 +314,7 @@ func (e *Element) AppendBefore(id string, children ...*Element) *Element {
 	return e
 }
 
+// AppendAfterElement appends children after the given element.
 func (e *Element) AppendAfterElement(element *Element, children ...*Element) *Element {
 	if e.value.IsUndefined() || element.value.IsUndefined() {
 		for i, child := range e.Children {
@@ -290,6 +331,7 @@ func (e *Element) AppendAfterElement(element *Element, children ...*Element) *El
 	return e
 }
 
+// AppendBeforeElement appends children before the given element.
 func (e *Element) AppendBeforeElement(element *Element, children ...*Element) *Element {
 	if e.value.IsUndefined() {
 		for i, child := range e.Children {
@@ -319,6 +361,7 @@ func (e *Element) AsyncForEach(fn func(*Element) bool) {
 	close(terminate)
 }
 
+// Loop over all inner elements recursively asynchronously.
 func (e *Element) asyncForEach(fn func(*Element) bool, wg *sync.WaitGroup, terminate chan struct{}) {
 	defer wg.Done()
 	if fn(e) {
@@ -336,6 +379,7 @@ func (e *Element) asyncForEach(fn func(*Element) bool, wg *sync.WaitGroup, termi
 	}
 }
 
+// Add an eventlistener to the element.
 func (e *Element) AddEventListener(event string, fn func(this jsext.Value, event jsext.Event)) {
 	if e.value.IsUndefined() {
 		e.eventListeners[event] = append(e.eventListeners[event], fn)
@@ -383,38 +427,77 @@ func (e *Element) InnerHTML(html string) *Element {
 	return e
 }
 
+// Remove the element from the javascript dom.
 func (e *Element) Remove() {
-	if e.value.IsUndefined() {
-		return
+	if !e.value.IsUndefined() {
+		e.value.Call("remove")
 	}
-	e.value.Call("remove")
+	e = nil
 }
 
+// Clear the inner html of the element.
+// This includes removing all element children.
 func (e *Element) ClearInnerHTML() {
+	e.Text = ""
+	e.Children = make([]*Element, 0)
 	if e.value.IsUndefined() {
-		return
+		e.value.Set("innerHTML", "")
 	}
-	e.value.Set("innerHTML", "")
 }
 
+// Clear the inner text of the element.
 func (e *Element) ClearInnerText() {
+	e.Text = ""
 	if e.value.IsUndefined() {
-		return
-	}
-	e.value.Set("innerText", "")
-}
-
-func (e *Element) Clear() {
-	if e.value.IsUndefined() {
-		return
-	}
-	e.value.Set("innerHTML", "")
-	e.value.Set("innerText", "")
-	for _, child := range e.Children {
-		child.Remove()
+		e.value.Set("innerText", "")
 	}
 }
 
+// Reset all element attributes or
+// clear the javascript element and remove all children.
+func (e *Element) Reset() {
+	// Remove all attributes
+	e.Attributes_Normal = make(map[string][]string, 0)
+	e.Attributes_Semicolon = make(map[string][]string, 0)
+	e.Attributes_Boolean = make(map[string]bool, 0)
+	// Clear the inner html
+	e.Text = ""
+	e.Children = make([]*Element, 0)
+	// Remove all animations
+	e.Animations.animations = make([]Animation, 0)
+	// Remove all event listeners
+	e.eventListeners = make(map[string][]func(this jsext.Value, event jsext.Event), 0)
+	if !e.value.IsUndefined() {
+		// Clear the inner html
+		e.value.Set("innerHTML", "")
+		e.value.Set("innerText", "")
+		// Remove all attributes
+		elem := e.JSExtElement()
+		attrs := elem.Get("attributes")
+		for i := 0; i < attrs.Length(); i++ {
+			elem.Call("removeAttribute", attrs.Index(i).Get("name").Value())
+		}
+
+		// Remove all animations
+		var animations = jsext.Call("getAnimations", e.value)
+		for i := 0; i < animations.Length(); i++ {
+			animations.Index(i).Call("cancel")
+		}
+
+		// Remove all event listeners
+		var eventListeners = jsext.Call("getEventListeners", e.value)
+		var keys = jsext.Call("Object", "keys", eventListeners.Value())
+		for i := 0; i < keys.Length(); i++ {
+			var key = keys.Index(i).String()
+			var eventListener = eventListeners.Get(key)
+			for j := 0; j < eventListener.Length(); j++ {
+				e.value.Call("removeEventListener", key, eventListener.Index(j).Get("listener").Value())
+			}
+		}
+	}
+}
+
+// Generate the javascript element and return it.
 func (e *Element) Render() jsext.Element {
 	if e.value.IsUndefined() {
 		e.generate(js.Undefined())
@@ -422,6 +505,7 @@ func (e *Element) Render() jsext.Element {
 	return e.JSExtElement()
 }
 
+// Render the element onto another javascript element by using a query selector.
 func (e *Element) RenderTo(appendToQuerySelector ...string) *Element {
 	// Create the element
 	if len(appendToQuerySelector) > 0 {
@@ -435,6 +519,7 @@ func (e *Element) RenderTo(appendToQuerySelector ...string) *Element {
 	return e
 }
 
+// Generate the javascript element and return it.
 func (e *Element) generate(parent js.Value) js.Value {
 	// Create the element
 	e.value = js.Global().Get("document").Call("createElement", e.Tag)
@@ -494,94 +579,109 @@ func (e *Element) generate(parent js.Value) js.Value {
 	return e.value
 }
 
-//func (e *Element) asyncSetAttrs() {
-//	// Create a channel for a maximum of 10 elements
-//	var guard = make(chan struct{}, 10)
-//	// Create a waitgroup
-//	var wg sync.WaitGroup
-//	wg.Add(3)
-//	// Loop over all attributes asynchronously
-//	go func() {
-//		defer wg.Done()
-//		for k, attr := range e.Attributes_Normal {
-//			// Add to the channel
-//			guard <- struct{}{}
-//			// Create a new goroutine
-//			go func(key string, attribute []string) {
-//				// Set the attribute
-//				e.value.Call("setAttribute", key, strings.Join(attribute, " "))
-//				<-guard
-//			}(k, attr)
-//		}
-//		// Wait for all goroutines to finish
-//	}()
-//	go func() {
-//		defer wg.Done()
-//		for k, attr := range e.Attributes_Semicolon {
-//			guard <- struct{}{}
-//			go func(key string, attribute []string) {
-//				e.value.Call("setAttribute", key, strings.Join(attribute, ";"))
-//				<-guard
-//			}(k, attr)
-//		}
-//	}()
-//	go func() {
-//		defer wg.Done()
-//		for k, attr := range e.Attributes_Boolean {
-//			guard <- struct{}{}
-//			go func(key string, attribute bool) {
-//				e.value.Call("setAttribute", key, attribute)
-//				<-guard
-//			}(k, attr)
-//		}
-//	}()
-//	// Wait for all goroutines to finish
-//	wg.Wait()
-//	close(guard)
-//}
+// Buffer interface.
+// Used to generate the HTML.
+type Buffer interface {
+	WriteString(string) (int, error)
+	String() string
+	Reset()
+	Len() int
+	Write(p []byte) (int, error)
+	Grow(n int)
+}
 
-//type Attribute struct {
-//	value any
-//}
-//
-//func (a *Attribute) String() string {
-//	return a.value.(string)
-//}
-//
-//func (a *Attribute) Bool() bool {
-//	return a.value.(bool)
-//}
-//
-//func (a *Attribute) Int() int {
-//	return a.value.(int)
-//}
-//
-//func (a *Attribute) Int64() int64 {
-//	return a.value.(int64)
-//}
-//
-//func (a *Attribute) Float64() float64 {
-//	return a.value.(float64)
-//}
-//
-//func (e *Element) GetAttr(p string) Attribute {
-//	if e.value.IsUndefined() {
-//		attr, ok := e.Attributes_Normal[p]
-//		if ok {
-//			return Attribute{strings.Join(attr, " ")}
-//		}
-//		attr, ok = e.Attributes_Semicolon[p]
-//		if ok {
-//			return Attribute{strings.Join(attr, ";")}
-//		}
-//	}
-//	var attr = e.value.Call("getAttribute", p)
-//	if attr.IsUndefined() {
-//		return ""
-//	}
-//	if attr.Type() == js.TypeBoolean {
-//		return Attribute{attr.Bool()}
-//	}
-//	return Attribute{attr.String()}
-//}
-//
+// Generate the Element and children as HTML.
+func (e *Element) Generate(spacing string, buf Buffer) {
+	var length int
+	if e.Tag != "" {
+		length += len(e.Tag) + len(spacing) + 4
+		if e.Text != "" {
+			length += len(e.Text) + len(spacing) + len(SPACING) + 2
+		}
+		if !e.noEnd {
+			length += len(spacing) + 5 + len(e.Tag)
+		}
+		buf.Grow(length)
+
+		buf.WriteString(spacing)
+		buf.WriteString("<")
+		buf.WriteString(e.Tag)
+
+		writeAttrs(buf, e.Attributes_Normal, " ")
+		writeAttrs(buf, e.Attributes_Semicolon, ";")
+
+		for k, attr := range e.Attributes_Boolean {
+			// buf.WriteString(" " + k + "=\"" + strconv.FormatBool(attr) + "\"")
+			if attr {
+				buf.Grow(10 + len(k))
+			} else {
+				buf.Grow(11 + len(k))
+			}
+			buf.WriteString(" ")
+			buf.WriteString(k)
+			buf.WriteString("=\"")
+			buf.WriteString(strconv.FormatBool(attr))
+			buf.WriteString("\"")
+		}
+		buf.WriteString(">\n")
+	}
+
+	if !e.textAfter {
+		if e.Text != "" {
+			// buf.WriteString(spacing + SPACING + e.text + "\n")
+			buf.WriteString(spacing)
+			buf.WriteString(SPACING)
+			buf.WriteString(e.Text)
+			buf.WriteString("\n")
+		}
+	}
+	// Loop over inner html elements
+	for _, e := range e.Children {
+		e.Generate(spacing+SPACING, buf)
+	}
+
+	if e.textAfter {
+		if e.Text != "" {
+			// buf.WriteString(spacing + SPACING + e.text + "\n")
+			buf.WriteString(spacing)
+			buf.WriteString(SPACING)
+			buf.WriteString(e.Text)
+			buf.WriteString("\n")
+		}
+	}
+	if e.Tag != "" {
+		if e.noEnd {
+			// buf.WriteString(spacing + "</" + e.Type + ">\n")
+			buf.WriteString(spacing)
+			buf.WriteString("</")
+			buf.WriteString(e.Tag)
+			buf.WriteString(">\n")
+		}
+	}
+}
+
+// Write the attributes to the buffer.
+func writeAttrs(buf Buffer, attrs map[string][]string, sep string) {
+	for k, attr := range attrs {
+		// buf.WriteString(" " + k + "=\"" + strings.Join(attr, sep) + "\"")
+		n := len(sep)*(len(attr)-1) + len(k) + 6
+		for i := 0; i < len(attr); i++ {
+			n += len(attr[i])
+		}
+		buf.Grow(n)
+		buf.WriteString(" ")
+		buf.WriteString(k)
+		buf.WriteString("=\"")
+		// buf.WriteString(strings.Join(attr, sep))
+		if len(attr) == 1 {
+			buf.WriteString(attr[0])
+		} else {
+			buf.WriteString(attr[0])
+			for _, s := range attr[1:] {
+				buf.WriteString(sep)
+				buf.WriteString(s)
+			}
+		}
+		buf.WriteString("\"")
+	}
+}
