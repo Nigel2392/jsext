@@ -6,7 +6,7 @@ package elements
 import (
 	"syscall/js"
 
-	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/v2"
 )
 
 type ObserverOption int

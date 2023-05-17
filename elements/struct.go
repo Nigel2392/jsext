@@ -9,7 +9,7 @@ import (
 	"sync"
 	"syscall/js"
 
-	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/v2"
 )
 
 const SPACING string = "    "

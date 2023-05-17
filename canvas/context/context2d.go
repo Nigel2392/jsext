@@ -6,7 +6,7 @@ package context
 import (
 	"syscall/js"
 
-	"github.com/Nigel2392/jsext/canvas/path"
+	"github.com/Nigel2392/jsext/v2/canvas/path"
 )
 
 type Context2D js.Value

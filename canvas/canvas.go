@@ -6,8 +6,8 @@ package canvas
 import (
 	"syscall/js"
 
-	"github.com/Nigel2392/jsext"
-	"github.com/Nigel2392/jsext/canvas/context"
+	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/canvas/context"
 )
 
 const (

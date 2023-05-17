@@ -6,9 +6,12 @@ package jsext
 import (
 	"errors"
 	"regexp"
+	"strconv"
 	"strings"
 	"syscall/js"
 	"time"
+
+	"github.com/Nigel2392/jsext/v2/console"
 )
 
 // Default syscall/js values, some wrapped.
@@ -20,6 +23,24 @@ var (
 	Body     Element
 	Head     Element
 )
+
+var waiter = make(chan struct{})
+
+func Wait(exit chan error) {
+	select {
+	case <-waiter:
+		close(waiter)
+		close(exit)
+	case err := <-exit:
+		close(waiter)
+		close(exit)
+		console.Log(err)
+	}
+}
+
+func EmitInitiated() {
+	EventEmit("jsext.initialized", strconv.FormatInt(time.Now().Unix(), 10))
+}
 
 func init() {
 	// Initialize default values

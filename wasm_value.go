@@ -80,6 +80,10 @@ func (w Value) Toggle(s string) {
 // 	- Returns the new value
 func (w Value) ToggleCustom(s string) bool {
 	var val = w.Value().Get(s)
+	if val.Type() == js.TypeUndefined {
+		w.Value().Set(s, true)
+		return true
+	}
 	var nVal = !val.Bool()
 	w.Value().Set(s, nVal)
 	return nVal

@@ -4,13 +4,11 @@
 package messages
 
 import (
-	"github.com/Nigel2392/jsext"
+	"github.com/Nigel2392/jsext/v2"
 )
 
 // Sends messages through eventlisteners.
 // These can be accessed though window.runtime.eventOn("jsextMessages", callback(arg: function(type, message)))
-// Or optionally when using the jsext tool, you can use "window.runtime.onMessage(callback(arg: function(type, message)))"
-// go install github.com/Nigel2392/jsexttool/
 
 type MessageType string
 
