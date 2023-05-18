@@ -10,6 +10,7 @@ import (
 	"strings"
 	"syscall/js"
 	"time"
+	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2/console"
 )
@@ -281,7 +282,20 @@ func TypeOf(value, constructor js.Value) bool {
 
 // Returns the value of a property.
 func ValueOf(value any) Value {
-	return Value(js.ValueOf(value))
+	switch v := value.(type) {
+	case Value:
+		return v
+	case js.Value:
+		return Value(v)
+	case Element:
+		return v.Value()
+	case Style:
+		return v.JSExt()
+	case Event:
+		return v.Value()
+	default:
+		return Value(js.ValueOf(v))
+	}
 }
 
 // Returns a new object.
@@ -353,6 +367,15 @@ func IsMobile() bool {
 }
 
 // Convert a js.Value to a map[string]T.
+//
+// Uses unsafe.Pointer to convert the value to the type of T.
+//
+// Example:
+//
+//	var m = ObjectToMapT[string](js.ValueOf(map[string]interface{
+//		"hello": "world",
+//	}))
+//	fmt.Println(m["hello"])
 func ObjectToMapT[T any](obj js.Value) map[string]T {
 	var m = make(map[string]T)
 	var keys = obj.Call("keys")
@@ -360,11 +383,39 @@ func ObjectToMapT[T any](obj js.Value) map[string]T {
 		var key = keys.Index(i).String()
 		switch any(*new(T)).(type) {
 		case string:
-			m[key] = any(obj.Get(key).String()).(T)
+			var v = obj.Get(key).String()
+			m[key] = *(*T)(unsafe.Pointer(&v))
 		case int, int8, int16, int32, int64:
-			m[key] = any(obj.Get(key).Int()).(T)
+			var v T
+			switch any(*new(T)).(type) {
+			case int:
+				var intie = obj.Get(key).Int()
+				v = *(*T)(unsafe.Pointer(&intie))
+			case int8:
+				var intie = int8(obj.Get(key).Int())
+				v = *(*T)(unsafe.Pointer(&intie))
+			case int16:
+				var intie = int16(obj.Get(key).Int())
+				v = *(*T)(unsafe.Pointer(&intie))
+			case int32:
+				var intie = int32(obj.Get(key).Int())
+				v = *(*T)(unsafe.Pointer(&intie))
+			case int64:
+				var intie = int64(obj.Get(key).Int())
+				v = *(*T)(unsafe.Pointer(&intie))
+			}
+			m[key] = v
 		case float64, float32:
-			m[key] = any(obj.Get(key).Float()).(T)
+			var v T
+			switch any(*new(T)).(type) {
+			case float64:
+				var floatie = obj.Get(key).Float()
+				v = *(*T)(unsafe.Pointer(&floatie))
+			case float32:
+				var floatie = float32(obj.Get(key).Float())
+				v = *(*T)(unsafe.Pointer(&floatie))
+			}
+			m[key] = v
 		case bool:
 			m[key] = any(obj.Get(key).Bool()).(T)
 		case js.Value, Value, Element, Event:
