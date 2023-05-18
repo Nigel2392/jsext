@@ -4,6 +4,7 @@
 package console
 
 import (
+	"fmt"
 	"syscall/js"
 )
 
@@ -129,4 +130,39 @@ func replaceArgs(args []interface{}) []interface{} {
 		}
 	}
 	return args
+}
+
+// Javascript Console.Log with a format string
+func Logf(format string, args ...interface{}) {
+	Log(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Error with a format string
+func Errorf(format string, args ...interface{}) {
+	Error(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Info with a format string
+func Infof(format string, args ...interface{}) {
+	Info(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Warn with a format string
+func Warnf(format string, args ...interface{}) {
+	Warn(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Debug with a format string
+func Debugf(format string, args ...interface{}) {
+	Debug(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Trace with a format string
+func Tracef(format string, args ...interface{}) {
+	Trace(fmt.Sprintf(format, args...))
+}
+
+// Javascript Console.Assert with a format string
+func Assertf(condition bool, format string, args ...interface{}) {
+	Assert(condition, fmt.Sprintf(format, args...))
 }
