@@ -10,6 +10,7 @@ import (
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/websocket"
 )
 
 const SPACING string = "    "
@@ -93,6 +94,18 @@ func NewElement(tag string, text ...string) *Element {
 		onRender:             make([]func(this jsext.Element), 0),
 	}
 	e.Animations = &Animations{element: e, animations: make([]Animation, 0)}
+	return e
+}
+
+func ElementFromJS(value jsext.Element) *Element {
+	var nodeName = value.Get("nodeName")
+	if nodeName.IsNull() || nodeName.IsUndefined() {
+		return nil
+	}
+	var nodenameLower = nodeName.String()
+	nodenameLower = strings.ToLower(nodenameLower)
+	var e = NewElement(nodenameLower)
+	e.value = value.JSValue()
 	return e
 }
 
@@ -345,6 +358,14 @@ func (e *Element) AppendBeforeElement(element *Element, children ...*Element) *E
 			element.value.Call("before", child.Render())
 		}
 	}
+	return e
+}
+
+// OnWebsocketMessage runs a function on the element when a websocket message is received.
+func (e *Element) OnWebsocketMessage(sock *websocket.WebSocket, fn func(websocket.MessageEvent, *Element)) *Element {
+	sock.OnMessage(func(event websocket.MessageEvent) {
+		fn(event, e)
+	})
 	return e
 }
 
