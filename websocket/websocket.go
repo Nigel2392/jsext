@@ -14,6 +14,11 @@ import (
 type WebSocket struct {
 	value js.Value
 	open  bool
+
+	openFuncs    []func(MessageEvent)
+	closeFuncs   []func(jsext.Event)
+	errorFuncs   []func(jsext.Event)
+	messageFuncs []func(MessageEvent)
 }
 
 func New(url string, protocols ...string) *WebSocket {
@@ -183,41 +188,68 @@ func (w *WebSocket) SendJSON(v interface{}) error {
 }
 
 func (w *WebSocket) OnOpen(f func(e MessageEvent)) {
-	w.value.Call("addEventListener", "open", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	if w.openFuncs == nil {
+		w.openFuncs = make([]func(e MessageEvent), 0)
+	}
+	w.openFuncs = append(w.openFuncs, f)
+	w.value.Set("onopen", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) < 1 {
 			return nil
 		}
 		w.open = true
-		f(MessageEvent(args[0]))
+		for _, f := range w.openFuncs {
+			f(MessageEvent(args[0]))
+		}
 		return nil
 	}))
 }
 
 func (w *WebSocket) OnClose(f func(jsext.Event)) {
-	w.value.Call("addEventListener", "close", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	if w.closeFuncs == nil {
+		w.closeFuncs = make([]func(jsext.Event), 0)
+	}
+	w.closeFuncs = append(w.closeFuncs, f)
+	w.value.Set("onclose", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) < 1 {
 			return nil
 		}
 		w.open = false
-		f(jsext.Event(args[0]))
+		for _, f := range w.closeFuncs {
+			f(jsext.Event(args[0]))
+		}
 		return nil
 	}))
 }
 
 func (w *WebSocket) OnError(f func(jsext.Event)) {
-	w.value.Call("addEventListener", "error", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	if w.errorFuncs == nil {
+		w.errorFuncs = make([]func(jsext.Event), 0)
+	}
+	w.errorFuncs = append(w.errorFuncs, f)
+	w.value.Set("onerror", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		if len(args) < 1 {
 			return nil
 		}
 		w.open = false
-		f(jsext.Event(args[0]))
+		for _, f := range w.errorFuncs {
+			f(jsext.Event(args[0]))
+		}
 		return nil
 	}))
 }
 
 func (w *WebSocket) OnMessage(f func(MessageEvent)) {
-	w.value.Call("addEventListener", "message", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		f(MessageEvent(args[0]))
+	if w.messageFuncs == nil {
+		w.messageFuncs = make([]func(MessageEvent), 0)
+	}
+	w.messageFuncs = append(w.messageFuncs, f)
+	w.value.Set("onmessage", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) < 1 {
+			return nil
+		}
+		for _, f := range w.messageFuncs {
+			f(MessageEvent(args[0]))
+		}
 		return nil
 	}))
 }
