@@ -279,7 +279,7 @@ func (e *Element) Prepend(children ...*Element) *Element {
 		e.Children = append(children, e.Children...)
 	} else {
 		for _, child := range children {
-			e.value.Call("prepend", child.Render())
+			e.value.Call("prepend", child.Render().JSValue())
 		}
 	}
 	return e

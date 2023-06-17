@@ -5,6 +5,7 @@ package elements
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -112,8 +113,8 @@ func Dfn(text ...string) *Element {
 	return NewElement("dfn", text...)
 }
 
-func Div(text ...string) *Element {
-	return NewElement("div", text...)
+func Div(classList ...string) *Element {
+	return NewElement("div").AttrClass(classList...)
 }
 
 func Dl(text ...string) *Element {
@@ -126,10 +127,6 @@ func Dt(text ...string) *Element {
 
 func Em(text ...string) *Element {
 	return NewElement("em", text...)
-}
-
-func Embed(src string) *Element {
-	return NewElement("embed").Set("src", src)
 }
 
 func Fieldset(text ...string) *Element {
@@ -152,28 +149,15 @@ func Form(action, method string) *Element {
 	return NewElement("form").Set("action", action).Set("method", method)
 }
 
-func H1(text ...string) *Element {
-	return NewElement("h1", text...)
-}
-
-func H2(text ...string) *Element {
-	return NewElement("h2", text...)
-}
-
-func H3(text ...string) *Element {
-	return NewElement("h3", text...)
-}
-
-func H4(text ...string) *Element {
-	return NewElement("h4", text...)
-}
-
-func H5(text ...string) *Element {
-	return NewElement("h5", text...)
-}
-
-func H6(text ...string) *Element {
-	return NewElement("h6", text...)
+func Heading(size int, text ...string) *Element {
+	var s string = strconv.Itoa(size)
+	if size < 1 || size > 6 {
+		s = "1"
+	}
+	var b = make([]byte, 1+len(s))
+	b[0] = 'h'
+	b = append(b, s...)
+	return NewElement(string(b), text...)
 }
 
 func Header(text ...string) *Element {
@@ -200,8 +184,8 @@ func Img(src string) *Element {
 	return NewElement("img").Set("src", src)
 }
 
-func Input(typ, name, placeholder string) *Element {
-	return NewElement("input").Set("type", typ).Set("name", name).Set("placeholder", placeholder)
+func Input(typ, name string) *Element {
+	return NewElement("input").Set("type", typ).Set("name", name)
 }
 
 func Ins(text ...string) *Element {
@@ -210,10 +194,6 @@ func Ins(text ...string) *Element {
 
 func Kbd(text ...string) *Element {
 	return NewElement("kbd", text...)
-}
-
-func Keygen(text ...string) *Element {
-	return NewElement("keygen", text...)
 }
 
 func Label(text, forElem string) *Element {
@@ -244,14 +224,6 @@ func Mark(text ...string) *Element {
 	return NewElement("mark", text...)
 }
 
-func Menu(text ...string) *Element {
-	return NewElement("menu", text...)
-}
-
-func Menuitem(text ...string) *Element {
-	return NewElement("menuitem", text...)
-}
-
 func Meta(name, content string) *Element {
 	return NewElement("meta").Set("name", name).Set("content", content)
 }
@@ -280,8 +252,13 @@ func Optgroup(text ...string) *Element {
 	return NewElement("optgroup", text...)
 }
 
-func Option(text ...string) *Element {
-	return NewElement("option", text...)
+func Option(text, value string, selected ...bool) *Element {
+	var e = NewElement("option", text)
+	e.Set("value", value)
+	if len(selected) > 0 && selected[0] {
+		e.Set("selected", "selected")
+	}
+	return e
 }
 
 func Output(text ...string) *Element {
@@ -318,10 +295,6 @@ func Rt(text ...string) *Element {
 
 func Ruby(text ...string) *Element {
 	return NewElement("ruby", text...)
-}
-
-func S(text ...string) *Element {
-	return NewElement("s", text...)
 }
 
 func Samp(text ...string) *Element {
@@ -427,10 +400,6 @@ func Tr(text ...string) *Element {
 
 func Track(text ...string) *Element {
 	return NewElement("track", text...)
-}
-
-func U(text ...string) *Element {
-	return NewElement("u", text...)
 }
 
 func Ul(text ...string) *Element {
