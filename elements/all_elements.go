@@ -333,6 +333,7 @@ func Style(text ...string) *Element {
 	return NewElement("style", text...)
 }
 
+// Create a style element with the given text as its content.
 func StyleBlock(t ...string) *Element {
 	var v = NewElement("style")
 	v.Set("type", "text/css")
