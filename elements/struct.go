@@ -361,6 +361,14 @@ func (e *Element) AppendBeforeElement(element *Element, children ...*Element) *E
 	return e
 }
 
+func (e *Element) JSAppend(element jsext.Element) {
+	e.JSExtElement().AppendChild(element)
+}
+
+func (e *Element) JSPrepend(element jsext.Element) {
+	e.JSExtElement().Prepend(element)
+}
+
 // OnWebsocketMessage runs a function on the element when a websocket message is received.
 func (e *Element) OnWebsocketMessage(sock *websocket.WebSocket, fn func(websocket.MessageEvent, *Element)) *Element {
 	sock.OnMessage(func(event websocket.MessageEvent) {

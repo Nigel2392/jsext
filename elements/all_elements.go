@@ -154,7 +154,7 @@ func Heading(size int, text ...string) *Element {
 	if size < 1 || size > 6 {
 		s = "1"
 	}
-	var b = make([]byte, 1+len(s))
+	var b = make([]byte, 2)
 	b[0] = 'h'
 	b = append(b, s...)
 	return NewElement(string(b), text...)

@@ -108,7 +108,7 @@ func (w Value) AppendChild(child Element) {
 	// if !child.IsElement() || !w.IsElement() {
 	// panic("replaceChild: child and w must be elements")
 	// }
-	w.Value().Call("appendChild", child.Value())
+	w.Value().Call("appendChild", child.JSValue())
 }
 
 // PrependChild inserts a node before another node.
