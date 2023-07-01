@@ -5,7 +5,7 @@ package loaders
 
 import (
 	"github.com/Nigel2392/jsext/v2/css"
-	"github.com/Nigel2392/jsext/v2/elements"
+	"github.com/Nigel2392/jsext/v2/jse"
 )
 
 var (
@@ -24,8 +24,10 @@ var (
 //   - Loader needs to be deleted instead of disabled.
 //
 // https://www.udemy.com/course/css-animation-transitions-and-transforms-creativity-course/
-func LoaderRotatingBlock(idContainer, idLoader string) *elements.Element {
-	var container = elements.Div().AttrID(idContainer).AttrStyle("display:none")
+func LoaderRotatingBlock(idContainer, idLoader string) *jse.Element {
+	var container = jse.Div()
+	container.AttrID(idContainer)
+	container.Style().Display("none")
 	container.Div().AttrID(idLoader)
 	container.StyleBlock(`
 	#` + idContainer + `{
@@ -60,8 +62,11 @@ func LoaderRotatingBlock(idContainer, idLoader string) *elements.Element {
 //   - Loader needs to be deleted instead of disabled.
 //
 // https://www.udemy.com/course/css-animation-transitions-and-transforms-creativity-course/
-func LoaderHexagonRolling(idContainer, idLoader string) *elements.Element {
-	var container = elements.Div().AttrID(idContainer).AttrStyle("display:none")
+func LoaderHexagonRolling(idContainer, idLoader string) *jse.Element {
+	var container = jse.Div()
+	container.AttrID(idContainer)
+	container.Style().Display("none")
+
 	var line = container.Div().AttrID(idLoader)
 	line.Div()
 
@@ -132,8 +137,11 @@ func LoaderHexagonRolling(idContainer, idLoader string) *elements.Element {
 //   - Loader needs to be deleted instead of disabled.
 //
 // https://www.udemy.com/course/css-animation-transitions-and-transforms-creativity-course/
-func LoaderMultiRing(idContainer, idLoader string) *elements.Element {
-	var container = elements.Div().AttrID(idContainer).AttrStyle("display:none")
+func LoaderMultiRing(idContainer, idLoader string) *jse.Element {
+	var container = jse.Div()
+	container.AttrID(idContainer)
+	container.Style().Display("none")
+
 	var ld = container.Div().AttrID(idLoader)
 	ld.Div()
 	ld.Div()
@@ -222,8 +230,10 @@ func LoaderMultiRing(idContainer, idLoader string) *elements.Element {
 //   - Loader needs to be deleted instead of disabled.
 //
 // https://www.udemy.com/course/css-animation-transitions-and-transforms-creativity-course/
-func LoaderRing(idContainer, idLoader string) *elements.Element {
-	var container = elements.Div().AttrID(idContainer).AttrStyle("display:none")
+func LoaderRing(idContainer, idLoader string) *jse.Element {
+	var container = jse.Div()
+	container.AttrID(idContainer)
+	container.Style().Display("none")
 	var innerContainer = container.Div().AttrID(idLoader)
 	innerContainer.Div(LOADING_TEXT)
 	innerContainer.Div()
@@ -275,8 +285,10 @@ func LoaderRing(idContainer, idLoader string) *elements.Element {
 //   - Loader needs to be deleted instead of disabled.
 //
 // https://www.udemy.com/course/css-animation-transitions-and-transforms-creativity-course/
-func LoaderQuadSquares(idContainer, idLoader string) *elements.Element {
-	var container = elements.Div().AttrID(idContainer).AttrStyle("display:none")
+func LoaderQuadSquares(idContainer, idLoader string) *jse.Element {
+	var container = jse.Div()
+	container.AttrID(idContainer)
+	container.Style().Display("none")
 	var innerContainer = container.Div().AttrID(idLoader)
 	innerContainer.Span()
 	innerContainer.Span()

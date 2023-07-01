@@ -7,7 +7,7 @@ import (
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
-	"github.com/Nigel2392/jsext/v2/elements"
+	"github.com/Nigel2392/jsext/v2/jse"
 )
 
 const (
@@ -16,9 +16,9 @@ const (
 )
 
 // LoaderFunc is a function that returns a loader element.
-type LoaderFunc = func(idContainer, idLoader string) *elements.Element
+type LoaderFunc = func(idContainer, idLoader string) *jse.Element
 
-// Loader struct to be used for all loader elements.
+// Loader struct to be used for all loader jse.
 type Loader struct {
 	appendTo       string
 	Activated      bool
@@ -77,10 +77,14 @@ func (l *Loader) Finalize() {
 // Create the loader element.
 func (l *Loader) create() jsext.Value {
 	var loader_container = l.getLoaderElem(ID_LOADER_CONTAINER, ID_LOADER)
-	var loader_val = loader_container.RenderTo(l.appendTo).Value()
-	l.jsVal = js.Value(loader_val)
+	var elem = jsext.Document.QuerySelector(l.appendTo)
+	if elem.IsNull() {
+		return jsext.Null()
+	}
+	elem.Append(loader_container.Element())
+	l.jsVal = js.Value(*loader_container)
 	l.created = true
-	return loader_val
+	return loader_container.Value()
 }
 
 // Activate the loader.

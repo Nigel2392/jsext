@@ -17,12 +17,13 @@ import (
 
 // Default syscall/js values, some wrapped.
 var (
-	JSExt    Export
-	Global   js.Value
-	Document js.Value
-	Window   js.Value
-	Body     Element
-	Head     Element
+	JSExt           Export
+	Global          js.Value
+	Document        Value
+	DocumentElement Element
+	Window          Value
+	Body            Element
+	Head            Element
 )
 
 var waiter = make(chan struct{})
@@ -46,8 +47,9 @@ func EmitInitiated() {
 func init() {
 	// Initialize default values
 	Global = js.Global()
-	Document = Global.Get("document")
-	Window = Global.Get("window")
+	Document = Value(Global.Get("document"))
+	DocumentElement = Element(Document)
+	Window = Value(Global.Get("window"))
 	Body = Element(Document.Get("body"))
 	Head = Element(Document.Get("head"))
 	// Initialize jsext export object.
@@ -173,7 +175,7 @@ func GetElementsByTagName(tag string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v)
+	var elements = UnpackArray[Element](v.Value())
 	return elements, nil
 }
 
@@ -183,7 +185,7 @@ func GetElementsByClassName(class string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v)
+	var elements = UnpackArray[Element](v.Value())
 	return elements, nil
 }
 
@@ -202,7 +204,7 @@ func QuerySelectorAll(selector string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v)
+	var elements = UnpackArray[Element](v.Value())
 	return elements, nil
 }
 
@@ -417,7 +419,8 @@ func ObjectToMapT[T any](obj js.Value) map[string]T {
 			}
 			m[key] = v
 		case bool:
-			m[key] = any(obj.Get(key).Bool()).(T)
+			var v = obj.Get(key).Bool()
+			m[key] = *(*T)(unsafe.Pointer(&v))
 		case js.Value, Value, Element, Event:
 			m[key] = any(obj.Get(key)).(T)
 		case []byte:

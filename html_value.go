@@ -42,6 +42,18 @@ func (e Elements) RemoveEventListener(event string, listener func(this Value, ev
 // Element is a wrapper around js.Value.
 type Element js.Value
 
+func (e Element) IsNull() bool {
+	return js.Value(e).IsNull()
+}
+
+func (e Element) IsUndefined() bool {
+	return js.Value(e).IsUndefined()
+}
+
+func (e Element) IsNaN() bool {
+	return js.Value(e).IsNaN()
+}
+
 // JSValue returns the underlying js.Value.
 func (e Element) JSValue() js.Value {
 	return js.Value(e)
