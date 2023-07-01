@@ -72,6 +72,8 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Println("Generating file:", *outFile, "from file:", fileName)
+
 	var f = NewMultiBufferedWriter(func() LenStringerWriter { return &strings.Builder{} })
 
 	var imports = make(map[string]struct{})
@@ -81,6 +83,7 @@ func main() {
 		var comment = comment.Text()
 
 		var split = strings.Split(comment, CLOSING_TAG)
+	htmlLoop:
 		for _, functionHTML := range split {
 
 			if strings.TrimSpace(functionHTML) == "" {
@@ -98,7 +101,8 @@ func main() {
 
 			var doc, err = html.Parse(strings.NewReader(htmlString))
 			if err != nil {
-				panic(err)
+				fmt.Println("Error parsing html:", err)
+				continue
 			}
 
 			var n *html.Node
@@ -110,7 +114,7 @@ func main() {
 				}
 			}
 			if n == nil {
-				panic("No root node")
+				continue htmlLoop
 			}
 
 			var funcName = n.Data
