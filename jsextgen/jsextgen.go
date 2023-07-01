@@ -119,27 +119,28 @@ func main() {
 
 			var funcName = n.Data
 			var defaultNewFunc = "jse.NewElement"
+			var retStatement = "return e"
 
 			if strings.TrimSpace(funcName) == "" {
 				panic("No data in root node (function not defined)")
 			}
 
-		attrLoop:
 			for _, a := range n.Attr {
 				switch a.Key {
-				case "upper":
+				case "upper", "uppercase":
 					var parts = strings.Split(a.Val, ";")
 					for _, p := range parts {
 						funcName = strings.Replace(funcName, p, strings.ToUpper(p), 1)
 					}
-				case "newfunc":
+				case "new", "newfunc":
 					defaultNewFunc = strings.TrimSpace(a.Val)
-					break attrLoop
-				case "imports":
+				case "import", "imports":
 					var parts = strings.Split(a.Val, ";")
 					for _, p := range parts {
 						imports[strings.TrimSpace(p)] = struct{}{}
 					}
+				case "ret", "return":
+					retStatement = strings.TrimSpace(a.Val)
 				}
 			}
 
@@ -184,11 +185,13 @@ func main() {
 			for c := currentElem.FirstChild; c != nil; c = c.NextSibling {
 				parseChildren("e", c, f)
 			}
-			f.WriteString("\treturn e\n")
+			f.WriteString("\t")
+			f.WriteString(retStatement)
+			f.WriteString("\n")
 			f.WriteString("}\n\n")
 
-			fmt.Println("Found function:", funcName)
-
+			funcs[funcName] = struct{}{}
+			fmt.Printf("Found function %s, instantiated with %s, returning %s\n", funcName, defaultNewFunc, retStatement)
 		}
 	}
 
