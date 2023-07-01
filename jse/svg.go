@@ -21,6 +21,8 @@ func (s *SVG) Element() *Element {
 func (s *SVG) SetAttr(name, value string) *SVG {
 	switch name {
 	// Special case for code generation
+	//
+	// This is because xml namespace is not supported by the Element.SetAttr method
 	case "viewBox":
 		s.Element().Call("setAttributeNS", nil, name, value)
 		return s
