@@ -77,7 +77,7 @@ func (l *Loader) Finalize() {
 // Create the loader element.
 func (l *Loader) create() jsext.Value {
 	var loader_container = l.getLoaderElem(ID_LOADER_CONTAINER, ID_LOADER)
-	var elem = jsext.Document.QuerySelector(l.appendTo)
+	var elem = jsext.DocumentValue.QuerySelector(l.appendTo)
 	if elem.IsNull() {
 		return jsext.Null()
 	}

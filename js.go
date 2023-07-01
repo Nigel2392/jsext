@@ -19,7 +19,8 @@ import (
 var (
 	JSExt           Export
 	Global          js.Value
-	Document        Value
+	Document        js.Value
+	DocumentValue   Value
 	DocumentElement Element
 	Window          Value
 	Body            Element
@@ -47,7 +48,8 @@ func EmitInitiated() {
 func init() {
 	// Initialize default values
 	Global = js.Global()
-	Document = Value(Global.Get("document"))
+	Document = Global.Get("document")
+	DocumentValue = Value(Document)
 	DocumentElement = Element(Document)
 	Window = Value(Global.Get("window"))
 	Body = Element(Document.Get("body"))
@@ -175,7 +177,7 @@ func GetElementsByTagName(tag string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v.Value())
+	var elements = UnpackArray[Element](v)
 	return elements, nil
 }
 
@@ -185,7 +187,7 @@ func GetElementsByClassName(class string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v.Value())
+	var elements = UnpackArray[Element](v)
 	return elements, nil
 }
 
@@ -204,7 +206,7 @@ func QuerySelectorAll(selector string) (Elements, error) {
 	if v.IsUndefined() || v.IsNull() {
 		return nil, errors.New("value is undefined || null")
 	}
-	var elements = UnpackArray[Element](v.Value())
+	var elements = UnpackArray[Element](v)
 	return elements, nil
 }
 
