@@ -18,8 +18,19 @@ func (s *SVG) Element() *Element {
 	return (*Element)(s)
 }
 
+func (s *SVG) SetAttr(name, value string) *SVG {
+	switch name {
+	// Special case for code generation
+	case "viewBox":
+		s.Element().Call("setAttributeNS", nil, name, value)
+		return s
+	}
+	s.Element().SetAttr(name, value)
+	return s
+}
+
 func (s *SVG) XMLNS(u string) *SVG {
-	s.Element().SetAttr("xmlns", u)
+	s.SetAttr("xmlns", u)
 	return s
 }
 
@@ -29,17 +40,17 @@ func (s *SVG) ViewBox(x, y, width, height int) *SVG {
 }
 
 func (s *SVG) Fill(color string) *SVG {
-	s.Element().SetAttr("fill", color)
+	s.SetAttr("fill", color)
 	return s
 }
 
 func (s *SVG) Width(width int) *SVG {
-	s.Element().SetAttr("width", fmt.Sprintf("%d", width))
+	s.SetAttr("width", fmt.Sprintf("%d", width))
 	return s
 }
 
 func (s *SVG) Height(height int) *SVG {
-	s.Element().SetAttr("height", fmt.Sprintf("%d", height))
+	s.SetAttr("height", fmt.Sprintf("%d", height))
 	return s
 }
 
