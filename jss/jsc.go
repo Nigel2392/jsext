@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"strings"
 	"syscall/js"
+
+	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/jse"
 )
 
 // Package JSC implements a way to convert javascript objects to go objects, and vice versa.
@@ -33,6 +36,18 @@ func ValueOf(f any) js.Value {
 		return js.ValueOf(val)
 	case js.Value, js.Func:
 		return js.ValueOf(val)
+	case jsext.Value:
+		return val.Value()
+	case *jse.Element:
+		return val.JSValue()
+	case jsext.Element:
+		return val.JSValue()
+	case jsext.Event:
+		return val.JSValue()
+	case jsext.Import:
+		return val.JSValue()
+	case jsext.Promise:
+		return val.JSValue()
 	case []byte:
 		var enc = base64.StdEncoding.EncodeToString(val)
 		return js.ValueOf(enc)
