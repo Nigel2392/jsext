@@ -43,7 +43,7 @@ func (s *SVG) Height(height int) *SVG {
 	return s
 }
 
-func (s *SVG) CreateElement(name string) *Element {
+func (s *SVG) NewElement(name string) *Element {
 	var ns = s.Element().Get("namespaceURI")
 	var e = jsext.Document.Call("createElementNS", ns.Value(), name)
 	s.Element().Call("appendChild", e)
