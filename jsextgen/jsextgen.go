@@ -279,8 +279,8 @@ func parseChildren(parent string, n *html.Node, b LenStringerWriter) {
 		}
 		return
 	}
-	switch n.Type {
-	case html.TextNode:
+	switch {
+	case n.Type == html.TextNode:
 		b.WriteString("\t")
 		b.WriteString(parent)
 		b.WriteString(".InnerText(")
@@ -290,8 +290,21 @@ func parseChildren(parent string, n *html.Node, b LenStringerWriter) {
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			parseChildren(parent, c, b)
 		}
-
-	case html.ElementNode:
+	case n.Type == html.ElementNode && strings.TrimSpace(n.Data) == "go":
+		var innerCode = n.FirstChild.Data
+		var parentReplacer = strings.NewReplacer(
+			"{{PARENT}}", parent,
+			"{{parent}}", parent,
+		)
+		innerCode = parentReplacer.Replace(innerCode)
+		innerCodeSlice := strings.Split(innerCode, "\n")
+		for _, line := range innerCodeSlice {
+			b.WriteString("\t")
+			b.WriteString(strings.TrimSpace(line))
+			b.WriteString("\n")
+		}
+		b.WriteString("\n")
+	case n.Type == html.ElementNode:
 		if n.FirstChild != nil {
 			b.WriteString("\n")
 		}
@@ -321,5 +334,6 @@ func parseChildren(parent string, n *html.Node, b LenStringerWriter) {
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
 			parseChildren(elem, c, b)
 		}
+
 	}
 }
