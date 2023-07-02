@@ -16,7 +16,7 @@ import (
 //
 // If the js tag is not specified on struct fields, it will default to using json.
 //
-// This package uses reflection, thus might cause unforseen errors with TinyGo.
+// This file uses reflection, thus might cause unforseen errors with TinyGo.
 
 type Marshaller interface {
 	MarshalJS() js.Value
