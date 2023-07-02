@@ -262,11 +262,8 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 	if dstVal.Kind() == reflect.Ptr {
 		dstVal = dstVal.Elem()
 	}
-	if !dstVal.CanSet() {
-		return ErrCannotSet
-	}
 
-	if dstVal.Type().Implements(unmarshallerType) {
+	if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
 		var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
 		return unmarshaller.UnmarshalJS(srcVal)
 	}
@@ -347,28 +344,53 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 		if err != nil {
 			return err
 		}
-		var dstKeyValue = reflect.New(dstVal.Type().Elem())
+
+		var scanInto = dstVal.MapIndex(dstKey.Elem())
+		if scanInto.IsValid() {
+			err = scanValue(srcKeyValue, scanInto)
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		var typeOfDstValElem = dstVal.Type().Elem()
+		if typeOfDstValElem.Kind() == reflect.Ptr {
+			typeOfDstValElem = typeOfDstValElem.Elem()
+		}
+		var dstKeyValue = reflect.New(typeOfDstValElem)
+
 		err = scanValue(srcKeyValue, dstKeyValue)
 		if err != nil {
 			return err
 		}
+
+		dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue)
 	}
 	return nil
 }
 
 func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
-	if dstVal.IsNil() {
-		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcVal.Length(), srcVal.Length()))
+	var srcLen = srcVal.Length()
+	if srcLen == 0 {
+		return nil
 	}
-	var numElem = srcVal.Length()
-	for i := 0; i < numElem; i++ {
+	if dstVal.IsNil() {
+		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
+	}
+	for i := 0; i < srcLen; i++ {
 		var srcElem = srcVal.Index(i)
 		var dstElem = reflect.New(dstVal.Type().Elem())
 		var err = scanValue(srcElem, dstElem)
 		if err != nil {
 			return err
 		}
-		dstVal.Index(i).Set(dstElem.Elem())
+		// slice index out of range
+		if i >= dstVal.Len() {
+			dstVal.Set(reflect.Append(dstVal, dstElem.Elem()))
+		} else {
+			dstVal.Index(i).Set(dstElem.Elem())
+		}
 	}
 	return nil
 }
