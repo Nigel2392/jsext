@@ -37,10 +37,6 @@ func IsDataView(value js.Value) bool {
 	return value.InstanceOf(js.Global().Get("DataView"))
 }
 
-type Unmarshaller interface {
-	UnmarshalJS(js.Value) error
-}
-
 // Cast a value to the correct type, return an error
 // if the javascript value is not the correct type.
 //

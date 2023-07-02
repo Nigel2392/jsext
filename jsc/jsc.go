@@ -178,3 +178,197 @@ func getStructTag(field reflect.StructField, tags ...string) (name string, omitE
 
 	return name, omitEmpty, ok
 }
+
+type Error string
+
+func (e Error) Error() string {
+	return string(e)
+}
+
+const (
+	ErrUndefined Error = "src is null or undefined"
+	ErrNil       Error = "dst is nil"
+	ErrNotObject Error = "src is not an object"
+	ErrNotPtr    Error = "dst is not a pointer"
+	ErrNotValid  Error = "dst is not a pointer to a struct, map, or slice"
+	ErrNotStruct Error = "dst is not a pointer to a struct"
+	ErrCannotSet Error = "cannot set dst field"
+)
+
+type Unmarshaller interface {
+	UnmarshalJS(js.Value) error
+}
+
+func Scan(src js.Value, dst interface{}) error {
+	if src.IsNull() || src.IsUndefined() {
+		return ErrUndefined
+	}
+
+	if dst == nil {
+		return ErrNil
+	}
+
+	if src.Type() != js.TypeObject {
+		return ErrNotObject
+	}
+
+	var (
+		dstVal = reflect.ValueOf(dst)
+		dstTyp = dstVal.Type()
+	)
+
+	if dstTyp.Kind() != reflect.Ptr {
+		return ErrNotPtr
+	}
+
+	dstVal = dstVal.Elem()
+
+	return scanValue(src, dstVal)
+}
+
+func scanStruct(src js.Value, dstVal reflect.Value, dstTyp reflect.Type) error {
+	if dstTyp.Kind() != reflect.Struct {
+		return ErrNotStruct
+	}
+	var numField = dstTyp.NumField()
+	for i := 0; i < numField; i++ {
+		var dstField = dstTyp.Field(i)
+		var dstTag, _, dstOk = getStructTag(dstField, "js", "json", "jsc")
+		if !dstOk {
+			continue
+		}
+		var dstValField = dstVal.Field(i)
+		if dstValField.Kind() == reflect.Ptr {
+			dstValField = dstValField.Elem()
+		}
+		if !dstValField.CanSet() {
+			return ErrCannotSet
+		}
+		var srcVal = src.Get(dstTag)
+		if srcVal.IsUndefined() || srcVal.IsNull() {
+			continue
+		}
+		var err = scanValue(srcVal, dstValField)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+var unmarshallerType = reflect.TypeOf((*Unmarshaller)(nil)).Elem()
+
+func scanValue(srcVal js.Value, dstVal reflect.Value) error {
+	if dstVal.Kind() == reflect.Ptr {
+		dstVal = dstVal.Elem()
+	}
+	if !dstVal.CanSet() {
+		return ErrCannotSet
+	}
+
+	if dstVal.Type().Implements(unmarshallerType) {
+		var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
+		return unmarshaller.UnmarshalJS(srcVal)
+	}
+
+	switch dstVal.Kind() {
+	case reflect.String:
+		dstVal.SetString(srcVal.String())
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		dstVal.SetInt(int64(srcVal.Int()))
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		dstVal.SetUint(uint64(srcVal.Int()))
+	case reflect.Float32, reflect.Float64:
+		dstVal.SetFloat(srcVal.Float())
+	case reflect.Bool:
+		dstVal.SetBool(srcVal.Bool())
+	case reflect.Slice:
+		if dstVal.Type().Elem().Kind() == reflect.Uint8 {
+			var bytes, err = base64.StdEncoding.DecodeString(srcVal.String())
+			if err == nil {
+				dstVal.SetBytes(bytes)
+			} else {
+				var b = make([]byte, srcVal.Length())
+				js.CopyBytesToGo(b, srcVal)
+			}
+			return nil
+		}
+		var err = scanSlice(srcVal, dstVal)
+		if err != nil {
+			return err
+		}
+	case reflect.Struct:
+		var err = scanStruct(srcVal, dstVal, dstVal.Type())
+		if err != nil {
+			return err
+		}
+	case reflect.Map:
+		var err = scanMap(srcVal, dstVal)
+		if err != nil {
+			return err
+		}
+	case reflect.Interface:
+		switch srcVal.Type() {
+		case js.TypeBoolean:
+			dstVal.SetBool(srcVal.Bool())
+		case js.TypeNumber:
+			dstVal.SetFloat(srcVal.Float())
+		case js.TypeString:
+			dstVal.SetString(srcVal.String())
+		case js.TypeObject:
+			var m = make(map[string]interface{})
+			var valueOf = reflect.ValueOf(&m)
+			var err = scanMap(srcVal, valueOf)
+			if err != nil {
+				return err
+			}
+			dstVal.Set(valueOf)
+		}
+	case reflect.Ptr:
+		var err = scanValue(srcVal, dstVal.Elem())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func scanMap(srcVal js.Value, dstVal reflect.Value) error {
+	if dstVal.IsNil() {
+		dstVal.Set(reflect.MakeMap(dstVal.Type()))
+	}
+	var keys = js.Global().Get("Object").Call("keys", srcVal)
+	var numKeys = keys.Length()
+	for i := 0; i < numKeys; i++ {
+		var srcKey = keys.Index(i)
+		var srcKeyValue = srcVal.Get(srcKey.String())
+		var dstKey = reflect.New(dstVal.Type().Key())
+		var err = scanValue(srcKey, dstKey)
+		if err != nil {
+			return err
+		}
+		var dstKeyValue = reflect.New(dstVal.Type().Elem())
+		err = scanValue(srcKeyValue, dstKeyValue)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
+	if dstVal.IsNil() {
+		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcVal.Length(), srcVal.Length()))
+	}
+	var numElem = srcVal.Length()
+	for i := 0; i < numElem; i++ {
+		var srcElem = srcVal.Index(i)
+		var dstElem = reflect.New(dstVal.Type().Elem())
+		var err = scanValue(srcElem, dstElem)
+		if err != nil {
+			return err
+		}
+		dstVal.Index(i).Set(dstElem.Elem())
+	}
+	return nil
+}
