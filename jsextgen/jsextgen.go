@@ -120,6 +120,8 @@ func main() {
 			var funcName = n.Data
 			var defaultNewFunc = "jse.NewElement"
 			var retStatement = "return e"
+			var returningArg = "*jse.Element"
+			var initialarg = "{{NAME}}"
 
 			if strings.TrimSpace(funcName) == "" {
 				panic("No data in root node (function not defined)")
@@ -141,6 +143,10 @@ func main() {
 					}
 				case "ret", "return":
 					retStatement = strings.TrimSpace(a.Val)
+				case "retarg", "returnarg":
+					returningArg = strings.TrimSpace(a.Val)
+				case "arg", "argument":
+					initialarg = strings.TrimSpace(a.Val)
 				}
 			}
 
@@ -150,7 +156,9 @@ func main() {
 
 			f.WriteString("func ")
 			f.WriteString(funcName)
-			f.WriteString("() *jse.Element {\n")
+			f.WriteString("() ")
+			f.WriteString(returningArg)
+			f.WriteString(" {\n")
 
 			if n.FirstChild == nil {
 				panic("no root element")
@@ -172,7 +180,7 @@ func main() {
 			f.WriteString("\tvar e = ")
 			f.WriteString(defaultNewFunc)
 			f.WriteString("(")
-			f.WriteString(strconv.Quote(currentElem.Data))
+			f.WriteString(strconv.Quote(strings.Replace(initialarg, "{{NAME}}", currentElem.Data, -1)))
 			f.WriteString(")\n")
 
 			for _, a := range currentElem.Attr {
@@ -217,7 +225,13 @@ func main() {
 	file.WriteString("\t\"github.com/Nigel2392/jsext/v2/jse\"\n")
 	file.WriteString(")\n\n")
 
-	_, err = file.WriteString(f.String())
+	var str = f.String()
+	if str == "" {
+		println("No functions found")
+		os.Exit(0)
+	}
+
+	_, err = file.WriteString(str)
 	if err != nil {
 		panic(err)
 	}
