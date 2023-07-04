@@ -666,8 +666,8 @@ func (e *Element) Option(text, value string, selected ...bool) *OptionElement {
 	return ne
 }
 
-func (e *Element) Label(text string, forElem string) *Element {
-	var ne = Label(text, forElem)
+func (e *Element) Label(forElement, text string, classes ...string) *Element {
+	var ne = Label(forElement, text, classes...)
 	e.AppendChild(ne)
 	return ne
 }
