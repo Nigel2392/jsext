@@ -29,7 +29,7 @@ var (
 
 var waiter = make(chan struct{})
 
-func Wait(exit chan error) {
+func Wait(exit chan error) error {
 	select {
 	case <-waiter:
 		close(waiter)
@@ -38,7 +38,13 @@ func Wait(exit chan error) {
 		close(waiter)
 		close(exit)
 		console.Log(err)
+		return err
 	}
+	return nil
+}
+
+func StopWaiting() {
+	waiter <- struct{}{}
 }
 
 func EmitInitiated() {

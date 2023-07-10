@@ -2,13 +2,17 @@ package jsc
 
 import (
 	"encoding/base64"
+	"fmt"
 	"reflect"
 	"strings"
 	"syscall/js"
+	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/jse"
 )
+
+var TINYGO bool
 
 // Package JSC implements a way to convert javascript objects to go objects, and vice versa.
 //
@@ -17,6 +21,9 @@ import (
 // If the js tag is not specified on struct fields, it will default to using json.
 //
 // This file uses reflection, thus might cause unforseen errors with TinyGo.
+//
+// When using tinygo as a compiler, be sure to set jsc.TINYGO = true.
+// This will try to make sure no unforseen panics happen during runtime.
 
 type Marshaller interface {
 	MarshalJS() js.Value
@@ -112,10 +119,12 @@ func ValueOf(f any) js.Value {
 		if !valueOf.CanInterface() {
 			return js.Null()
 		}
-		if valueOf.Type().ConvertibleTo(reflect.TypeOf(js.Value{})) {
-			var jsValue js.Value
-			reflect.ValueOf(&jsValue).Elem().Set(valueOf)
-			return jsValue
+		if !TINYGO {
+			if valueOf.Type().ConvertibleTo(reflect.TypeOf(js.Value{})) {
+				var jsValue js.Value
+				reflect.ValueOf(&jsValue).Elem().Set(valueOf)
+				return jsValue
+			}
 		}
 		var object = js.Global().Get("Object").New()
 		var typeOf = valueOf.Type()
@@ -263,9 +272,11 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 		dstVal = dstVal.Elem()
 	}
 
-	if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
-		var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
-		return unmarshaller.UnmarshalJS(srcVal)
+	if !TINYGO {
+		if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
+			var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
+			return unmarshaller.UnmarshalJS(srcVal)
+		}
 	}
 
 	switch dstVal.Kind() {
@@ -334,6 +345,9 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 	if dstVal.IsNil() {
 		dstVal.Set(reflect.MakeMap(dstVal.Type()))
 	}
+	if dstVal.Kind() == reflect.Ptr {
+		dstVal = dstVal.Elem()
+	}
 	var keys = js.Global().Get("Object").Call("keys", srcVal)
 	var numKeys = keys.Length()
 	for i := 0; i < numKeys; i++ {
@@ -376,7 +390,14 @@ func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
 		return nil
 	}
 	if dstVal.IsNil() {
-		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
+		if TINYGO {
+			var err = tinySetNilSlice(dstVal, dstVal.Type().Elem().Kind(), srcLen)
+			if err != nil {
+				return err
+			}
+		} else {
+			dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
+		}
 	}
 	for i := 0; i < srcLen; i++ {
 		var srcElem = srcVal.Index(i)
@@ -391,6 +412,52 @@ func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
 		} else {
 			dstVal.Index(i).Set(dstElem.Elem())
 		}
+	}
+	return nil
+}
+
+func tinySetNilSlice(dstVal reflect.Value, elemKind reflect.Kind, srcLen int) error {
+	switch elemKind {
+	case reflect.Interface:
+		dstVal.Set(reflect.ValueOf(make([]interface{}, srcLen)))
+	case reflect.String:
+		dstVal.Set(reflect.ValueOf(make([]string, srcLen)))
+	case reflect.Int:
+		dstVal.Set(reflect.ValueOf(make([]int, srcLen)))
+	case reflect.Int8:
+		dstVal.Set(reflect.ValueOf(make([]int8, srcLen)))
+	case reflect.Int16:
+		dstVal.Set(reflect.ValueOf(make([]int16, srcLen)))
+	case reflect.Int32:
+		dstVal.Set(reflect.ValueOf(make([]int32, srcLen)))
+	case reflect.Int64:
+		dstVal.Set(reflect.ValueOf(make([]int64, srcLen)))
+	case reflect.Uint:
+		dstVal.Set(reflect.ValueOf(make([]uint, srcLen)))
+	case reflect.Uint8:
+		dstVal.Set(reflect.ValueOf(make([]uint8, srcLen)))
+	case reflect.Uint16:
+		dstVal.Set(reflect.ValueOf(make([]uint16, srcLen)))
+	case reflect.Uint32:
+		dstVal.Set(reflect.ValueOf(make([]uint32, srcLen)))
+	case reflect.Uint64:
+		dstVal.Set(reflect.ValueOf(make([]uint64, srcLen)))
+	case reflect.Float32:
+		dstVal.Set(reflect.ValueOf(make([]float32, srcLen)))
+	case reflect.Float64:
+		dstVal.Set(reflect.ValueOf(make([]float64, srcLen)))
+	case reflect.Bool:
+		dstVal.Set(reflect.ValueOf(make([]bool, srcLen)))
+	case reflect.Complex64:
+		dstVal.Set(reflect.ValueOf(make([]complex64, srcLen)))
+	case reflect.Complex128:
+		dstVal.Set(reflect.ValueOf(make([]complex128, srcLen)))
+	case reflect.Uintptr:
+		dstVal.Set(reflect.ValueOf(make([]uintptr, srcLen)))
+	case reflect.UnsafePointer:
+		dstVal.Set(reflect.ValueOf(make([]unsafe.Pointer, srcLen)))
+	default:
+		return fmt.Errorf("tinygo: unsupported slice element type: %v", elemKind)
 	}
 	return nil
 }
