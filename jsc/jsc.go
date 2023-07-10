@@ -12,6 +12,7 @@ import (
 	"github.com/Nigel2392/jsext/v2/jse"
 )
 
+// TINYGO is used to check if we are using tinygo as a compiler.
 var TINYGO bool
 
 // Package JSC implements a way to convert javascript objects to go objects, and vice versa.
