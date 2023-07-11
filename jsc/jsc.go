@@ -313,24 +313,7 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 			return err
 		}
 	case reflect.Interface:
-		var i interface{}
-		switch srcVal.Type() {
-		case js.TypeBoolean:
-			i = srcVal.Bool()
-		case js.TypeString:
-			i = srcVal.String()
-		case js.TypeNumber:
-			i = srcVal.Float()
-		case js.TypeObject:
-			var m = make(map[string]interface{})
-			var valueOf = reflect.ValueOf(&m)
-			var err = scanMap(srcVal, valueOf)
-			if err != nil {
-				return err
-			}
-			i = m
-		}
-		dstVal.Set(reflect.ValueOf(i))
+		dstVal.Set(reflect.ValueOf(guessType(srcVal)))
 	case reflect.Ptr:
 		var err = scanValue(srcVal, dstVal.Elem())
 		if err != nil {
@@ -338,6 +321,43 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 		}
 	}
 	return nil
+}
+
+func guessType(srcVal js.Value) interface{} {
+	var i interface{}
+	switch srcVal.Type() {
+	case js.TypeBoolean:
+		i = srcVal.Bool()
+	case js.TypeString:
+		i = srcVal.String()
+	case js.TypeNumber:
+		i = srcVal.Float()
+	case js.TypeObject:
+		if srcVal.InstanceOf(js.Global().Get("Array")) {
+			var s = make([]interface{}, srcVal.Length())
+			for i := 0; i < srcVal.Length(); i++ {
+				s[i] = guessType(srcVal.Index(i))
+			}
+			i = s
+			break
+		}
+		var m = make(map[string]interface{})
+		var valueOf = reflect.ValueOf(&m)
+		var err = scanMap(srcVal, valueOf)
+		if err != nil {
+			return err
+		}
+		i = m
+	case js.TypeFunction:
+		i = func(args ...any) js.Value {
+			var s = make([]interface{}, len(args))
+			for i, arg := range args {
+				s[i] = ValueOf(arg)
+			}
+			return srcVal.Invoke(s...)
+		}
+	}
+	return i
 }
 
 func scanMap(srcVal js.Value, dstVal reflect.Value) error {
