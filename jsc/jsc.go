@@ -155,6 +155,42 @@ func ValueOf(f any) js.Value {
 			return js.Null()
 		}
 		return ValueOf(valueOf.Elem().Interface())
+	case reflect.Interface:
+		if valueOf.IsNil() {
+			return js.Null()
+		}
+		return ValueOf(valueOf.Elem().Interface())
+
+	// Very incompatible with TinyGo...
+	//	case reflect.Func:
+	//		if valueOf.IsNil() {
+	//			return js.Null()
+	//		}
+	//		return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	//			var in = make([]reflect.Value, len(args))
+	//			for i := range args {
+	//				var arg = args[i]
+	//				var castJS = guessType(arg)
+	//				var jsValueOf = reflect.ValueOf(castJS)
+	//				if jsValueOf.Kind() == reflect.Ptr {
+	//					jsValueOf = jsValueOf.Elem()
+	//				}
+	//				if jsValueOf.Type().ConvertibleTo(valueOf.Type().In(i)) {
+	//					in[i] = jsValueOf.Convert(valueOf.Type().In(i))
+	//				} else {
+	//					in[i] = reflect.ValueOf(castJS)
+	//				}
+	//			}
+	//			var out = valueOf.Call(in)
+	//			if len(out) == 0 {
+	//				return nil
+	//			}
+	//			var returnValues = make([]interface{}, len(out))
+	//			for i := range out {
+	//				returnValues[i] = out[i].Interface()
+	//			}
+	//			return ValueOf(returnValues)
+	//		}).Value
 	default:
 		panic("ValueOf: unsupported type " + kind.String())
 	}
