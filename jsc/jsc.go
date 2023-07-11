@@ -2,11 +2,9 @@ package jsc
 
 import (
 	"encoding/base64"
-	"fmt"
 	"reflect"
 	"strings"
 	"syscall/js"
-	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/jse"
@@ -273,11 +271,9 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 		dstVal = dstVal.Elem()
 	}
 
-	if !TINYGO {
-		if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
-			var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
-			return unmarshaller.UnmarshalJS(srcVal)
-		}
+	if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
+		var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
+		return unmarshaller.UnmarshalJS(srcVal)
 	}
 
 	switch dstVal.Kind() {
@@ -317,13 +313,14 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 			return err
 		}
 	case reflect.Interface:
+		var i interface{}
 		switch srcVal.Type() {
 		case js.TypeBoolean:
-			dstVal.SetBool(srcVal.Bool())
-		case js.TypeNumber:
-			dstVal.SetFloat(srcVal.Float())
+			i = srcVal.Bool()
 		case js.TypeString:
-			dstVal.SetString(srcVal.String())
+			i = srcVal.String()
+		case js.TypeNumber:
+			i = srcVal.Float()
 		case js.TypeObject:
 			var m = make(map[string]interface{})
 			var valueOf = reflect.ValueOf(&m)
@@ -331,8 +328,9 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 			if err != nil {
 				return err
 			}
-			dstVal.Set(valueOf)
+			i = m
 		}
+		dstVal.Set(reflect.ValueOf(i))
 	case reflect.Ptr:
 		var err = scanValue(srcVal, dstVal.Elem())
 		if err != nil {
@@ -380,7 +378,7 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 			return err
 		}
 
-		dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue)
+		dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue.Elem())
 	}
 	return nil
 }
@@ -391,14 +389,8 @@ func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
 		return nil
 	}
 	if dstVal.IsNil() {
-		if TINYGO {
-			var err = tinySetNilSlice(dstVal, dstVal.Type().Elem().Kind(), srcLen)
-			if err != nil {
-				return err
-			}
-		} else {
-			dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
-		}
+		// makeslice is implemented in tinygo! :)
+		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
 	}
 	for i := 0; i < srcLen; i++ {
 		var srcElem = srcVal.Index(i)
@@ -417,48 +409,50 @@ func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
 	return nil
 }
 
-func tinySetNilSlice(dstVal reflect.Value, elemKind reflect.Kind, srcLen int) error {
-	switch elemKind {
-	case reflect.Interface:
-		dstVal.Set(reflect.ValueOf(make([]interface{}, srcLen)))
-	case reflect.String:
-		dstVal.Set(reflect.ValueOf(make([]string, srcLen)))
-	case reflect.Int:
-		dstVal.Set(reflect.ValueOf(make([]int, srcLen)))
-	case reflect.Int8:
-		dstVal.Set(reflect.ValueOf(make([]int8, srcLen)))
-	case reflect.Int16:
-		dstVal.Set(reflect.ValueOf(make([]int16, srcLen)))
-	case reflect.Int32:
-		dstVal.Set(reflect.ValueOf(make([]int32, srcLen)))
-	case reflect.Int64:
-		dstVal.Set(reflect.ValueOf(make([]int64, srcLen)))
-	case reflect.Uint:
-		dstVal.Set(reflect.ValueOf(make([]uint, srcLen)))
-	case reflect.Uint8:
-		dstVal.Set(reflect.ValueOf(make([]uint8, srcLen)))
-	case reflect.Uint16:
-		dstVal.Set(reflect.ValueOf(make([]uint16, srcLen)))
-	case reflect.Uint32:
-		dstVal.Set(reflect.ValueOf(make([]uint32, srcLen)))
-	case reflect.Uint64:
-		dstVal.Set(reflect.ValueOf(make([]uint64, srcLen)))
-	case reflect.Float32:
-		dstVal.Set(reflect.ValueOf(make([]float32, srcLen)))
-	case reflect.Float64:
-		dstVal.Set(reflect.ValueOf(make([]float64, srcLen)))
-	case reflect.Bool:
-		dstVal.Set(reflect.ValueOf(make([]bool, srcLen)))
-	case reflect.Complex64:
-		dstVal.Set(reflect.ValueOf(make([]complex64, srcLen)))
-	case reflect.Complex128:
-		dstVal.Set(reflect.ValueOf(make([]complex128, srcLen)))
-	case reflect.Uintptr:
-		dstVal.Set(reflect.ValueOf(make([]uintptr, srcLen)))
-	case reflect.UnsafePointer:
-		dstVal.Set(reflect.ValueOf(make([]unsafe.Pointer, srcLen)))
-	default:
-		return fmt.Errorf("tinygo: unsupported slice element type: %v", elemKind)
-	}
-	return nil
-}
+// makeslice is implemented in tinygo! :)
+//	func tinySetNilSlice(dstVal reflect.Value, elemKind reflect.Kind, srcLen int) error {
+//		switch elemKind {
+//		case reflect.Interface:
+//			dstVal.Set(reflect.ValueOf(make([]interface{}, srcLen)))
+//		case reflect.String:
+//			dstVal.Set(reflect.ValueOf(make([]string, srcLen)))
+//		case reflect.Int:
+//			dstVal.Set(reflect.ValueOf(make([]int, srcLen)))
+//		case reflect.Int8:
+//			dstVal.Set(reflect.ValueOf(make([]int8, srcLen)))
+//		case reflect.Int16:
+//			dstVal.Set(reflect.ValueOf(make([]int16, srcLen)))
+//		case reflect.Int32:
+//			dstVal.Set(reflect.ValueOf(make([]int32, srcLen)))
+//		case reflect.Int64:
+//			dstVal.Set(reflect.ValueOf(make([]int64, srcLen)))
+//		case reflect.Uint:
+//			dstVal.Set(reflect.ValueOf(make([]uint, srcLen)))
+//		case reflect.Uint8:
+//			dstVal.Set(reflect.ValueOf(make([]uint8, srcLen)))
+//		case reflect.Uint16:
+//			dstVal.Set(reflect.ValueOf(make([]uint16, srcLen)))
+//		case reflect.Uint32:
+//			dstVal.Set(reflect.ValueOf(make([]uint32, srcLen)))
+//		case reflect.Uint64:
+//			dstVal.Set(reflect.ValueOf(make([]uint64, srcLen)))
+//		case reflect.Float32:
+//			dstVal.Set(reflect.ValueOf(make([]float32, srcLen)))
+//		case reflect.Float64:
+//			dstVal.Set(reflect.ValueOf(make([]float64, srcLen)))
+//		case reflect.Bool:
+//			dstVal.Set(reflect.ValueOf(make([]bool, srcLen)))
+//		case reflect.Complex64:
+//			dstVal.Set(reflect.ValueOf(make([]complex64, srcLen)))
+//		case reflect.Complex128:
+//			dstVal.Set(reflect.ValueOf(make([]complex128, srcLen)))
+//		case reflect.Uintptr:
+//			dstVal.Set(reflect.ValueOf(make([]uintptr, srcLen)))
+//		case reflect.UnsafePointer:
+//			dstVal.Set(reflect.ValueOf(make([]unsafe.Pointer, srcLen)))
+//		default:
+//			return fmt.Errorf("tinygo: unsupported slice element type: %v", elemKind)
+//		}
+//		return nil
+//	}
+//
