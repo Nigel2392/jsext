@@ -28,6 +28,8 @@ type Marshaller interface {
 	MarshalJS() js.Value
 }
 
+// ValueOf will return the js.Value of the given value.
+// It will panic if the value is not a supported type.
 func ValueOf(f any) js.Value {
 	if f == nil {
 		return js.Null()
@@ -162,35 +164,40 @@ func ValueOf(f any) js.Value {
 		return ValueOf(valueOf.Elem().Interface())
 
 	// Very incompatible with TinyGo...
-	//	case reflect.Func:
-	//		if valueOf.IsNil() {
-	//			return js.Null()
-	//		}
-	//		return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-	//			var in = make([]reflect.Value, len(args))
-	//			for i := range args {
-	//				var arg = args[i]
-	//				var castJS = guessType(arg)
-	//				var jsValueOf = reflect.ValueOf(castJS)
-	//				if jsValueOf.Kind() == reflect.Ptr {
-	//					jsValueOf = jsValueOf.Elem()
-	//				}
-	//				if jsValueOf.Type().ConvertibleTo(valueOf.Type().In(i)) {
-	//					in[i] = jsValueOf.Convert(valueOf.Type().In(i))
-	//				} else {
-	//					in[i] = reflect.ValueOf(castJS)
-	//				}
-	//			}
-	//			var out = valueOf.Call(in)
-	//			if len(out) == 0 {
-	//				return nil
-	//			}
-	//			var returnValues = make([]interface{}, len(out))
-	//			for i := range out {
-	//				returnValues[i] = out[i].Interface()
-	//			}
-	//			return ValueOf(returnValues)
-	//		}).Value
+	case reflect.Func:
+		if valueOf.IsNil() {
+			return js.Null()
+		}
+		if TINYGO {
+			panic("(reflect.Type).In() not supported in tinygo: cannot convert func to js.Func")
+		}
+		return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			var in = make([]reflect.Value, len(args))
+			for i := range args {
+				var arg = args[i]
+				var castJS = guessType(arg)
+				var jsValueOf = reflect.ValueOf(castJS)
+				if jsValueOf.Kind() == reflect.Ptr {
+					jsValueOf = jsValueOf.Elem()
+				}
+				if jsValueOf.Type().ConvertibleTo(valueOf.Type().In(i)) {
+					in[i] = jsValueOf.Convert(valueOf.Type().In(i))
+				} else {
+					in[i] = reflect.ValueOf(castJS)
+				}
+			}
+			var out = valueOf.Call(in)
+			if len(out) == 0 {
+				return nil
+			} else if len(out) == 1 {
+				return ValueOf(out[0].Interface())
+			}
+			var returnValues = make([]interface{}, len(out))
+			for i := range out {
+				returnValues[i] = out[i].Interface()
+			}
+			return ValueOf(returnValues)
+		}).Value
 	default:
 		panic("ValueOf: unsupported type " + kind.String())
 	}
