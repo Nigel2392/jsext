@@ -239,7 +239,6 @@ func (e Error) Error() string {
 const (
 	ErrUndefined Error = "src is null or undefined"
 	ErrNil       Error = "dst is nil"
-	ErrNotObject Error = "src is not an object"
 	ErrNotPtr    Error = "dst is not a pointer"
 	ErrNotValid  Error = "dst is not a pointer to a struct, map, or slice"
 	ErrNotStruct Error = "dst is not a pointer to a struct"
@@ -259,9 +258,9 @@ func Scan(src js.Value, dst interface{}) error {
 		return ErrNil
 	}
 
-	if src.Type() != js.TypeObject {
-		return ErrNotObject
-	}
+	//	if src.Type() != js.TypeObject {
+	//		return ErrNotObject
+	//	}
 
 	var (
 		dstVal = reflect.ValueOf(dst)
