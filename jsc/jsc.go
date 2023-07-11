@@ -441,6 +441,7 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 		}
 
 		// check if map value is pointer
+		// if it is, set the map value to the pointer
 		if dstVal.Type().Elem().Kind() == reflect.Ptr {
 			dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue)
 			continue
