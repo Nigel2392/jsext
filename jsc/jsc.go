@@ -440,6 +440,12 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 			return err
 		}
 
+		// check if map value is pointer
+		if dstVal.Type().Elem().Kind() == reflect.Ptr {
+			dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue)
+			continue
+		}
+
 		dstVal.SetMapIndex(dstKey.Elem(), dstKeyValue.Elem())
 	}
 	return nil
