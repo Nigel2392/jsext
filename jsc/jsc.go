@@ -76,6 +76,9 @@ func ValueOf(f any) js.Value {
 		return val.MarshalJS()
 	}
 	var valueOf = reflect.ValueOf(f)
+	if !valueOf.IsValid() {
+		return js.Null()
+	}
 	var kind = valueOf.Kind()
 	switch kind {
 	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
@@ -89,16 +92,11 @@ func ValueOf(f any) js.Value {
 	case reflect.Bool:
 		return js.ValueOf(valueOf.Bool())
 	case reflect.Slice, reflect.Array:
-		if !valueOf.IsValid() {
-			return js.Null()
-		}
-
 		// Check if bytes
 		if valueOf.Type().Elem().Kind() == reflect.Uint8 {
 			var enc = base64.StdEncoding.EncodeToString(valueOf.Bytes())
 			return js.ValueOf(enc)
 		}
-
 		var length = valueOf.Len()
 		var array = js.Global().Get("Array").New(length)
 		for i := 0; i < length; i++ {
@@ -132,7 +130,7 @@ func ValueOf(f any) js.Value {
 		var numField = valueOf.NumField()
 		for i := 0; i < numField; i++ {
 			var field = typeOf.Field(i)
-			var tag, omitEmpty, ok = getStructTag(field, "js", "json", "jsc")
+			var tag, omitEmpty, ok = getStructTag(field, "js", "jsc", "json")
 			if !ok {
 				continue
 			}
@@ -152,17 +150,8 @@ func ValueOf(f any) js.Value {
 			object.Set(tag, ValueOf(valField.Interface()))
 		}
 		return object
-	case reflect.Ptr:
-		if valueOf.IsNil() {
-			return js.Null()
-		}
+	case reflect.Ptr, reflect.Interface:
 		return ValueOf(valueOf.Elem().Interface())
-	case reflect.Interface:
-		if valueOf.IsNil() {
-			return js.Null()
-		}
-		return ValueOf(valueOf.Elem().Interface())
-
 	// Very incompatible with TinyGo...
 	case reflect.Func:
 		if valueOf.IsNil() {
@@ -180,9 +169,10 @@ func ValueOf(f any) js.Value {
 				if jsValueOf.Kind() == reflect.Ptr {
 					jsValueOf = jsValueOf.Elem()
 				}
-				if jsValueOf.Type().ConvertibleTo(valueOf.Type().In(i)) {
+				switch {
+				case jsValueOf.Type().ConvertibleTo(valueOf.Type().In(i)):
 					in[i] = jsValueOf.Convert(valueOf.Type().In(i))
-				} else {
+				default:
 					in[i] = reflect.ValueOf(castJS)
 				}
 			}
@@ -217,14 +207,18 @@ func getStructTag(field reflect.StructField, tags ...string) (name string, omitE
 	if name == "-" {
 		return "", false, false
 	}
-
 	ok = true
 	omitEmpty = false
 
 	if strings.Index(name, ",") != -1 {
 		var parts = strings.Split(name, ",")
 		name = parts[0]
-		omitEmpty = strings.ToLower(parts[1]) == "omitempty"
+		for _, part := range parts[1:] {
+			if part == "omitempty" {
+				omitEmpty = true
+				break
+			}
+		}
 	}
 
 	return name, omitEmpty, ok
@@ -283,7 +277,7 @@ func scanStruct(src js.Value, dstVal reflect.Value, dstTyp reflect.Type) error {
 	var numField = dstTyp.NumField()
 	for i := 0; i < numField; i++ {
 		var dstField = dstTyp.Field(i)
-		var dstTag, _, dstOk = getStructTag(dstField, "js", "json", "jsc")
+		var dstTag, _, dstOk = getStructTag(dstField, "js", "jsc", "json")
 		if !dstOk {
 			continue
 		}
