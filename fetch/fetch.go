@@ -51,6 +51,7 @@ func fetch(options Request) (*Response, error) {
 		var resp = &Response{
 			Headers:    jsHeaders,
 			StatusCode: statusCode,
+			JS:         response,
 		}
 		response.Call("text").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			var b []byte
