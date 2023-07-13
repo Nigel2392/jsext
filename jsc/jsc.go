@@ -13,6 +13,9 @@ import (
 // TINYGO is used to check if we are using tinygo as a compiler.
 var TINYGO bool
 
+// Wether to encode and decode bytes using base64.
+var BASE64 = true
+
 // Package JSC implements a way to convert javascript objects to go objects, and vice versa.
 //
 // This package is used to communicate between the frontend and backend.
@@ -80,6 +83,10 @@ func ValueOf(f any) js.Value {
 		return js.Null()
 	}
 	var kind = valueOf.Kind()
+	return valueOfJS(valueOf, kind)
+}
+
+func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 	switch kind {
 	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
 		return js.ValueOf(valueOf.Int())
@@ -94,6 +101,12 @@ func ValueOf(f any) js.Value {
 	case reflect.Slice, reflect.Array:
 		// Check if bytes
 		if valueOf.Type().Elem().Kind() == reflect.Uint8 {
+			if !BASE64 {
+				var length = valueOf.Len()
+				var array = js.Global().Get("Uint8Array").New(length)
+				js.CopyBytesToJS(array, valueOf.Bytes())
+				return array
+			}
 			var enc = base64.StdEncoding.EncodeToString(valueOf.Bytes())
 			return js.ValueOf(enc)
 		}
@@ -149,6 +162,16 @@ func ValueOf(f any) js.Value {
 
 			object.Set(tag, ValueOf(valField.Interface()))
 		}
+
+		if !TINYGO {
+			var numMethod = valueOf.NumMethod()
+			for i := 0; i < numMethod; i++ {
+				var methodType = valueOf.Type().Method(i)
+				var method = valueOf.Method(i)
+				object.Set(methodType.Name, ValueOf(method.Interface()))
+			}
+		}
+
 		return object
 	case reflect.Ptr, reflect.Interface:
 		return ValueOf(valueOf.Elem().Interface())
@@ -325,6 +348,12 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 		dstVal.SetBool(srcVal.Bool())
 	case reflect.Slice:
 		if dstVal.Type().Elem().Kind() == reflect.Uint8 {
+			if !BASE64 {
+				var b = make([]byte, srcVal.Length())
+				js.CopyBytesToGo(b, srcVal)
+				dstVal.SetBytes(b)
+				return nil
+			}
 			var bytes, err = base64.StdEncoding.DecodeString(srcVal.String())
 			if err == nil {
 				dstVal.SetBytes(bytes)
