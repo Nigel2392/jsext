@@ -1,9 +1,9 @@
 package try
 
 import (
-	"bytes"
 	"errors"
 	"math/rand"
+	"strings"
 	"syscall/js"
 	"unsafe"
 
@@ -79,7 +79,7 @@ func Catch(f js.Func, args ...interface{}) error {
 	defer js.Global().Delete(funcName)
 
 	// create the function
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteString("(function(")
 	for i, arg := range argsTuple {
 		if i > 0 {
