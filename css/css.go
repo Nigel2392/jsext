@@ -49,7 +49,6 @@ func ToPX(px int, end_css_statement ...bool) string {
 	var s = strconv.Itoa(px) + "px"
 	var end_CSS = len(end_css_statement) > 0 && end_css_statement[0]
 	if end_CSS {
-		// god I fucking hate concatenating strings,
 		// is a buffer worth?
 		return s + ";"
 	}
@@ -61,7 +60,6 @@ func ToPercent(percent int, end_css_statement ...bool) string {
 	var s = strconv.Itoa(percent) + "%"
 	var end_CSS = len(end_css_statement) > 0 && end_css_statement[0]
 	if end_CSS {
-		// god I fucking hate concatenating strings,
 		// is a buffer worth?
 		return s + ";"
 	}
@@ -73,7 +71,6 @@ func ToRem(rem int, end_css_statement ...bool) string {
 	var s = strconv.Itoa(rem) + "rem"
 	var end_CSS = len(end_css_statement) > 0 && end_css_statement[0]
 	if end_CSS {
-		// god I fucking hate concatenating strings,
 		// is a buffer worth?
 		return s + ";"
 	}
@@ -85,7 +82,6 @@ func ToVW(vw int, end_css_statement ...bool) string {
 	var s = strconv.Itoa(vw) + "vw"
 	var end_CSS = len(end_css_statement) > 0 && end_css_statement[0]
 	if end_CSS {
-		// god I fucking hate concatenating strings,
 		// is a buffer worth?
 		return s + ";"
 	}
@@ -97,7 +93,6 @@ func ToVH(vh int, end_css_statement ...bool) string {
 	var s = strconv.Itoa(vh) + "vh"
 	var end_CSS = len(end_css_statement) > 0 && end_css_statement[0]
 	if end_CSS {
-		// god I fucking hate concatenating strings,
 		// is a buffer worth?
 		return s + ";"
 	}

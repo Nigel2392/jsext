@@ -37,6 +37,34 @@ type ErrorMarshaller interface {
 	MarshalJS() (js.Value, error)
 }
 
+// ValuesOf will return the js.Value of the given values.
+// It will return an error if any of the value are not supported.
+func ValuesOf(f ...any) ([]js.Value, error) {
+	var (
+		v      js.Value
+		err    error
+		values = make([]js.Value, len(f))
+	)
+	for i := range f {
+		v, err = ValueOf(f[i])
+		if err != nil {
+			return nil, err
+		}
+		values[i] = v
+	}
+	return values, nil
+}
+
+// MustValuesOf will return the js.Value of the given values.
+// This can be useful for inlining known-safe types.
+func MustValuesOf(f ...any) []js.Value {
+	var v, err = ValuesOf(f...)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // ValueOf will return the js.Value of the given value.
 // It will return an error if the value is not supported.
 func ValueOf(f any) (js.Value, error) {

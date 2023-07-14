@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall/js"
 	"time"
 
 	"github.com/Nigel2392/jsext/v2"
@@ -300,7 +301,64 @@ func (t *Timer) Value() *Element {
 	return t.Element
 }
 
+func checkTimeCss() {
+	var head = js.Global().Get("document").Get("head")
+	var style = head.Call("querySelector", "style#time-input-css")
+	if style.IsUndefined() {
+		style = StyleBlock(`
+			.time-input-container{
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;
+				margin: 0.5rem;
+				width: 100%;
+			}
+			.time-input-group {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.time-input-container > .time-input-group {
+				flex: 1 1 auto;
+				margin: 0.5rem;
+			}
+			.time-input-container > .time-input-group:first-child {
+				margin-left: 0;
+			}
+			.time-input-container > .time-input-group:last-child {
+				margin-right: 0;
+			}
+			.time-input-group > .time-input-items {
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: stretch;
+				margin: 0.5rem;
+				width: 100%;
+			}
+			.time-input-items > .time-input{
+				width: 50%;
+				border-radius: 0.5rem 0 0 0.5rem !important;
+				padding: 0.5rem;
+			}
+			.time-input-items > .time-input-label {
+				width: 50%;
+				border-radius: 0 0.5rem 0.5rem 0 !important;
+				padding: 0.5rem;
+				font-weight: bold;
+			}
+		`).JSValue()
+		style.Set("id", "time-input-css")
+		head.Call("appendChild", style)
+	}
+}
+
 func TimeInput(name string, h, m, s int, opts *InputOptions) *Timer {
+
+	checkTimeCss()
+
 	var inputDiv = Div("time-input-container")
 
 	var (
