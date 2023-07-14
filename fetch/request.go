@@ -9,6 +9,7 @@ import (
 
 type Request struct {
 	Body        []byte
+	GetBody     func() (io.ReadCloser, error)
 	Cache       string
 	Credentials string
 	Destination string
@@ -61,6 +62,8 @@ func (f *Request) SetBody(body any) (err error) {
 			return err
 		}
 		f.Body = buf.Bytes()
+	case func() (io.ReadCloser, error):
+		f.GetBody = body.(func() (io.ReadCloser, error))
 	default:
 		var buf bytes.Buffer
 		err = json.NewEncoder(&buf).Encode(body)
@@ -89,6 +92,18 @@ func (f *Request) MarshalJS() js.Value {
 	if f.Body != nil {
 		var jsBody = js.Global().Get("Uint8Array").New(len(f.Body))
 		js.CopyBytesToJS(jsBody, f.Body)
+		jsRequest.Set("body", jsBody)
+	} else if f.GetBody != nil {
+		var reader, err = f.GetBody()
+		if err != nil {
+			panic(err)
+		}
+		var buf bytes.Buffer
+		if _, err = io.Copy(&buf, reader); err != nil {
+			panic(err)
+		}
+		var jsBody = js.Global().Get("Uint8Array").New(len(buf.Bytes()))
+		js.CopyBytesToJS(jsBody, buf.Bytes())
 		jsRequest.Set("body", jsBody)
 	}
 	if f.Method != "" {
