@@ -58,26 +58,12 @@ func fetch(options Request) (*Response, error) {
 			StatusCode: statusCode,
 			JS:         response,
 		}
-		response.Call("text").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		response.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			var b []byte
-			switch {
-			case len(args) < 1:
-				b = []byte{}
-			case args[0].IsUndefined(), args[0].IsNull():
-				b = []byte{}
-			case args[0].Type() == js.TypeString:
-				b = []byte(args[0].String())
-			case js.Global().Get("Uint8Array").Call("isPrototypeOf", args[0]).Bool(),
-				js.Global().Get("Uint8ClampedArray").Call("isPrototypeOf", args[0]).Bool(),
-				args[0].InstanceOf(js.Global().Get("ArrayBuffer")):
-				// Is a buffer type.
-				var uint8Array = args[0]
-				var length = uint8Array.Get("length").Int()
-				b = make([]byte, length)
-				js.CopyBytesToGo(b, uint8Array)
-			default:
-				b = []byte{}
-			}
+			var arrBuff = args[0]
+			var length = arrBuff.Get("length").Int()
+			b = make([]byte, length)
+			js.CopyBytesToGo(b, arrBuff)
 			resp.Body = []byte(b)
 			respChan <- resp
 			return nil
