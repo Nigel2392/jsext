@@ -303,6 +303,14 @@ func ValueOf(value any) Value {
 		return v.JSExt()
 	case Event:
 		return v.Value()
+	case Export:
+		return v.JSExt()
+	case JSExtFunc:
+		return Value(v.ToJSFunc().Value)
+	case Import:
+		return v.Value()
+	case Promise:
+		return v.Value()
 	default:
 		return Value(js.ValueOf(v))
 	}
