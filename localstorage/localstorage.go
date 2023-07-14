@@ -9,6 +9,7 @@ import (
 
 var localStorage = js.Global().Get("localStorage")
 
+// Set a key value pair in localStorage
 func Set(key, value string) error {
 	if localStorage.IsUndefined() {
 		return errors.New("localStorage is undefined")
@@ -17,6 +18,7 @@ func Set(key, value string) error {
 	return nil
 }
 
+// Get a value from localStorage
 func Get(key string) (string, error) {
 	if localStorage.IsUndefined() {
 		return "", errors.New("localStorage is undefined")
@@ -24,6 +26,7 @@ func Get(key string) (string, error) {
 	return localStorage.Call("getItem", key).String(), nil
 }
 
+// Remove a key value pair from localStorage
 func Remove(key string) error {
 	if localStorage.IsUndefined() {
 		return errors.New("localStorage is undefined")
@@ -32,6 +35,7 @@ func Remove(key string) error {
 	return nil
 }
 
+// Clear all key value pairs from localStorage
 func Clear() error {
 	if localStorage.IsUndefined() {
 		return errors.New("localStorage is undefined")
