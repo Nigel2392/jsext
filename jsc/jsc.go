@@ -2,11 +2,13 @@ package jsc
 
 import (
 	"encoding/base64"
+	"errors"
 	"reflect"
 	"strings"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/console"
 	"github.com/Nigel2392/jsext/v2/jse"
 )
 
@@ -31,11 +33,15 @@ type Marshaller interface {
 	MarshalJS() js.Value
 }
 
+type ErrorMarshaller interface {
+	MarshalJS() (js.Value, error)
+}
+
 // ValueOf will return the js.Value of the given value.
 // It will panic if the value is not a supported type.
-func ValueOf(f any) js.Value {
+func ValueOf(f any) (js.Value, error) {
 	if f == nil {
-		return js.Null()
+		return js.Null(), nil
 	}
 	switch val := f.(type) {
 	case int, int64, int32, int16, int8,
@@ -44,60 +50,66 @@ func ValueOf(f any) js.Value {
 		string, bool:
 		// []any, map[string]any: // Removed so we can call jss.ValueOf on a slice or map.
 
-		return js.ValueOf(val)
+		return js.ValueOf(val), nil
 	case js.Value, js.Func:
-		return js.ValueOf(val)
+		return js.ValueOf(val), nil
 	case jsext.Value:
-		return val.Value()
+		return val.Value(), nil
 	case *jse.Element:
-		return val.JSValue()
+		return val.JSValue(), nil
 	case jsext.Element:
-		return val.JSValue()
+		return val.JSValue(), nil
 	case jsext.Event:
-		return val.JSValue()
+		return val.JSValue(), nil
 	case jsext.Import:
-		return val.JSValue()
+		return val.JSValue(), nil
 	case jsext.Promise:
-		return val.JSValue()
+		return val.JSValue(), nil
 	case []byte:
 		var enc = base64.StdEncoding.EncodeToString(val)
-		return js.ValueOf(enc)
+		return js.ValueOf(enc), nil
 	case func():
 		if val == nil {
-			return js.Null()
+			return js.Null(), nil
 		}
 		return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			val()
 			return nil
-		}).Value
+		}).Value, nil
 	case func(this js.Value, args []js.Value) interface{}:
 		if val == nil {
-			return js.Null()
+			return js.Null(), nil
 		}
-		return js.FuncOf(val).Value
+		return js.FuncOf(val).Value, nil
 	case Marshaller:
-		return val.MarshalJS()
+		return val.MarshalJS(), nil
+	case ErrorMarshaller:
+		var jsValue, err = val.MarshalJS()
+		if err != nil {
+			panic(err)
+		}
+		return jsValue, nil
 	}
 	var valueOf = reflect.ValueOf(f)
 	if !valueOf.IsValid() {
-		return js.Null()
+		return js.Null(), nil
 	}
 	var kind = valueOf.Kind()
 	return valueOfJS(valueOf, kind)
 }
 
-func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
+func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 	switch kind {
 	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
-		return js.ValueOf(valueOf.Int())
+		return js.ValueOf(valueOf.Int()), nil
 	case reflect.Uint, reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uintptr:
-		return js.ValueOf(valueOf.Uint())
+		return js.ValueOf(valueOf.Uint()), nil
 	case reflect.Float64, reflect.Float32:
-		return js.ValueOf(valueOf.Float())
+		return js.ValueOf(valueOf.Float()), nil
 	case reflect.String:
-		return js.ValueOf(valueOf.String())
+		return js.ValueOf(valueOf.String()), nil
 	case reflect.Bool:
-		return js.ValueOf(valueOf.Bool())
+		return js.ValueOf(valueOf.Bool()), nil
 	case reflect.Slice, reflect.Array:
 		// Check if bytes
 		if valueOf.Type().Elem().Kind() == reflect.Uint8 {
@@ -105,10 +117,10 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 				var length = valueOf.Len()
 				var array = js.Global().Get("Uint8Array").New(length)
 				js.CopyBytesToJS(array, valueOf.Bytes())
-				return array
+				return array, nil
 			}
 			var enc = base64.StdEncoding.EncodeToString(valueOf.Bytes())
-			return js.ValueOf(enc)
+			return js.ValueOf(enc), nil
 		}
 		var length = valueOf.Len()
 		var array = js.Global().Get("Array").New(length)
@@ -117,25 +129,42 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 			if index.Kind() == reflect.Ptr {
 				index = index.Elem()
 			}
-			array.SetIndex(i, ValueOf(index.Interface()))
+
+			var v, err = ValueOf(index.Interface())
+			if err != nil {
+				return js.Null(), err
+			}
+
+			array.SetIndex(i, v)
 		}
-		return js.ValueOf(array)
+		return js.ValueOf(array), nil
 	case reflect.Map:
 		var keys = valueOf.MapKeys()
 		var object = js.Global().Get("Object").New()
 		for _, key := range keys {
-			object.Set(key.String(), ValueOf(valueOf.MapIndex(key).Interface()))
+			var index = valueOf.MapIndex(key)
+			if index.Kind() == reflect.Ptr {
+				index = index.Elem()
+			}
+			if !index.CanInterface() {
+				return js.Null(), nil
+			}
+			var v, err = ValueOf(index.Interface())
+			if err != nil {
+				return js.Null(), err
+			}
+			object.Set(key.String(), v)
 		}
-		return object
+		return object, nil
 	case reflect.Struct:
 		if !valueOf.CanInterface() {
-			return js.Null()
+			return js.Null(), nil
 		}
 		if !TINYGO {
 			if valueOf.Type().ConvertibleTo(reflect.TypeOf(js.Value{})) {
 				var jsValue js.Value
 				reflect.ValueOf(&jsValue).Elem().Set(valueOf)
-				return jsValue
+				return jsValue, nil
 			}
 		}
 		var object = js.Global().Get("Object").New()
@@ -160,7 +189,12 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 				panic("ValueOf: cannot interface " + valField.String())
 			}
 
-			object.Set(tag, ValueOf(valField.Interface()))
+			var v, err = ValueOf(valField.Interface())
+			if err != nil {
+				return js.Null(), err
+			}
+
+			object.Set(tag, v)
 		}
 
 		if !TINYGO {
@@ -168,17 +202,27 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 			for i := 0; i < numMethod; i++ {
 				var methodType = valueOf.Type().Method(i)
 				var method = valueOf.Method(i)
-				object.Set(methodType.Name, ValueOf(method.Interface()))
+
+				if !method.CanInterface() {
+					continue
+				}
+
+				var v, err = ValueOf(method.Interface())
+				if err != nil {
+					return js.Null(), err
+				}
+
+				object.Set(methodType.Name, v)
 			}
 		}
 
-		return object
+		return object, nil
 	case reflect.Ptr, reflect.Interface:
 		return ValueOf(valueOf.Elem().Interface())
 	// Very incompatible with TinyGo...
 	case reflect.Func:
 		if valueOf.IsNil() {
-			return js.Null()
+			return js.Null(), nil
 		}
 		if TINYGO {
 			panic("(reflect.Type).In() not supported in tinygo: cannot convert func to js.Func")
@@ -203,16 +247,26 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) js.Value {
 			if len(out) == 0 {
 				return nil
 			} else if len(out) == 1 {
-				return ValueOf(out[0].Interface())
+				var v, err = ValueOf(out[0].Interface())
+				if err != nil {
+					return js.Null()
+				}
+				return v
 			}
 			var returnValues = make([]interface{}, len(out))
 			for i := range out {
 				returnValues[i] = out[i].Interface()
 			}
-			return ValueOf(returnValues)
-		}).Value
+
+			var v, err = ValueOf(returnValues)
+			if err != nil {
+				return js.Null()
+			}
+
+			return v
+		}).Value, nil
 	default:
-		panic("ValueOf: unsupported type " + kind.String())
+		return js.Null(), errors.New("ValueOf: unsupported type " + kind.String())
 	}
 }
 
@@ -417,7 +471,12 @@ func guessType(srcVal js.Value) interface{} {
 		i = func(args ...any) js.Value {
 			var s = make([]interface{}, len(args))
 			for i, arg := range args {
-				s[i] = ValueOf(arg)
+				var v, err = ValueOf(arg)
+				if err != nil {
+					console.Error(err.Error())
+					return js.Null()
+				}
+				s[i] = v
 			}
 			return srcVal.Invoke(s...)
 		}

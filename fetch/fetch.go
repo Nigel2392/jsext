@@ -23,7 +23,12 @@ func fetch(options Request) (*Response, error) {
 		options.Body = nil
 	}
 
-	var fetch = js.Global().Call("fetch", options.URL, options.MarshalJS())
+	var jsReq, err = options.MarshalJS()
+	if err != nil {
+		return nil, err
+	}
+
+	var fetch = js.Global().Call("fetch", options.URL, jsReq)
 	if fetch.IsUndefined() {
 		panic("fetch is undefined")
 	}
@@ -91,7 +96,6 @@ func fetch(options Request) (*Response, error) {
 		return nil
 	}))
 	var resp *Response
-	var err error
 	select {
 	case resp = <-respChan:
 	case err = <-errChan:

@@ -76,7 +76,7 @@ func (f *Request) SetBody(body any) (err error) {
 	return nil
 }
 
-func (f *Request) MarshalJS() js.Value {
+func (f *Request) MarshalJS() (js.Value, error) {
 	var jsRequest = js.Global().Get("Object").New()
 	if f.Headers != nil {
 		var jsMap = js.Global().Get("Object").New()
@@ -96,11 +96,11 @@ func (f *Request) MarshalJS() js.Value {
 	} else if f.GetBody != nil {
 		var reader, err = f.GetBody()
 		if err != nil {
-			panic(err)
+			return js.Null(), err
 		}
 		var buf bytes.Buffer
 		if _, err = io.Copy(&buf, reader); err != nil {
-			panic(err)
+			return js.Null(), err
 		}
 		var jsBody = js.Global().Get("Uint8Array").New(len(buf.Bytes()))
 		js.CopyBytesToJS(jsBody, buf.Bytes())
@@ -133,5 +133,5 @@ func (f *Request) MarshalJS() js.Value {
 	if f.Referrer != "" {
 		jsRequest.Set("referrer", f.Referrer)
 	}
-	return jsRequest
+	return jsRequest, nil
 }
