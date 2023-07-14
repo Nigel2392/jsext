@@ -15,10 +15,10 @@ type WebSocket struct {
 	value js.Value
 	open  bool
 
-	openFuncs    []func(MessageEvent)
-	closeFuncs   []func(jsext.Event)
-	errorFuncs   []func(jsext.Event)
-	messageFuncs []func(MessageEvent)
+	openFuncs    []func(*WebSocket, MessageEvent)
+	closeFuncs   []func(*WebSocket, jsext.Event)
+	errorFuncs   []func(*WebSocket, jsext.Event)
+	messageFuncs []func(*WebSocket, MessageEvent)
 }
 
 func New(url string, protocols ...string) *WebSocket {
@@ -187,9 +187,9 @@ func (w *WebSocket) SendJSON(v interface{}) error {
 	return w.SendBytes(data)
 }
 
-func (w *WebSocket) OnOpen(f func(e MessageEvent)) {
+func (w *WebSocket) OnOpen(f func(w *WebSocket, e MessageEvent)) {
 	if w.openFuncs == nil {
-		w.openFuncs = make([]func(e MessageEvent), 0)
+		w.openFuncs = make([]func(w *WebSocket, e MessageEvent), 0)
 	}
 	w.openFuncs = append(w.openFuncs, f)
 	w.value.Set("onopen", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -198,15 +198,15 @@ func (w *WebSocket) OnOpen(f func(e MessageEvent)) {
 		}
 		w.open = true
 		for _, f := range w.openFuncs {
-			f(MessageEvent(args[0]))
+			f(w, MessageEvent(args[0]))
 		}
 		return nil
 	}))
 }
 
-func (w *WebSocket) OnClose(f func(jsext.Event)) {
+func (w *WebSocket) OnClose(f func(w *WebSocket, e jsext.Event)) {
 	if w.closeFuncs == nil {
-		w.closeFuncs = make([]func(jsext.Event), 0)
+		w.closeFuncs = make([]func(w *WebSocket, e jsext.Event), 0)
 	}
 	w.closeFuncs = append(w.closeFuncs, f)
 	w.value.Set("onclose", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -215,15 +215,15 @@ func (w *WebSocket) OnClose(f func(jsext.Event)) {
 		}
 		w.open = false
 		for _, f := range w.closeFuncs {
-			f(jsext.Event(args[0]))
+			f(w, jsext.Event(args[0]))
 		}
 		return nil
 	}))
 }
 
-func (w *WebSocket) OnError(f func(jsext.Event)) {
+func (w *WebSocket) OnError(f func(w *WebSocket, e jsext.Event)) {
 	if w.errorFuncs == nil {
-		w.errorFuncs = make([]func(jsext.Event), 0)
+		w.errorFuncs = make([]func(w *WebSocket, e jsext.Event), 0)
 	}
 	w.errorFuncs = append(w.errorFuncs, f)
 	w.value.Set("onerror", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -232,15 +232,15 @@ func (w *WebSocket) OnError(f func(jsext.Event)) {
 		}
 		w.open = false
 		for _, f := range w.errorFuncs {
-			f(jsext.Event(args[0]))
+			f(w, jsext.Event(args[0]))
 		}
 		return nil
 	}))
 }
 
-func (w *WebSocket) OnMessage(f func(MessageEvent)) {
+func (w *WebSocket) OnMessage(f func(w *WebSocket, e MessageEvent)) {
 	if w.messageFuncs == nil {
-		w.messageFuncs = make([]func(MessageEvent), 0)
+		w.messageFuncs = make([]func(w *WebSocket, e MessageEvent), 0)
 	}
 	w.messageFuncs = append(w.messageFuncs, f)
 	w.value.Set("onmessage", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -248,7 +248,7 @@ func (w *WebSocket) OnMessage(f func(MessageEvent)) {
 			return nil
 		}
 		for _, f := range w.messageFuncs {
-			f(MessageEvent(args[0]))
+			f(w, MessageEvent(args[0]))
 		}
 		return nil
 	}))
