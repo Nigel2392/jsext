@@ -8,7 +8,7 @@ import (
 
 type History js.Value
 
-func GetHistory() History {
+func Get() History {
 	return History(js.Global().Get("history"))
 }
 
