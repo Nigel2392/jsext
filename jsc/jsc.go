@@ -38,7 +38,7 @@ type ErrorMarshaller interface {
 }
 
 // ValueOf will return the js.Value of the given value.
-// It will panic if the value is not a supported type.
+// It will return an error if the value is not supported.
 func ValueOf(f any) (js.Value, error) {
 	if f == nil {
 		return js.Null(), nil
@@ -86,7 +86,7 @@ func ValueOf(f any) (js.Value, error) {
 	case ErrorMarshaller:
 		var jsValue, err = val.MarshalJS()
 		if err != nil {
-			panic(err)
+			return js.Null(), err
 		}
 		return jsValue, nil
 	}
@@ -186,7 +186,7 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 			}
 
 			if !valField.CanInterface() {
-				panic("ValueOf: cannot interface " + valField.String())
+				continue
 			}
 
 			var v, err = ValueOf(valField.Interface())
