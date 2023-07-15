@@ -8,7 +8,7 @@ import (
 )
 
 func getRandString(n int) string {
-	var js = `(function(len){
+	var javascript = `(function(len){
 		function dec2hex (dec) {
 			return dec.toString(16).padStart(2, "0")
 		}
@@ -17,6 +17,6 @@ func getRandString(n int) string {
 		window.crypto.getRandomValues(arr)
 		return Array.from(arr, dec2hex).join('')
 	})`
-	var funcRandString = js.Global().Call("eval", js)
+	var funcRandString = js.Global().Call("eval", javascript)
 	return ("f_" + funcRandString.Invoke(n).String())
 }
