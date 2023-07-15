@@ -2,50 +2,13 @@ package try
 
 import (
 	"errors"
-	"math/rand"
 	"strings"
 	"syscall/js"
-	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2/jsc"
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-var src = rand.NewSource(0<<63 - 1)
-
-// https://stackoverflow.com/a/31832326/18020941
-func randStringBytesMaskImprSrcUnsafe(n int) string {
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return *(*string)(unsafe.Pointer(&b))
-}
-
-type argTuple struct {
-	name string
-	val  js.Value
-}
-
 // Catch is a function that takes a js.Func and any number of arguments.
-//
-// It will call the js.Func with the arguments and return the result.
 //
 // If the js.Func throws/raises an error, it will return the error.
 //
@@ -58,6 +21,10 @@ type argTuple struct {
 //	        return e
 //	    }
 //	})
+//
+// The returned value is the value which the js.Func returns.
+//
+// If an error occurs, the js.Value will be js.Null() and the error will be non-nil.
 func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 	var argsJS, err = jsc.ValuesOf(args...)
 	if err != nil {
@@ -67,11 +34,11 @@ func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 	var argnames = make([]string, len(args))
 	args = make([]interface{}, len(args))
 	for i, arg := range argsJS {
-		argnames[i] = randStringBytesMaskImprSrcUnsafe(16)
+		argnames[i] = getRandString(16)
 		args[i] = arg
 	}
 	// set the function to the global scope
-	var funcName = randStringBytesMaskImprSrcUnsafe(32)
+	var funcName = getRandString(32)
 	js.Global().Set(funcName, f)
 
 	// delete the function after we're done
