@@ -58,18 +58,17 @@ type argTuple struct {
 //	        return e
 //	    }
 //	})
-func Catch(f js.Func, args ...interface{}) error {
+func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 	var argsJS, err = jsc.ValuesOf(args...)
 	if err != nil {
-		return err
+		return js.Null(), err
 	}
 	// generate a random name for each argument
-	var argsTuple = make([]argTuple, len(args))
+	var argnames = make([]string, len(args))
+	args = make([]interface{}, len(args))
 	for i, arg := range argsJS {
-		argsTuple[i] = argTuple{
-			name: randStringBytesMaskImprSrcUnsafe(16),
-			val:  arg,
-		}
+		argnames[i] = randStringBytesMaskImprSrcUnsafe(16)
+		args[i] = arg
 	}
 	// set the function to the global scope
 	var funcName = randStringBytesMaskImprSrcUnsafe(32)
@@ -81,22 +80,22 @@ func Catch(f js.Func, args ...interface{}) error {
 	// create the function
 	var b strings.Builder
 	b.WriteString("(function(")
-	for i, arg := range argsTuple {
+	for i, arg := range argnames {
 		if i > 0 {
 			b.WriteString(",")
 		}
-		b.WriteString(arg.name)
+		b.WriteString(arg)
 	}
 	b.WriteString("){")
 	b.WriteString("try{")
 	b.WriteString("return ")
 	b.WriteString(funcName)
 	b.WriteString("(")
-	for i, arg := range argsTuple {
+	for i, arg := range argnames {
 		if i > 0 {
 			b.WriteString(",")
 		}
-		b.WriteString(arg.name)
+		b.WriteString(arg)
 	}
 	b.WriteString(")")
 	b.WriteString("}catch(e){return e}})")
@@ -107,7 +106,7 @@ func Catch(f js.Func, args ...interface{}) error {
 
 	// check if the return value is an error
 	if ret.InstanceOf(js.Global().Get("Error")) {
-		return errors.New(ret.Get("message").String())
+		return js.Null(), errors.New(ret.Get("message").String())
 	}
-	return nil
+	return ret, nil
 }
