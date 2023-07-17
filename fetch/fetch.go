@@ -60,9 +60,10 @@ func fetch(options Request) (*Response, error) {
 		}
 		response.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			var arrBuff = args[0]
-			var length = arrBuff.Get("byteLength").Int()
+			var uint8Array = js.Global().Get("Uint8Array").New(arrBuff)
+			var length = uint8Array.Get("length").Int()
 			var b = make([]byte, length)
-			js.CopyBytesToGo(b, arrBuff)
+			js.CopyBytesToGo(b, uint8Array)
 			resp.Body = b
 			respChan <- resp
 			return nil
