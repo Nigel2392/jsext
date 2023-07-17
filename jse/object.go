@@ -166,21 +166,27 @@ func (e *Element) GetElementsByTagName(tagName string) *Element {
 }
 
 // Add an event listener to the Element
-func (e *Element) AddEventListener(event string, callback func(this *Element, event jsext.Event)) *Element {
+//
+// This will return the function that was added to the element.
+func (e *Element) AddEventListener(event string, callback func(this *Element, event jsext.Event)) js.Func {
 	if e == nil {
-		return e
+		return js.Func{Value: js.Null()}
 	}
 	if callback == nil {
-		return e
+		return js.Func{Value: js.Null()}
 	}
-	e.JSValue().Call("addEventListener", event, js.FuncOf(func(_ js.Value, args []js.Value) interface{} {
+
+	var f = js.FuncOf(func(_ js.Value, args []js.Value) interface{} {
 		if len(args) < 1 {
 			return nil
 		}
 		callback(e, jsext.Event(args[0]))
 		return nil
-	}))
-	return e
+	})
+
+	e.JSValue().Call("addEventListener", event, f)
+
+	return f
 }
 
 // Get the scroll height of the Element
