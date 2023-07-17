@@ -151,15 +151,8 @@ func afterFunc(d, rep time.Duration, event jsext.Event, f func()) *debouncer {
 // Optionally, the function can call event.Get("stopTimer").Invoke() to stop the timer
 func (e *Element) OnHoldKey(wait time.Duration, repeat time.Duration, f func(*Element, jsext.Event)) *Element {
 	var debouncer *debouncer
-	var setStopTimer = func(event jsext.Event) {
-		event.Set("stopTimer", js.FuncOf(func(this js.Value, args []js.Value) any {
-			debouncer.Stop()
-			return nil
-		}))
-	}
 
 	e.OnKeyDown(func(this *Element, event jsext.Event) {
-		setStopTimer(event)
 		debouncer.Stop()
 		f(this, event)
 		debouncer = afterFunc(wait, repeat, event, func() {
@@ -186,15 +179,7 @@ func (e *Element) OnHoldKey(wait time.Duration, repeat time.Duration, f func(*El
 func (e *Element) OnHoldClick(wait time.Duration, repeat time.Duration, f func(this *Element, event jsext.Event)) *Element {
 	var debouncer *debouncer
 
-	var setStopTimer = func(event jsext.Event) {
-		event.Set("stopTimer", js.FuncOf(func(this js.Value, args []js.Value) any {
-			debouncer.Stop()
-			return nil
-		}))
-	}
-
 	e.OnMouseDown(func(this *Element, event jsext.Event) {
-		setStopTimer(event)
 		debouncer.Stop()
 		f(this, event)
 		debouncer = afterFunc(wait, repeat, event, func() {
