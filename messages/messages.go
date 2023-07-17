@@ -13,30 +13,30 @@ import (
 type MessageType string
 
 const (
-	Info    = "info"
-	Success = "success"
-	Warning = "warning"
-	Error   = "error"
+	TypeInfo    MessageType = "info"
+	TypeSuccess MessageType = "success"
+	TypeWarning MessageType = "warning"
+	TypeError   MessageType = "error"
 )
 
-func SendMessage(typ, message string) {
+func Emit(typ MessageType, message string) {
 	jsext.EventEmit("jsextMessages", string(typ), message)
 }
 
-func SendInfo(message string) {
-	SendMessage(Info, message)
+func Info(message string) {
+	Emit(TypeInfo, message)
 }
 
-func SendSuccess(message string) {
-	SendMessage(Success, message)
+func Success(message string) {
+	Emit(TypeSuccess, message)
 }
 
-func SendWarning(message string) {
-	SendMessage(Warning, message)
+func Warning(message string) {
+	Emit(TypeWarning, message)
 }
 
-func SendError(message string) {
-	SendMessage(Error, message)
+func Error(message string) {
+	Emit(TypeError, message)
 }
 
 func Listen(callback func(typ string, message string)) {
@@ -53,20 +53,4 @@ func ListenFor(typ MessageType, callback func(message string)) {
 			callback(message)
 		}
 	})
-}
-
-func ListenForInfo(callback func(message string)) {
-	ListenFor(Info, callback)
-}
-
-func ListenForSuccess(callback func(message string)) {
-	ListenFor(Success, callback)
-}
-
-func ListenForWarning(callback func(message string)) {
-	ListenFor(Warning, callback)
-}
-
-func ListenForError(callback func(message string)) {
-	ListenFor(Error, callback)
 }

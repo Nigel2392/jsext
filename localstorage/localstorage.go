@@ -53,11 +53,6 @@ var json = js.Global().Get("JSON")
 // Try to set any object by first converting it to a js.Value,
 // then converting it to a string, shelling out to JSON.stringify,
 func UnsafeSet(key, value interface{}) error {
-	defer func() {
-		if r := recover(); r != nil {
-			return
-		}
-	}()
 	if localStorage.IsUndefined() {
 		return errors.New("localStorage is undefined")
 	}
@@ -73,11 +68,6 @@ func UnsafeSet(key, value interface{}) error {
 // Try to get any object by first getting the string from localStorage,
 // then shell out to JSON.parse and scan the object into dst.
 func UnsafeGet(key string, dst interface{}) error {
-	defer func() {
-		if r := recover(); r != nil {
-			return
-		}
-	}()
 	if localStorage.IsUndefined() {
 		return errors.New("localStorage is undefined")
 	}
@@ -85,7 +75,6 @@ func UnsafeGet(key string, dst interface{}) error {
 	if item.IsNull() || item.IsUndefined() {
 		return errors.New("key not found")
 	}
-	var s = item.String()
-	var v = json.Call("parse", s)
+	var v = json.Call("parse", item)
 	return jsc.Scan(v, dst)
 }

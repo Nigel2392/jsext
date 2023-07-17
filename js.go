@@ -13,11 +13,12 @@ import (
 	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2/console"
+	"github.com/Nigel2392/jsext/v2/export"
 )
 
 // Default syscall/js values, some wrapped.
 var (
-	JSExt           Export
+	Export          export.Export
 	Global          js.Value
 	Document        js.Value
 	DocumentValue   Value
@@ -61,18 +62,17 @@ func init() {
 	Body = Element(Document.Get("body"))
 	Head = Element(Document.Get("head"))
 	// Initialize jsext export object.
-	JSExt = NewExport()
-	JSExt.Register("jsext")
+	Export = export.NewExport("jsext")
+	Export.Set("runtime", Runtime.Value())
 	// Register runtime eventlisteners.
-	Runtime.RegisterTo("runtime", JSExt.JSExt())
-	Runtime.SetFuncWithArgs("eventEmit", func(this Value, args Args) interface{} {
+	Runtime.Set("eventEmit", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		eventName := args[0].String()
-		eventArgs := args[1:]
+		eventArgs := Args(args[1:])
 		EventEmit(eventName, eventArgs.Slice()...)
 		return nil
-	})
-	Runtime.SetFuncWithArgs("eventOn", func(this Value, args Args) interface{} {
-		eventName := args[0].String()
+	}))
+	Runtime.Set("eventOn", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		var eventName = args[0].String()
 		EventOn(eventName, func(a ...interface{}) {
 			for _, arg := range args {
 				if arg.Type() == js.TypeFunction {
@@ -83,8 +83,7 @@ func init() {
 			}
 		})
 		return nil
-	})
-
+	}))
 }
 
 // Default functions, wrapped.
@@ -303,8 +302,8 @@ func ValueOf(value any) Value {
 		return v.JSExt()
 	case Event:
 		return v.Value()
-	case Export:
-		return v.JSExt()
+	case export.Export:
+		return Value(v.Value())
 	case JSExtFunc:
 		return Value(v.ToJSFunc().Value)
 	case Import:

@@ -65,6 +65,11 @@ func (l *Loader) Show() {
 	l.activate()
 }
 
+// Hide the loader.
+func (l *Loader) Hide() {
+	l.Finalize()
+}
+
 // Delete or deactivate depending on the deleteOnFinish flag.
 func (l *Loader) Finalize() {
 	if l.deleteOnFinish {

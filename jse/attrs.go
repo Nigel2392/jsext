@@ -1,5 +1,12 @@
 package jse
 
+func (e *Element) Attrs(m map[string]interface{}) *Element {
+	for k, v := range m {
+		e.Set(k, v)
+	}
+	return e
+}
+
 func (e *Element) AttrAccept(v string) *Element {
 	e.SetAttr("accept", v)
 	return e

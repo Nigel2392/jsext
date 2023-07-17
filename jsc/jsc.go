@@ -38,8 +38,8 @@ type ErrorMarshaller interface {
 }
 
 // ValuesOf will return the js.Value of the given values.
-// It will return an error if any of the value are not supported.
-func ValuesOf(f ...any) ([]js.Value, error) {
+// It will return an error if interface{} of the value are not supported.
+func ValuesOf(f ...interface{}) ([]js.Value, error) {
 	var (
 		v      js.Value
 		err    error
@@ -55,10 +55,42 @@ func ValuesOf(f ...any) ([]js.Value, error) {
 	return values, nil
 }
 
+// ValuesOfInterface will return the js.Value of the given values in an array of interface{}.
+// It will return an error if interface{} of the value are not supported.
+//
+// This is a helper function, since js.(Value).Call or set will not take a slice of js.Value.
+func ValuesOfInterface(f ...interface{}) ([]interface{}, error) {
+	var (
+		v      js.Value
+		err    error
+		values = make([]interface{}, len(f))
+	)
+	for i := range f {
+		v, err = ValueOf(f[i])
+		if err != nil {
+			return nil, err
+		}
+		values[i] = v
+	}
+	return values, nil
+}
+
 // MustValuesOf will return the js.Value of the given values.
 // This can be useful for inlining known-safe types.
-func MustValuesOf(f ...any) []js.Value {
+func MustValuesOf(f ...interface{}) []js.Value {
 	var v, err = ValuesOf(f...)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// MustValuesOfInterface will return the js.Value of the given values in an array of interface{}.
+// This can be useful for inlining known-safe types.
+//
+// This is a helper function, since js.(Value).Call or set will not take a slice of js.Value.
+func MustValuesOfInterface(f ...interface{}) []interface{} {
+	var v, err = ValuesOfInterface(f...)
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +99,7 @@ func MustValuesOf(f ...any) []js.Value {
 
 // ValueOf will return the js.Value of the given value.
 // It will return an error if the value is not supported.
-func ValueOf(f any) (js.Value, error) {
+func ValueOf(f interface{}) (js.Value, error) {
 	if f == nil {
 		return js.Null(), nil
 	}
@@ -76,7 +108,7 @@ func ValueOf(f any) (js.Value, error) {
 		float64, float32,
 		uint, uint64, uint32, uint16, uint8, uintptr,
 		string, bool:
-		// []any, map[string]any: // Removed so we can call jss.ValueOf on a slice or map.
+		// []interface{}, map[string]interface{}: // Removed so we can call jss.ValueOf on a slice or map.
 
 		return js.ValueOf(val), nil
 	case js.Value, js.Func:
@@ -496,7 +528,7 @@ func guessType(srcVal js.Value) interface{} {
 		}
 		i = m
 	case js.TypeFunction:
-		i = func(args ...any) js.Value {
+		i = func(args ...interface{}) js.Value {
 			var s = make([]interface{}, len(args))
 			for i, arg := range args {
 				var v, err = ValueOf(arg)

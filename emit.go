@@ -3,25 +3,31 @@
 
 package jsext
 
-import "syscall/js"
+import (
+	"syscall/js"
+
+	"github.com/Nigel2392/jsext/v2/export"
+)
 
 // See js.go.init() for the initialization of this variable onto the global export object.
-var Runtime Export = Export(Eval("new EventTarget();"))
+var Runtime export.Export = export.NewFromValue(Eval("new EventTarget();").Value())
 
 // Emit an event on the global Runtime object.
 func EventEmit(name string, args ...interface{}) Value {
 	var event = js.Global().Get("Event").New(name)
 	event.Set("args", args)
-	return Runtime.Call("dispatchEvent", event)
+	return Value(Runtime.Call("dispatchEvent", event))
 }
 
 // Listen for an event on the global Runtime object.
 func EventOn(name string, f func(args ...interface{})) Value {
-	return Runtime.JSExt().ToElement().AddEventListener(name, func(this Value, event Event) {
-		var jsArgs = event.Get("args")
-		var args = ArrayToSlice(jsArgs)
-		f(args...)
-	}).Value()
+	return Value(Runtime.Value().Call("addEventListener", name, func(this js.Value, args []js.Value) interface{} {
+		var jsArgs = args[0].Get("args")
+		var arguments = ArrayToSlice(jsArgs)
+		f(arguments...)
+		return nil
+
+	}))
 }
 
 // Listen for multiple events on the global Runtime object.
