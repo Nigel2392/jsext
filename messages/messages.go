@@ -9,6 +9,7 @@ import (
 
 // Sends messages through eventlisteners.
 // These can be accessed though window.runtime.eventOn("jsextMessages", callback(arg: function(type, message)))
+// The type is a string and the message is a string.
 
 type MessageType string
 

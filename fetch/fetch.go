@@ -59,12 +59,11 @@ func fetch(options Request) (*Response, error) {
 			JS:         response,
 		}
 		response.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			var b []byte
 			var arrBuff = args[0]
-			var length = arrBuff.Get("length").Int()
-			b = make([]byte, length)
+			var length = arrBuff.Get("byteLength").Int()
+			var b = make([]byte, length)
 			js.CopyBytesToGo(b, arrBuff)
-			resp.Body = []byte(b)
+			resp.Body = b
 			respChan <- resp
 			return nil
 		}))
