@@ -80,6 +80,11 @@ func (e Element) Call(m string, args ...interface{}) Value {
 	return Value(e.JSValue().Call(m, args...))
 }
 
+// CallFunc is used by state management.
+func (e Element) CallFunc(name string, args ...interface{}) {
+	e.Call(name, args...)
+}
+
 // Delete deletes a property from the element.
 func (e Element) Delete(p string) {
 	e.JSValue().Delete(p)

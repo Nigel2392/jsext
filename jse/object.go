@@ -333,6 +333,11 @@ func (e *Element) Animate(keyframes []interface{}, options map[string]interface{
 	return jsext.Value(e.JSValue().Call("animate", jsext.SliceToArray(keyframes).Value(), jsext.MapToObject(options).Value()))
 }
 
+// CallFunc is used for state management.
+func (e *Element) CallFunc(name string, args ...interface{}) {
+	e.Call(name, args...)
+}
+
 // /////////////////////////////////////////////////////////
 //
 // js.Value methods.
