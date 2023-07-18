@@ -1,8 +1,6 @@
 package state
 
-import (
-	"errors"
-)
+import "github.com/Nigel2392/jsext/v2/errs"
 
 func MakeSetRemoverSlice[T SetRemover](e []T) []SetRemover {
 	var r = make([]SetRemover, len(e))
@@ -67,7 +65,7 @@ func (s state) Add(key string, e ...SetRemover) error {
 		v.Elements = append(v.Elements, e...)
 		return v.renderIndex(elementLen, len(v.Elements))
 	}
-	return errors.New("state not found")
+	return errs.Error("state not found")
 }
 
 // Change changes the state in the state map.
@@ -83,7 +81,7 @@ func (s state) Change(key string, change string, changeType ChangeType, value in
 		v.Value = value
 		return v.Render()
 	}
-	return errors.New("state not found")
+	return errs.Error("state not found")
 }
 
 // Remove will Remove the current elements included in the stateful element.
@@ -94,7 +92,7 @@ func (s state) Remove(key string, e ...SetRemover) error {
 	if v, ok := s[key]; ok {
 		v.Remove(e...)
 	}
-	return errors.New("state not found")
+	return errs.Error("state not found")
 }
 
 // Edit changes the value of the state in the state map.

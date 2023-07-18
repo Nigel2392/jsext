@@ -5,10 +5,10 @@ package websocket
 
 import (
 	"encoding/json"
-	"errors"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/errs"
 )
 
 type WebSocket struct {
@@ -69,7 +69,7 @@ func Open(url string, protocols ...string) (*WebSocket, error) {
 	ws.value.Call("removeEventListener", "open", openFunc)
 
 	if ws.ReadyState() != SockOpen {
-		return ws, errors.New("websocket: failed to open")
+		return ws, errs.Error("websocket: failed to open")
 	}
 	return ws, nil
 }
@@ -106,7 +106,7 @@ func eventToError(event js.Value) error {
 	default:
 		reason = "Unknown reason"
 	}
-	return errors.New(reason)
+	return errs.Error(reason)
 }
 
 func (w *WebSocket) IsOpen() bool {
@@ -156,7 +156,7 @@ func (w *WebSocket) CloseReasoned(code int, reason string) {
 // Will convert the bytes to a string, unless connection is binary.
 func (w *WebSocket) SendBytes(data []byte) error {
 	if !w.open {
-		return errors.New("websocket: not open")
+		return errs.Error("websocket: not open")
 	}
 
 	var arr js.Value
@@ -176,7 +176,7 @@ func (w *WebSocket) SendBytes(data []byte) error {
 
 func (w *WebSocket) SendJSON(v interface{}) error {
 	if !w.open {
-		return errors.New("websocket: not open")
+		return errs.Error("websocket: not open")
 	}
 
 	var data, err = json.MarshalIndent(v, "", "  ")

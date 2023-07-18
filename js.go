@@ -4,7 +4,6 @@
 package jsext
 
 import (
-	"errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/Nigel2392/jsext/v2/console"
+	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/export"
 )
 
@@ -171,7 +171,7 @@ func WrapFunc(f func()) js.Func {
 func GetElementById(id string) (Element, error) {
 	var v = Document.Call("getElementById", id)
 	if v.IsUndefined() || v.IsNull() {
-		return Element(Undefined()), errors.New("value is undefined || null")
+		return Element(Undefined()), errs.Error("value is undefined || null")
 	}
 	return Element(v), nil
 }
@@ -180,7 +180,7 @@ func GetElementById(id string) (Element, error) {
 func GetElementsByTagName(tag string) (Elements, error) {
 	var v = Document.Call("getElementsByTagName", tag)
 	if v.IsUndefined() || v.IsNull() {
-		return nil, errors.New("value is undefined || null")
+		return nil, errs.Error("value is undefined || null")
 	}
 	var elements = UnpackArray[Element](v)
 	return elements, nil
@@ -190,7 +190,7 @@ func GetElementsByTagName(tag string) (Elements, error) {
 func GetElementsByClassName(class string) (Elements, error) {
 	var v = Document.Call("getElementsByClassName", class)
 	if v.IsUndefined() || v.IsNull() {
-		return nil, errors.New("value is undefined || null")
+		return nil, errs.Error("value is undefined || null")
 	}
 	var elements = UnpackArray[Element](v)
 	return elements, nil
@@ -200,7 +200,7 @@ func GetElementsByClassName(class string) (Elements, error) {
 func QuerySelector(selector string) (Element, error) {
 	var v = Document.Call("querySelector", selector)
 	if v.IsUndefined() || v.IsNull() {
-		return Element(Undefined()), errors.New("value is undefined || null")
+		return Element(Undefined()), errs.Error("value is undefined || null")
 	}
 	return Element(v), nil
 }
@@ -209,7 +209,7 @@ func QuerySelector(selector string) (Element, error) {
 func QuerySelectorAll(selector string) (Elements, error) {
 	var v = Document.Call("querySelectorAll", selector)
 	if v.IsUndefined() || v.IsNull() {
-		return nil, errors.New("value is undefined || null")
+		return nil, errs.Error("value is undefined || null")
 	}
 	var elements = UnpackArray[Element](v)
 	return elements, nil
@@ -345,7 +345,7 @@ func SetCookie(name, value string, tim time.Duration) error {
 	var expires = time.Now().Add(tim).UTC().Format(time.RFC1123)
 	var cookie = name + "=" + value + "; expires=" + expires + "; path=/"
 	if len(cookie) > 4096 {
-		return errors.New("cookie length exceeds 4096 bytes")
+		return errs.Error("cookie length exceeds 4096 bytes")
 	}
 	Document.Set("cookie", cookie)
 	return nil

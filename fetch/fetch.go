@@ -1,8 +1,9 @@
 package fetch
 
 import (
-	"errors"
 	"syscall/js"
+
+	"github.com/Nigel2392/jsext/v2/errs"
 )
 
 // TinyGO fetch request implementation.
@@ -72,13 +73,13 @@ func fetch(options Request) (*Response, error) {
 	}))
 	if then.IsUndefined() {
 		close(respChan)
-		return nil, errors.New("then is undefined")
+		return nil, errs.Error("then is undefined")
 	}
 	var errChan = make(chan error)
 	then.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		var err = args[0]
 		var errString = err.Get("message").String()
-		errChan <- errors.New(errString)
+		errChan <- errs.Error(errString)
 		return nil
 	}))
 	var resp *Response

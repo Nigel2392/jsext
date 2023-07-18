@@ -1,10 +1,10 @@
 package try
 
 import (
-	"errors"
 	"strings"
 	"syscall/js"
 
+	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/jsc"
 )
 
@@ -73,7 +73,7 @@ func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 
 	// check if the return value is an error
 	if ret.InstanceOf(js.Global().Get("Error")) {
-		return js.Null(), errors.New(ret.Get("message").String())
+		return js.Null(), errs.Error(ret.Get("message").String())
 	}
 	return ret, nil
 }

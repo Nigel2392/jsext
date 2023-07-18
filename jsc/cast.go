@@ -1,11 +1,12 @@
 package jsc
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"syscall/js"
 	"unsafe"
+
+	"github.com/Nigel2392/jsext/v2/errs"
 )
 
 // Convert a js.Value to a map[string]T.
@@ -57,9 +58,9 @@ func Cast[T ObjectConstraints](value js.Value) (T, error) {
 	var typeOf = interface{}(preTypeOf)
 
 	if value.Type() == js.TypeNull {
-		return preTypeOf, errors.New("cannot cast null")
+		return preTypeOf, errs.Error("cannot cast null")
 	} else if value.Type() == js.TypeUndefined {
-		return preTypeOf, errors.New("cannot cast undefined")
+		return preTypeOf, errs.Error("cannot cast undefined")
 	}
 
 	// Do some type checking on the javascript values.
@@ -72,27 +73,27 @@ func Cast[T ObjectConstraints](value js.Value) (T, error) {
 		return *(*T)(unsafe.Pointer(&value)), nil
 	case string:
 		if value.Type() != js.TypeString {
-			return preTypeOf, errors.New("cannot cast to string")
+			return preTypeOf, errs.Error("cannot cast to string")
 		}
 	case int, int8, int16, int32, int64, float32, float64, uint, uint8, uint16, uint32, uint64:
 		if value.Type() != js.TypeNumber {
-			return preTypeOf, errors.New("cannot cast to number")
+			return preTypeOf, errs.Error("cannot cast to number")
 		}
 	case bool:
 		if value.Type() != js.TypeBoolean {
-			return preTypeOf, errors.New("cannot cast to boolean")
+			return preTypeOf, errs.Error("cannot cast to boolean")
 		}
 	case map[string]interface{}:
 		if value.Type() != js.TypeObject {
-			return preTypeOf, errors.New("cannot cast to object")
+			return preTypeOf, errs.Error("cannot cast to object")
 		}
 	case []byte:
 		if !IsTypedArray(value) {
-			return preTypeOf, errors.New("cannot cast to byte array")
+			return preTypeOf, errs.Error("cannot cast to byte array")
 		}
 	case []interface{}:
 		if !IsSlice(value) {
-			return preTypeOf, errors.New("cannot cast to slice")
+			return preTypeOf, errs.Error("cannot cast to slice")
 		}
 	}
 
@@ -189,7 +190,7 @@ func Cast[T ObjectConstraints](value js.Value) (T, error) {
 
 func castArray[T any](value js.Value) ([]T, error) {
 	if !IsArray(value) {
-		return []T{}, errors.New("cannot cast to array")
+		return []T{}, errs.Error("cannot cast to array")
 	}
 	var a = make([]T, value.Length())
 	var (
@@ -238,7 +239,7 @@ func guessConvert(value js.Value) (interface{}, error) {
 	case js.TypeFunction:
 		return value, nil
 	}
-	return nil, errors.New("cannot convert to type")
+	return nil, errs.Error("cannot convert to type")
 }
 
 func valueIsNullInterface[T any]() bool {

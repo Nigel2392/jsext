@@ -2,13 +2,13 @@ package jsc
 
 import (
 	"encoding/base64"
-	"errors"
 	"reflect"
 	"strings"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/console"
+	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/jse"
 )
 
@@ -326,7 +326,7 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 			return v
 		}).Value, nil
 	default:
-		return js.Null(), errors.New("ValueOf: unsupported type " + kind.String())
+		return js.Null(), errs.Error("ValueOf: unsupported type " + kind.String())
 	}
 }
 
@@ -361,19 +361,13 @@ func getStructTag(field reflect.StructField, tags ...string) (name string, omitE
 	return name, omitEmpty, ok
 }
 
-type Error string
-
-func (e Error) Error() string {
-	return string(e)
-}
-
 const (
-	ErrUndefined Error = "src is null or undefined"
-	ErrNil       Error = "dst is nil"
-	ErrNotPtr    Error = "dst is not a pointer"
-	ErrNotValid  Error = "dst is not a pointer to a struct, map, or slice"
-	ErrNotStruct Error = "dst is not a pointer to a struct"
-	ErrCannotSet Error = "cannot set dst field"
+	ErrUndefined errs.Error = "src is null or undefined"
+	ErrNil       errs.Error = "dst is nil"
+	ErrNotPtr    errs.Error = "dst is not a pointer"
+	ErrNotValid  errs.Error = "dst is not a pointer to a struct, map, or slice"
+	ErrNotStruct errs.Error = "dst is not a pointer to a struct"
+	ErrCannotSet errs.Error = "cannot set dst field"
 )
 
 type Unmarshaller interface {

@@ -54,6 +54,11 @@ func (e Element) IsNaN() bool {
 	return js.Value(e).IsNaN()
 }
 
+// IsZero returns true if the value is undefined or null.
+func (e Element) IsZero() bool {
+	return e.IsUndefined() || e.IsNull()
+}
+
 // JSValue returns the underlying js.Value.
 func (e Element) JSValue() js.Value {
 	return js.Value(e)

@@ -3,8 +3,8 @@ package state
 type ChangeType int
 
 const (
-	ChangeTypeValue ChangeType = iota
-	ChangeTypeFunc  ChangeType = iota
+	ValueType ChangeType = iota
+	FuncType  ChangeType = iota
 )
 
 type SetRemover interface {

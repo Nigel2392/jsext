@@ -3,6 +3,7 @@ package state
 import (
 	"syscall/js"
 
+	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/jsc"
 )
 
@@ -85,56 +86,70 @@ func (s *StatefulElement) renderIndex(start, end int) error {
 		s.Change = "innerHTML"
 	}
 	if cf, ok := s.Value.(Func); ok {
-		s.loopStateSetFunc(start, end, cf)
-		return nil
+		return s.loopStateSetFunc(start, end, cf)
 	}
 	var v, err = jsc.ValueOf(s.Value)
 	if err != nil {
 		return err
 	}
-	s.loopStateSetJS(start, end, v)
-	return nil
+	return s.loopStateSetJS(start, end, v)
 }
 
-func (s *StatefulElement) loopStateSetJS(start, end int, v js.Value) {
-	for i := start; i < end; i++ {
-		var e = s.Elements[i]
+func (s *StatefulElement) loopStateSetJS(start, end int, v js.Value) error {
+	var (
+		i   int
+		e   SetRemover
+		err error
+	)
+	for i = start; i < end; i++ {
+		e = s.Elements[i]
 		if e == nil {
 			continue
 		}
-		if editable, ok := e.(Editable); ok {
-			editable.EditState(s.Key, s.Change, s.Value)
-			continue
-		}
-		if s.ChangeType == ChangeTypeFunc {
-			e.CallFunc(s.Change, v)
-			continue
-		}
-		e.Set(s.Change, v)
-	}
-}
-
-func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}) error {
-	for i := start; i < end; i++ {
-		var e = s.Elements[i]
-		if e == nil {
-			continue
-		}
-
-		var v, err = jsc.ValueOf(fn())
+		err = setElement(e, s.Key, s.Change, s.ChangeType, v)
 		if err != nil {
 			return err
 		}
-
-		if editable, ok := e.(Editable); ok {
-			editable.EditState(s.Key, s.Change, v)
-			continue
-		}
-		if s.ChangeType == ChangeTypeFunc {
-			e.CallFunc(s.Change, v)
-			continue
-		}
-		e.Set(s.Change, v)
 	}
 	return nil
+}
+
+func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}) error {
+	var (
+		i   int
+		v   js.Value
+		e   SetRemover
+		err error
+	)
+	for i = start; i < end; i++ {
+		e = s.Elements[i]
+		if e == nil {
+			continue
+		}
+		v, err = jsc.ValueOf(fn())
+		if err != nil {
+			return err
+		}
+		err = setElement(e, s.Key, s.Change, s.ChangeType, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func setElement(e SetRemover, key, change string, changeType ChangeType, v js.Value) error {
+	if editable, ok := e.(Editable); ok {
+		return editable.EditState(key, change, v)
+	}
+	switch {
+	case changeType == ValueType:
+		e.Set(change, v)
+		return nil
+	case changeType == FuncType:
+		e.CallFunc(change, v)
+		return nil
+	default:
+		return errs.Error("invalid change type")
+	}
 }

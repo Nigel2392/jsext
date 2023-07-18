@@ -200,6 +200,12 @@ func (w Value) Int() int {
 func (w Value) Invoke(args ...any) Value {
 	return Value(w.Value().Invoke(args...))
 }
+
+// IsZero returns true if the value is undefined or null.
+func (w Value) IsZero() bool {
+	return w.IsUndefined() || w.IsNull()
+}
+
 func (w Value) IsNaN() bool {
 	return w.Value().IsNaN()
 }
