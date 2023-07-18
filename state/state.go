@@ -17,7 +17,7 @@ type State interface {
 	Set(key string, value interface{}, change string, changeType ChangeType, e ...SetRemover) error
 	Add(key string, e ...SetRemover) error
 	Change(key string, change string, changeType ChangeType, value interface{}) error
-	Replace(key string, e ...SetRemover) error
+	Remove(key string, e ...SetRemover) error
 	Edit(key string, value interface{}) error
 	Delete(key string, removeFromDOM bool)
 	Clear(removeFromDOM bool)
@@ -86,13 +86,13 @@ func (s state) Change(key string, change string, changeType ChangeType, value in
 	return errors.New("state not found")
 }
 
-// Replace will replace the current elements included in the stateful element.
-func (s state) Replace(key string, e ...SetRemover) error {
+// Remove will Remove the current elements included in the stateful element.
+func (s state) Remove(key string, e ...SetRemover) error {
 	if s == nil {
 		s = make(map[string]*StatefulElement)
 	}
 	if v, ok := s[key]; ok {
-		v.Replace(e...)
+		v.Remove(e...)
 	}
 	return errors.New("state not found")
 }

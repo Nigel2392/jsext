@@ -21,9 +21,38 @@ func (s *StatefulElement) Set(value any) error {
 }
 
 // Replace will replace the current elements included in the stateful element.
-func (s *StatefulElement) Replace(e ...SetRemover) error {
-	s.Elements = e
+func (s *StatefulElement) Remove(e ...SetRemover) error {
+	for _, v := range e {
+	inner:
+		for i, e := range s.Elements {
+			if e == v {
+				s.removeIndex(i)
+				e.Remove()
+				break inner
+			}
+		}
+	}
 	return s.Render()
+}
+
+// removeIndex will remove the current elements included in the stateful element.
+func (s *StatefulElement) removeIndex(i int) {
+	if i < 0 || i >= len(s.Elements) {
+		return
+	}
+	if len(s.Elements) == 1 {
+		s.Elements = make([]SetRemover, 0)
+		return
+	}
+	if i == 0 {
+		s.Elements = s.Elements[1:]
+		return
+	}
+	if i == len(s.Elements)-1 {
+		s.Elements = s.Elements[:len(s.Elements)-1]
+		return
+	}
+	s.Elements = append(s.Elements[:i], s.Elements[i+1:]...)
 }
 
 // Edit will allow you to execute a function on the stateful element.

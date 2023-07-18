@@ -24,9 +24,9 @@ func Change(key string, change string, changeType ChangeType, value interface{})
 	return GlobalState.Change(key, change, changeType, value)
 }
 
-// Replace will replace the current elements included in the stateful element.
-func Replace(key string, e ...SetRemover) error {
-	return GlobalState.Replace(key, e...)
+// Remove will remove the current elements included in the stateful element.
+func Remove(key string, e ...SetRemover) error {
+	return GlobalState.Remove(key, e...)
 }
 
 // Edit changes the value of the state in the state map.
