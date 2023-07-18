@@ -14,16 +14,21 @@ type StatefulElement struct {
 	Elements   []SetRemover
 }
 
+// Set sets the value of the current elements included in the stateful element.
 func (s *StatefulElement) Set(value any) error {
 	s.Value = value
 	return s.Render()
 }
 
+// Edit will allow you to execute a function on the stateful element.
+//
+// This will re-render the stateful element.
 func (s *StatefulElement) Edit(fn func(*StatefulElement)) error {
 	fn(s)
 	return s.Render()
 }
 
+// Render the stateful elements
 func (s *StatefulElement) Render() error {
 	return s.renderIndex(0, len(s.Elements))
 }
