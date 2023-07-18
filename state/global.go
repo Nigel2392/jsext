@@ -1,6 +1,11 @@
 package state
 
-var GlobalState = make(State)
+var GlobalState = New(nil)
+
+// Get returns the stateful element from the state map.
+func Get(key string) *StatefulElement {
+	return GlobalState.Get(key)
+}
 
 // Set sets the state in the state map.
 func Set(key string, value interface{}, change string, changeType ChangeType, e ...SetRemover) error {
@@ -17,6 +22,11 @@ func Add(key string, e ...SetRemover) error {
 // This is different from Edit, as it provides more options for changing.
 func Change(key string, change string, changeType ChangeType, value interface{}) error {
 	return GlobalState.Change(key, change, changeType, value)
+}
+
+// Replace will replace the current elements included in the stateful element.
+func Replace(key string, e ...SetRemover) error {
+	return GlobalState.Replace(key, e...)
 }
 
 // Edit changes the value of the state in the state map.
@@ -38,9 +48,4 @@ func Delete(key string, removeFromDOM bool) {
 // It also removes the elements bound to the state from the dom.
 func Clear(removeFromDOM bool) {
 	GlobalState.Clear(removeFromDOM)
-}
-
-// Get returns the stateful element from the state map.
-func Get(key string) *StatefulElement {
-	return GlobalState.Get(key)
 }

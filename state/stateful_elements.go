@@ -20,6 +20,12 @@ func (s *StatefulElement) Set(value any) error {
 	return s.Render()
 }
 
+// Replace will replace the current elements included in the stateful element.
+func (s *StatefulElement) Replace(e ...SetRemover) error {
+	s.Elements = e
+	return s.Render()
+}
+
 // Edit will allow you to execute a function on the stateful element.
 //
 // This will re-render the stateful element.
