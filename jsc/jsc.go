@@ -78,11 +78,7 @@ func ValuesOfInterface(f ...interface{}) ([]interface{}, error) {
 // MustValuesOf will return the js.Value of the given values.
 // This can be useful for inlining known-safe types.
 func MustValuesOf(f ...interface{}) []js.Value {
-	var v, err = ValuesOf(f...)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return mustValuesOf(ValuesOf, f...)
 }
 
 // MustValuesOfInterface will return the js.Value of the given values in an array of interface{}.
@@ -90,7 +86,11 @@ func MustValuesOf(f ...interface{}) []js.Value {
 //
 // This is a helper function, since js.(Value).Call or set will not take a slice of js.Value.
 func MustValuesOfInterface(f ...interface{}) []interface{} {
-	var v, err = ValuesOfInterface(f...)
+	return mustValuesOf(ValuesOfInterface, f...)
+}
+
+func mustValuesOf[T interface{} | js.Value](f func(args ...interface{}) ([]T, error), args ...interface{}) []T {
+	var v, err = f(args...)
 	if err != nil {
 		panic(err)
 	}

@@ -48,27 +48,49 @@ func Make[T JavascriptConstraint](e T) *Element {
 }
 
 func (e *Element) Element() jsext.Element {
+	if e == nil {
+		return jsext.Element(jsext.Null())
+	}
 	return (jsext.Element)(*e)
 }
 
 func (e *Element) Value() jsext.Value {
+	if e == nil {
+		return jsext.Null()
+	}
 	return (jsext.Value)(*e)
 }
 
 func (e *Element) JSValue() js.Value {
+	if e == nil {
+		return js.Null()
+	}
 	return (js.Value)(*e)
 }
 
 func (e *Element) AppendChild(children ...*Element) *Element {
 	for _, child := range children {
+		if child.IsZero() {
+			continue
+		}
 		e.Call("appendChild", child.JSValue())
 	}
 	return e
 }
 
 func (e *Element) PrependChild(children ...*Element) *Element {
+	var firstChild = e.JSValue().Get("firstChild")
 	for _, child := range children {
-		e.Call("insertBefore", child.JSValue(), e.JSValue().Get("firstChild"))
+		if child.IsZero() {
+			continue
+		}
+		if firstChild.IsNull() || firstChild.IsUndefined() {
+			firstChild = child.JSValue()
+			e.Call("appendChild", firstChild)
+			continue
+		}
+		e.Call("insertBefore", child.JSValue(), firstChild)
+		firstChild = child.JSValue()
 	}
 	return e
 }
@@ -128,15 +150,18 @@ func (e *Element) DelAttr(p string) *Element {
 }
 
 // RemoveChild removes a child from the Element
-func (e *Element) RemoveChild(child Element) *Element {
+func (e *Element) removeChild(child *Element) *Element {
+	if child == nil {
+		return e
+	}
 	e.JSValue().Call("removeChild", child.JSValue())
 	return e
 }
 
 // RemoveChildren removes multiple children from the Element
-func (e *Element) RemoveChildren(children []Element) *Element {
+func (e *Element) RemoveChildren(children ...*Element) *Element {
 	for _, child := range children {
-		e.RemoveChild(child)
+		e.removeChild(child)
 	}
 	return e
 }
@@ -289,6 +314,12 @@ func (e *Element) InsertBefore(element, before *Element) {
 
 // Replace the *Element with the before Element
 func (e *Element) ReplaceChild(element, before *Element) {
+	if element == nil || before == nil {
+		return
+	}
+	if element.IsZero() || before.IsZero() {
+		return
+	}
 	e.JSValue().Call("replaceChild", element.JSValue(), before.JSValue())
 }
 
@@ -302,69 +333,69 @@ func (e *Element) Animate(keyframes []interface{}, options map[string]interface{
 	return jsext.Value(e.JSValue().Call("animate", jsext.SliceToArray(keyframes).Value(), jsext.MapToObject(options).Value()))
 }
 
-func (e *Element) SetMap(m map[string]string) *Element {
-	for k, v := range m {
-		e.Set(k, v)
-	}
-	return e
-}
-
 // /////////////////////////////////////////////////////////
 //
 // js.Value methods.
 //
 // /////////////////////////////////////////////////////////
 func (e *Element) Bool() bool {
-	return e.Value().Bool()
+	return e.JSValue().Bool()
 }
 func (e *Element) Call(m string, args ...any) jsext.Value {
-	return jsext.Value(e.Value().Call(m, args...))
+	return jsext.Value(e.JSValue().Call(m, args...))
 }
 func (e *Element) Delete(p string) {
-	e.Value().Delete(p)
+	e.JSValue().Delete(p)
 }
 func (e *Element) Equal(other js.Value) bool {
-	return e.Value().Equal(other)
+	return e.JSValue().Equal(other)
 }
 func (e *Element) Float() float64 {
-	return e.Value().Float()
+	return e.JSValue().Float()
 }
 func (e *Element) Get(p string) jsext.Value {
-	return jsext.Value(e.Value().Get(p))
+	return jsext.Value(e.JSValue().Get(p))
 }
 func (e *Element) Index(i int) jsext.Value {
-	return jsext.Value(e.Value().Index(i))
+	return jsext.Value(e.JSValue().Index(i))
 }
 func (e *Element) Int() int {
-	return e.Value().Int()
+	return e.JSValue().Int()
 }
 func (e *Element) Invoke(args ...any) jsext.Value {
-	return jsext.Value(e.Value().Invoke(args...))
+	return jsext.Value(e.JSValue().Invoke(args...))
 }
 func (e *Element) IsNaN() bool {
-	return e.Value().IsNaN()
+	return e.JSValue().IsNaN()
 }
 func (e *Element) IsNull() bool {
-	return e.Value().IsNull()
+	return e.JSValue().IsNull()
 }
 func (e *Element) IsUndefined() bool {
-	return e.Value().IsUndefined()
+	return e.JSValue().IsUndefined()
 }
 func (e *Element) Length() int {
-	return e.Value().Length()
+	return e.JSValue().Length()
 }
 func (e *Element) Set(p string, x any) {
-	e.Value().Set(p, x)
+	e.JSValue().Set(p, x)
 }
 func (e *Element) SetIndex(i int, x any) {
-	e.Value().SetIndex(i, x)
+	e.JSValue().SetIndex(i, x)
 }
 func (e *Element) String() string {
-	return e.Value().String()
+	return e.JSValue().String()
 }
 func (e *Element) Truthy() bool {
-	return e.Value().Truthy()
+	return e.JSValue().Truthy()
 }
 func (e *Element) Type() js.Type {
-	return e.Value().Type()
+	return e.JSValue().Type()
+}
+
+func (e *Element) IsZero() bool {
+	if e == nil {
+		return true
+	}
+	return e.JSValue().IsNull() || e.JSValue().IsUndefined()
 }
