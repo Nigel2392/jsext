@@ -140,7 +140,7 @@ func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}
 
 func setElement(e SetRemover, key, change string, changeType ChangeType, v js.Value) error {
 	if editable, ok := e.(Editable); ok {
-		return editable.EditState(key, change, v)
+		return editable.EditState(key, change, changeType, v)
 	}
 	switch {
 	case changeType == ValueType:

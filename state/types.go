@@ -14,7 +14,7 @@ type SetRemover interface {
 }
 
 type Editable interface {
-	EditState(key string, change string, value interface{}) error
+	EditState(key string, change string, changeType ChangeType, value interface{}) error
 }
 
 type Func func() interface{}
