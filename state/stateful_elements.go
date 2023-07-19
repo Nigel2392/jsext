@@ -86,12 +86,8 @@ func (s *StatefulElement) renderIndex(start, end int) error {
 	if cf, ok := s.Value.(Func); ok {
 		return s.loopStateSetFunc(start, end, cf)
 	}
-	var v, err = jsc.ValueOf(s.Value)
-	if err != nil {
-		return err
-	}
 	var cf = func() interface{} {
-		return v
+		return s.Value
 	}
 	return s.loopStateSetFunc(start, end, cf)
 }
@@ -114,6 +110,7 @@ func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}
 			if err != nil {
 				return err
 			}
+			continue
 		}
 		v, err = jsc.ValueOf(v)
 		if err != nil {

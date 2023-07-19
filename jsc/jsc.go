@@ -104,13 +104,6 @@ func ValueOf(f interface{}) (js.Value, error) {
 		return js.Null(), nil
 	}
 	switch val := f.(type) {
-	case int, int64, int32, int16, int8,
-		float64, float32,
-		uint, uint64, uint32, uint16, uint8, uintptr,
-		string, bool:
-		// []interface{}, map[string]interface{}: // Removed so we can call jss.ValueOf on a slice or map.
-
-		return js.ValueOf(val), nil
 	case js.Value, js.Func:
 		return js.ValueOf(val), nil
 	case jsext.Value:
@@ -128,6 +121,13 @@ func ValueOf(f interface{}) (js.Value, error) {
 	case []byte:
 		var enc = base64.StdEncoding.EncodeToString(val)
 		return js.ValueOf(enc), nil
+	case int, int64, int32, int16, int8,
+		float64, float32,
+		uint, uint64, uint32, uint16, uint8, uintptr,
+		string, bool:
+		// []interface{}, map[string]interface{}: // Removed so we can call jss.ValueOf on a slice or map.
+
+		return js.ValueOf(val), nil
 	case func():
 		if val == nil {
 			return js.Null(), nil
