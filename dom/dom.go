@@ -1,6 +1,27 @@
 package dom
 
-import "syscall/js"
+import (
+	"syscall/js"
+)
+
+func Walk(nodetypes []NodeType, e js.Value, fn func(Node)) {
+	walk(nodetypes, e, fn, 0)
+}
+
+func walk(nodetypes []NodeType, e js.Value, fn func(Node), depth int) {
+	fn(Node{e, depth})
+	var childNodes = e.Get("childNodes")
+	for i := 0; i < childNodes.Length(); i++ {
+		var child = childNodes.Index(i)
+	inner:
+		for _, nodetype := range nodetypes {
+			if child.Get("nodeType").Int() == int(nodetype) {
+				walk(nodetypes, child, fn, depth+1)
+				break inner
+			}
+		}
+	}
+}
 
 var domParser = js.Global().Get("DOMParser").New()
 
@@ -36,47 +57,6 @@ func (d Document) GetElementById(id string) js.Value {
 	return (js.Value)(d).Call("getElementById", id)
 }
 
-func (d Document) Walk(nodeTypes []NodeType, fn func(js.Value)) {
+func (d Document) Walk(nodeTypes []NodeType, fn func(Node)) {
 	Walk(nodeTypes, (js.Value)(d), fn)
-}
-
-type NodeType int
-
-const (
-	NodeTypeElement NodeType = iota + 1
-	NodeTypeAttribute
-	NodeTypeText
-	NodeTypeCDATASection
-	NodeTypeProcessingInstruction
-	NodeTypeComment
-	NodeTypeDocument
-	NodeTypeDocumentType
-	NodeTypeDocumentFragment
-)
-
-var AllNodeTypes = []NodeType{
-	NodeTypeElement,
-	NodeTypeAttribute,
-	NodeTypeText,
-	NodeTypeCDATASection,
-	NodeTypeProcessingInstruction,
-	NodeTypeComment,
-	NodeTypeDocument,
-	NodeTypeDocumentType,
-	NodeTypeDocumentFragment,
-}
-
-func Walk(nodetypes []NodeType, e js.Value, fn func(js.Value)) {
-	fn(e)
-	var childNodes = e.Get("childNodes")
-	for i := 0; i < childNodes.Length(); i++ {
-		var child = childNodes.Index(i)
-	inner:
-		for _, nodetype := range nodetypes {
-			if child.Get("nodeType").Int() == int(nodetype) {
-				Walk(nodetypes, child, fn)
-				break inner
-			}
-		}
-	}
 }
