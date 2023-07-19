@@ -36,7 +36,7 @@ func (e *Plugin) Get(varName string) (js.Value, error) {
 
 type Plugins map[string]*Plugin
 
-func NewPlugins() Plugins {
+func New() Plugins {
 	var m = make(map[string]*Plugin)
 	var instantiateStreaming = webAssembly.Get("instantiateStreaming")
 	if instantiateStreaming.IsUndefined() {
@@ -65,7 +65,7 @@ const (
 	F_IMPORT_FROM_GLOBAL
 )
 
-func (e *Plugins) NewExport(name, url, pathToExports string, flag uint8) (*Plugin, error) {
+func (e *Plugins) NewPlugin(name, url, pathToExports string, flag uint8) (*Plugin, error) {
 	if e == nil {
 		*e = make(map[string]*Plugin)
 	}
