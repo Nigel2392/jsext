@@ -8,18 +8,32 @@ import (
 	"github.com/Nigel2392/jsext/v2/state"
 )
 
+type ElementNode struct {
+	*js.Value
+}
+
+func (e *ElementNode) Replace(other js.Value) {
+	e.Call("replaceWith", other)
+	*e.Value = other
+}
+
+func (e *ElementNode) Remove() {
+	e.Call("remove")
+}
+
 type Elements[T any] struct {
-	Elements []js.Value
+	Elements []*ElementNode
 	Data     T
-	EditFunc func(T, js.Value) error
+	EditFunc func(T, *ElementNode) error
 }
 
 func NewElements[T any](s ...js.Value) *Elements[T] {
-	if s == nil {
-		s = make([]js.Value, 0)
+	var sliceOf []*ElementNode = make([]*ElementNode, len(s))
+	for i, elem := range s {
+		sliceOf[i] = &ElementNode{&elem}
 	}
 	return &Elements[T]{
-		Elements: s,
+		Elements: sliceOf,
 	}
 }
 
@@ -85,7 +99,11 @@ func (s *Elements[T]) AppendChild(e ...js.Value) {
 		return
 	}
 	if s == nil {
-		s.Elements = make([]js.Value, 0)
+		s.Elements = make([]*ElementNode, 0)
 	}
-	s.Elements = append(s.Elements, e...)
+	var sliceOf []*ElementNode = make([]*ElementNode, len(e))
+	for i, elem := range e {
+		sliceOf[i] = &ElementNode{&elem}
+	}
+	s.Elements = append(s.Elements, sliceOf...)
 }
