@@ -37,6 +37,36 @@ type ErrorMarshaller interface {
 	MarshalJS() (js.Value, error)
 }
 
+/*
+
+	I AM UNSURE OF THE USE FOR THE FOLLOWING FUNCTION, LEAVING IT OUT.
+
+	type ref uint64
+
+	// Value represents a JavaScript value. The zero value is the JavaScript value "undefined".
+	// Values can be checked for equality with the Equal method.
+	type jsValue struct {
+		_     [0]func() // uncomparable; to make == not compile
+		ref   ref       // identifies a JavaScript value, see ref type
+		gcPtr *ref      // used to trigger the finalizer when the Value is not referenced any more
+	}
+
+	// Swap swaps the underlying value of two js.Value objects.
+	func Swap[T js.Value | jsext.Value | jsext.Element | jsext.Event | jsext.Import | jse.Element](a, b *T) {
+		var (
+			aTyp, bTyp     = (*jsValue)(unsafe.Pointer(a)), (*jsValue)(unsafe.Pointer(b))
+			aRef, bRef     = aTyp.ref, bTyp.ref
+			aGCPtr, bGCPtr = aTyp.gcPtr, bTyp.gcPtr
+		)
+
+		aTyp.ref, bTyp.ref = bRef, aRef
+		aTyp.gcPtr, bTyp.gcPtr = bGCPtr, aGCPtr
+
+		runtime.KeepAlive(a)
+		runtime.KeepAlive(b)
+	}
+*/
+
 // ValuesOf will return the js.Value of the given values.
 // It will return an error if interface{} of the value are not supported.
 func ValuesOf(f ...interface{}) ([]js.Value, error) {
