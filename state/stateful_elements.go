@@ -1,8 +1,6 @@
 package state
 
 import (
-	"syscall/js"
-
 	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/jsc"
 )
@@ -92,32 +90,16 @@ func (s *StatefulElement) renderIndex(start, end int) error {
 	if err != nil {
 		return err
 	}
-	return s.loopStateSetJS(start, end, v)
-}
-
-func (s *StatefulElement) loopStateSetJS(start, end int, v js.Value) error {
-	var (
-		i   int
-		e   SetRemover
-		err error
-	)
-	for i = start; i < end; i++ {
-		e = s.Elements[i]
-		if e == nil {
-			continue
-		}
-		err = setElement(e, s.Key, s.Change, s.ChangeType, v)
-		if err != nil {
-			return err
-		}
+	var cf = func() interface{} {
+		return v
 	}
-	return nil
+	return s.loopStateSetFunc(start, end, cf)
 }
 
 func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}) error {
 	var (
 		i   int
-		v   js.Value
+		v   any
 		e   SetRemover
 		err error
 	)
@@ -126,30 +108,25 @@ func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}
 		if e == nil {
 			continue
 		}
-		v, err = jsc.ValueOf(fn())
+		v = fn()
+		if editable, ok := e.(Editable); ok {
+			err = editable.EditState(s.Key, s.Change, s.ChangeType, v)
+			if err != nil {
+				return err
+			}
+		}
+		v, err = jsc.ValueOf(v)
 		if err != nil {
 			return err
 		}
-		err = setElement(e, s.Key, s.Change, s.ChangeType, v)
-		if err != nil {
-			return err
+		switch {
+		case s.ChangeType == ValueType:
+			e.Set(s.Change, v)
+		case s.ChangeType == FuncType:
+			e.CallFunc(s.Change, v)
+		default:
+			return errs.Error("invalid change type")
 		}
 	}
 	return nil
-}
-
-func setElement(e SetRemover, key, change string, changeType ChangeType, v js.Value) error {
-	if editable, ok := e.(Editable); ok {
-		return editable.EditState(key, change, changeType, v)
-	}
-	switch {
-	case changeType == ValueType:
-		e.Set(change, v)
-		return nil
-	case changeType == FuncType:
-		e.CallFunc(change, v)
-		return nil
-	default:
-		return errs.Error("invalid change type")
-	}
 }
