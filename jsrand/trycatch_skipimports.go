@@ -1,13 +1,13 @@
 //go:build skipimports
 // +build skipimports
 
-package try
+package jsrand
 
 import (
 	"syscall/js"
 )
 
-func getRandString(n int) string {
+func String(n int) string {
 	var javascript = `(function(len){
 		function dec2hex (dec) {
 			return dec.toString(16).padStart(2, "0")

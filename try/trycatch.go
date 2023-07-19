@@ -6,6 +6,7 @@ import (
 
 	"github.com/Nigel2392/jsext/v2/errs"
 	"github.com/Nigel2392/jsext/v2/jsc"
+	"github.com/Nigel2392/jsext/v2/jsrand"
 )
 
 // Catch is a function that takes a js.Func and any number of arguments.
@@ -34,11 +35,11 @@ func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 	var argnames = make([]string, len(args))
 	args = make([]interface{}, len(args))
 	for i, arg := range argsJS {
-		argnames[i] = getRandString(16)
+		argnames[i] = jsrand.String(16)
 		args[i] = arg
 	}
 	// set the function to the global scope
-	var funcName = getRandString(32)
+	var funcName = jsrand.String(32)
 	js.Global().Set(funcName, f)
 
 	// delete the function after we're done

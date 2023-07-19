@@ -1,7 +1,7 @@
 //go:build !skipimports
 // +build !skipimports
 
-package try
+package jsrand
 
 import (
 	"math/rand"
@@ -18,7 +18,7 @@ const (
 var src = rand.NewSource(0<<63 - 1)
 
 // https://stackoverflow.com/a/31832326/18020941
-func getRandString(n int) string {
+func String(n int) string {
 	b := make([]byte, n)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
 	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
