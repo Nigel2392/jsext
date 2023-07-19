@@ -9,12 +9,16 @@ import (
 )
 
 type ElementNode struct {
-	*js.Value
+	js.Value
 }
 
 func (e *ElementNode) Replace(other js.Value) {
 	e.Call("replaceWith", other)
-	*e.Value = other
+	e.Value = other
+}
+
+func (e *ElementNode) AppendChild(other js.Value) {
+	e.Call("appendChild", other)
 }
 
 func (e *ElementNode) Remove() {
@@ -30,7 +34,7 @@ type Elements[T any] struct {
 func NewElements[T any](s ...js.Value) *Elements[T] {
 	var sliceOf []*ElementNode = make([]*ElementNode, len(s))
 	for i, elem := range s {
-		sliceOf[i] = &ElementNode{&elem}
+		sliceOf[i] = &ElementNode{elem}
 	}
 	return &Elements[T]{
 		Elements: sliceOf,
@@ -103,7 +107,8 @@ func (s *Elements[T]) AppendChild(e ...js.Value) {
 	}
 	var sliceOf []*ElementNode = make([]*ElementNode, len(e))
 	for i, elem := range e {
-		sliceOf[i] = &ElementNode{&elem}
+		sliceOf[i] = &ElementNode{elem}
 	}
+
 	s.Elements = append(s.Elements, sliceOf...)
 }
