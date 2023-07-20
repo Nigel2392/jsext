@@ -5,7 +5,7 @@ import "syscall/js"
 var GlobalState = New(js.Null())
 
 // Get returns the stateful element from the state map.
-func Get(key Keyer) StatefulElement {
+func Get(key Keyer) []StatefulElement {
 	return GlobalState.Elements[key.Key()]
 }
 

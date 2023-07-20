@@ -1,7 +1,6 @@
 package state
 
 import (
-	"fmt"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2/errs"
@@ -17,14 +16,14 @@ const (
 
 type State struct {
 	Root     js.Value
-	Elements map[string]StatefulElement
+	Elements map[string][]StatefulElement
 	Flags    ListStateFlags
 }
 
 func New(root js.Value) *State {
 	return &State{
 		Root:     root,
-		Elements: make(map[string]StatefulElement),
+		Elements: make(map[string][]StatefulElement),
 	}
 }
 
@@ -33,7 +32,7 @@ func (s *State) With(value interface{}, e StatefulElement) error {
 		return errs.Error("stateful is nil")
 	}
 	if s.Elements == nil {
-		s.Elements = make(map[string]StatefulElement)
+		s.Elements = make(map[string][]StatefulElement)
 	}
 	return s.updateOrAdd(e, value)
 }
@@ -44,14 +43,16 @@ func (s *State) Update(key Keyer, v interface{}) error {
 	}
 	var e, ok = s.Elements[key.Key()]
 	if !ok {
-		var keys = make([]string, 0, len(s.Elements))
-		for k := range s.Elements {
-			keys = append(keys, k)
-		}
-		fmt.Println("Keys", keys, "Key", key.Key())
 		return errs.Error("key not found")
 	}
-	return e.EditState(v)
+	var err error
+	for _, elem := range e {
+		err = elem.EditState(v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *State) Without(e ...Keyer) error {
@@ -64,7 +65,9 @@ func (s *State) Without(e ...Keyer) error {
 		if !ok {
 			continue
 		}
-		e.Remove()
+		for _, elem := range e {
+			elem.Remove()
+		}
 		delete(s.Elements, key)
 	}
 	return nil
@@ -75,9 +78,11 @@ func (s *State) Clear() {
 		return
 	}
 	for _, elem := range s.Elements {
-		elem.Remove()
+		for _, e := range elem {
+			e.Remove()
+		}
 	}
-	s.Elements = make(map[string]StatefulElement)
+	s.Elements = make(map[string][]StatefulElement)
 }
 
 func (s *State) updateOrAdd(e StatefulElement, v interface{}) error {
@@ -101,22 +106,14 @@ func (s *State) update(e StatefulElement, v interface{}) error {
 	if oldKey != newKey {
 		delete(s.Elements, oldKey)
 	}
-	fmt.Println("Updating key", newKey)
-	s.Elements[newKey] = e
+	s.Elements[newKey] = append(s.Elements[newKey], e)
 	return nil
 }
 
 func (s *State) add(e StatefulElement, v interface{}) error {
-	fmt.Println("Adding key", e.Key())
 	if err := s.update(e, v); err != nil {
 		return err
 	}
-	var keys = make([]string, 0, len(s.Elements))
-	for k := range s.Elements {
-		keys = append(keys, k)
-	}
-	fmt.Println("Keys", keys)
-	fmt.Println("Added key", e.Key())
 
 	if !s.Root.IsNull() && !s.Root.IsUndefined() {
 		switch {
