@@ -97,7 +97,7 @@ func (e *FormElement) DelAttr(key string) *FormElement {
 // OnSubmit sets the onsubmit event handler.
 //
 // This function will do nothing if the element on which this was called is not a html form.
-func (e *FormElement) OnSubmit(f func(this *Element, event jsext.Event, v url.Values)) *FormElement {
+func (e *FormElement) OnSubmit(autoclear bool, f func(this *Element, event jsext.Event, v url.Values)) *FormElement {
 
 	var nodeName = e.Element().Get("nodeName")
 	if nodeName.IsUndefined() || nodeName.IsNull() {
@@ -122,6 +122,9 @@ func (e *FormElement) OnSubmit(f func(this *Element, event jsext.Event, v url.Va
 			var mapValue, ok = formValues[name]
 			if !ok {
 				mapValue = make([]string, 0)
+			}
+			if autoclear {
+				element.Set("value", "")
 			}
 			formValues[name] = append(mapValue, value)
 		}

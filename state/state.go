@@ -1,135 +1,132 @@
 package state
 
-import "github.com/Nigel2392/jsext/v2/errs"
+import (
+	"fmt"
+	"syscall/js"
 
-func MakeSetRemoverSlice[T SetRemover](e []T) []SetRemover {
-	var r = make([]SetRemover, len(e))
-	for i, v := range e {
-		r[i] = v
+	"github.com/Nigel2392/jsext/v2/errs"
+)
+
+type ListStateFlags uint32
+
+const (
+	F_APPEND ListStateFlags = 1 << iota
+	F_PREPEND
+	F_NONE
+)
+
+type State struct {
+	Root     js.Value
+	Elements map[string]StatefulElement
+	Flags    ListStateFlags
+}
+
+func New(root js.Value) *State {
+	return &State{
+		Root:     root,
+		Elements: make(map[string]StatefulElement),
 	}
-	return r
 }
 
-type State interface {
-	Get(key string) *StatefulElement
-	Set(key string, value interface{}, change string, changeType ChangeType, e ...SetRemover) error
-	Add(key string, e ...SetRemover) error
-	Change(key string, change string, changeType ChangeType, value interface{}) error
-	Remove(key string, e ...SetRemover) error
-	Edit(key string, value interface{}) error
-	Delete(key string, removeFromDOM bool)
-	Clear(removeFromDOM bool)
-}
-
-// State is a map of stateful elements.
-//
-// This will manage the state of the elements.
-type state map[string]*StatefulElement
-
-// New creates a new state map.
-func New(m map[string]*StatefulElement) State {
-	if m == nil {
-		m = make(map[string]*StatefulElement)
-	}
-	return state(m)
-}
-
-// Get returns the stateful element from the state map.
-func (s state) Get(key string) *StatefulElement {
-	return s[key]
-}
-
-// Set sets the state in the state map.
-func (s state) Set(key string, value interface{}, change string, changeType ChangeType, e ...SetRemover) error {
+func (s *State) With(value interface{}, e StatefulElement) error {
 	if s == nil {
-		s = make(map[string]*StatefulElement)
+		return errs.Error("stateful is nil")
 	}
-	var v = &StatefulElement{
-		Key:        key,
-		Value:      value,
-		Change:     change,
-		ChangeType: changeType,
-		Elements:   e,
+	if s.Elements == nil {
+		s.Elements = make(map[string]StatefulElement)
 	}
-	s[key] = v
-	return v.Render()
+	return s.updateOrAdd(e, value)
 }
 
-// Add adds the stateful element to the state map.
-func (s state) Add(key string, e ...SetRemover) error {
+func (s *State) Update(key Keyer, v interface{}) error {
 	if s == nil {
-		s = make(map[string]*StatefulElement)
+		return errs.Error("stateful is nil")
 	}
-	if v, ok := s[key]; ok {
-		var elementLen = len(v.Elements)
-		v.Elements = append(v.Elements, e...)
-		return v.renderIndex(elementLen, len(v.Elements))
+	var e, ok = s.Elements[key.Key()]
+	if !ok {
+		var keys = make([]string, 0, len(s.Elements))
+		for k := range s.Elements {
+			keys = append(keys, k)
+		}
+		fmt.Println("Keys", keys, "Key", key.Key())
+		return errs.Error("key not found")
 	}
-	return errs.Error("state not found")
+	return e.EditState(v)
 }
 
-// Change changes the state in the state map.
-//
-// This is different from Edit, as it provides more options for changing.
-func (s state) Change(key string, change string, changeType ChangeType, value interface{}) error {
+func (s *State) Without(e ...Keyer) error {
 	if s == nil {
-		s = make(map[string]*StatefulElement)
+		return errs.Error("stateful is nil")
 	}
-	if v, ok := s[key]; ok {
-		v.Change = change
-		v.ChangeType = changeType
-		v.Value = value
-		return v.Render()
-	}
-	return errs.Error("state not found")
-}
-
-// Remove will Remove the current elements included in the stateful element.
-func (s state) Remove(key string, e ...SetRemover) error {
-	if s == nil {
-		s = make(map[string]*StatefulElement)
-	}
-	if v, ok := s[key]; ok {
-		v.Remove(e...)
-	}
-	return errs.Error("state not found")
-}
-
-// Edit changes the value of the state in the state map.
-//
-// This is useful for changing the value of a state without changing the change or change type.
-func (s state) Edit(key string, value interface{}) error {
-	if s == nil {
-		s = make(map[string]*StatefulElement)
-	}
-	if v, ok := s[key]; ok {
-		v.Set(value)
+	for _, elem := range e {
+		var key = elem.Key()
+		var e, ok = s.Elements[key]
+		if !ok {
+			continue
+		}
+		e.Remove()
+		delete(s.Elements, key)
 	}
 	return nil
 }
 
-// Delete removes the state from the state map.
-//
-// It also removes the elements bound to the state from the dom.
-func (s state) Delete(key string, removeFromDOM bool) {
-	if removeFromDOM {
-		var v = s.Get(key)
-		if v == nil {
-			goto del
-		}
-		for _, e := range v.Elements {
-			e.Remove()
-		}
+func (s *State) Clear() {
+	if s == nil {
+		return
 	}
-del:
-	delete(s, key)
+	for _, elem := range s.Elements {
+		elem.Remove()
+	}
+	s.Elements = make(map[string]StatefulElement)
 }
 
-// Clear removes all the state from the state map.
-//
-// It also removes the elements bound to the state from the dom.
-func (s state) Clear(removeFromDOM bool) {
-	for k := range s {
-		s.Delete(k, removeFromDOM)
+func (s *State) updateOrAdd(e StatefulElement, v interface{}) error {
+	if e == nil {
+		return errs.Error("stateful element is nil")
 	}
+	if _, ok := s.Elements[e.Key()]; ok {
+		return s.update(e, v)
+	}
+	return s.add(e, v)
+}
+
+func (s *State) update(e StatefulElement, v interface{}) error {
+	var err error
+	var oldKey = e.Key()
+	err = e.EditState(v)
+	if err != nil {
+		return err
+	}
+	var newKey = e.Key()
+	if oldKey != newKey {
+		delete(s.Elements, oldKey)
+	}
+	fmt.Println("Updating key", newKey)
+	s.Elements[newKey] = e
+	return nil
+}
+
+func (s *State) add(e StatefulElement, v interface{}) error {
+	fmt.Println("Adding key", e.Key())
+	if err := s.update(e, v); err != nil {
+		return err
+	}
+	var keys = make([]string, 0, len(s.Elements))
+	for k := range s.Elements {
+		keys = append(keys, k)
+	}
+	fmt.Println("Keys", keys)
+	fmt.Println("Added key", e.Key())
+
+	if !s.Root.IsNull() && !s.Root.IsUndefined() {
+		switch {
+		case s.Flags&F_APPEND != 0:
+			s.Root.Call("appendChild", e.MarshalJS())
+		case s.Flags&F_PREPEND != 0:
+			s.Root.Call("prepend", e.MarshalJS())
+		default:
+			return nil
+		}
+	}
+	return nil
 }

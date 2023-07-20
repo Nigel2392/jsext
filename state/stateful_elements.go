@@ -1,129 +1,41 @@
 package state
 
 import (
+	"syscall/js"
+
 	"github.com/Nigel2392/jsext/v2/errs"
-	"github.com/Nigel2392/jsext/v2/jsc"
 )
 
-type StatefulElement struct {
-	Key        string
-	Change     string
-	ChangeType ChangeType
-	Value      interface{}
-	Elements   []SetRemover
+type statefulElement[T any] struct {
+	key   string
+	value *js.Value
+	edit  func(T, *js.Value) error
 }
 
-// Set sets the value of the current elements included in the stateful element.
-func (s *StatefulElement) Set(value any) error {
-	s.Value = value
-	return s.Render()
+func (s *statefulElement[T]) Key() string {
+	return s.key
 }
 
-// Replace will replace the current elements included in the stateful element.
-func (s *StatefulElement) Remove(e ...SetRemover) error {
-	for _, v := range e {
-	inner:
-		for i, e := range s.Elements {
-			if e == v {
-				s.removeIndex(i)
-				e.Remove()
-				break inner
-			}
-		}
-	}
-	return s.Render()
+func (s *statefulElement[T]) MarshalJS() js.Value {
+	return *s.value
 }
 
-// removeIndex will remove the current elements included in the stateful element.
-func (s *StatefulElement) removeIndex(i int) {
-	if i < 0 || i >= len(s.Elements) {
-		return
+func (s *statefulElement[T]) EditState(value interface{}) error {
+	v := value.(T)
+	if s.edit == nil {
+		return errs.Error("edit function is nil")
 	}
-	if len(s.Elements) == 1 {
-		s.Elements = make([]SetRemover, 0)
-		return
-	}
-	if i == 0 {
-		s.Elements = s.Elements[1:]
-		return
-	}
-	if i == len(s.Elements)-1 {
-		s.Elements = s.Elements[:len(s.Elements)-1]
-		return
-	}
-	s.Elements = append(s.Elements[:i], s.Elements[i+1:]...)
+	return s.edit(v, s.value)
 }
 
-// Edit will allow you to execute a function on the stateful element.
-//
-// This will re-render the stateful element.
-func (s *StatefulElement) Edit(fn func(*StatefulElement)) error {
-	fn(s)
-	return s.Render()
+func (s *statefulElement[T]) Remove() {
+	(*s.value).Call("remove")
 }
 
-// Render the stateful elements
-func (s *StatefulElement) Render() error {
-	return s.renderIndex(0, len(s.Elements))
-}
-
-func (s *StatefulElement) renderIndex(start, end int) error {
-	if s == nil {
-		return nil
+func NewElement[T any](key string, v *js.Value, edit func(T, *js.Value) error) StatefulElement {
+	return &statefulElement[T]{
+		key:   key,
+		value: v,
+		edit:  edit,
 	}
-	if start < 0 {
-		start = 0
-	}
-	if end > len(s.Elements) {
-		end = len(s.Elements)
-	}
-	if s.Elements == nil {
-		return nil
-	}
-	if s.Change == "" {
-		s.Change = "innerHTML"
-	}
-	if cf, ok := s.Value.(Func); ok {
-		return s.loopStateSetFunc(start, end, cf)
-	}
-	var cf = func() interface{} {
-		return s.Value
-	}
-	return s.loopStateSetFunc(start, end, cf)
-}
-
-func (s *StatefulElement) loopStateSetFunc(start, end int, fn func() interface{}) error {
-	var (
-		i   int
-		v   any
-		e   SetRemover
-		err error
-	)
-	for i = start; i < end; i++ {
-		e = s.Elements[i]
-		if e == nil {
-			continue
-		}
-		v = fn()
-		if editable, ok := e.(Editable); ok {
-			err = editable.EditState(s.Key, s.Change, s.ChangeType, v)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		v, err = jsc.ValueOf(v)
-		if err != nil {
-			return err
-		}
-		switch {
-		case s.ChangeType == ValueType:
-			e.Set(s.Change, v)
-		case s.ChangeType == FuncType:
-			e.CallFunc(s.Change, v)
-		default:
-			return errs.Error("invalid change type")
-		}
-	}
-	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/errs"
+	"github.com/Nigel2392/jsext/v2/jsrand"
 )
 
 type Element jsext.Element
@@ -14,7 +16,9 @@ func NewElement(tag string, text ...string) *Element {
 	if len(text) > 0 {
 		e.InnerHTML(strings.Join(text, "\n"))
 	}
-	return (*Element)(&e)
+	var elem = (*Element)(&e)
+	elem.SetKey(jsrand.String(16))
+	return elem
 }
 
 type JavascriptConstraint interface {
@@ -66,6 +70,89 @@ func (e *Element) JSValue() js.Value {
 		return js.Null()
 	}
 	return (js.Value)(*e)
+}
+
+func (e *Element) MarshalJS() js.Value {
+	return e.JSValue()
+}
+
+func (e *Element) Key() string {
+	var (
+		s   string
+		key jsext.Value
+	)
+	if e == nil {
+		return s
+	}
+	key = e.Dataset().Get("key")
+	if !key.IsZero() && key.String() != "" {
+		return key.String()
+	}
+	key = e.Call("getAttribute", "key")
+	if !key.IsZero() && key.String() != "" {
+		return key.String()
+	}
+	key = e.Call("getAttribute", "id")
+	if !key.IsZero() && key.String() != "" {
+		return key.String()
+	}
+	key = e.Call("getAttribute", "name")
+	if !key.IsZero() && key.String() != "" {
+		return key.String()
+	}
+	return key.String()
+}
+
+func (e *Element) SetKey(key string) *Element {
+	if e == nil {
+		return e
+	}
+	e.Dataset().Set("key", key)
+	return e
+}
+
+type (
+	Value     string
+	InnerHTML string
+	InnerText string
+	Classes   []string
+)
+
+func (e *Element) EditState(value interface{}) error {
+	if e == nil {
+		return errs.Error("element is nil")
+	}
+	if value == nil {
+		return nil
+	}
+	switch value := value.(type) {
+	case string:
+		e.InnerHTML(value)
+	case Value:
+		e.Set("value", string(value))
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64:
+		e.Set("value", value)
+	case InnerHTML:
+		e.InnerHTML(string(value))
+	case InnerText:
+		e.InnerText(string(value))
+	case Classes:
+		e.InlineClasses(value...)
+	case *Element:
+		e.Replace(value)
+	default:
+		return errs.Error("unknown type")
+	}
+	return nil
+}
+
+func (e *Element) Replace(elem *Element) {
+	if elem == nil || e == nil ||
+		elem.IsZero() || e.IsZero() {
+		return
+	}
+	e.Call("replaceWith", elem.JSValue())
+	*e = *elem
 }
 
 func (e *Element) AppendChild(children ...*Element) *Element {

@@ -220,6 +220,10 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 				index = index.Elem()
 			}
 
+			if !index.IsValid() || !index.CanInterface() {
+				return js.Null(), nil
+			}
+
 			var v, err = ValueOf(index.Interface())
 			if err != nil {
 				return js.Null(), err
@@ -501,7 +505,7 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 			}
 			return nil
 		}
-		var err = scanSlice(srcVal, dstVal)
+		var err = scanSlice(srcVal, dstVal.Addr())
 		if err != nil {
 			return err
 		}
@@ -619,27 +623,40 @@ func scanMap(srcVal js.Value, dstVal reflect.Value) error {
 }
 
 func scanSlice(srcVal js.Value, dstVal reflect.Value) error {
+	if dstVal.Kind() == reflect.Ptr {
+		dstVal = dstVal.Elem()
+	}
 	var srcLen = srcVal.Length()
 	if srcLen == 0 {
 		return nil
 	}
-	if dstVal.IsNil() {
+	if dstVal.IsNil() || dstVal.Len() == 0 {
 		// makeslice is implemented in tinygo! :)
 		dstVal.Set(reflect.MakeSlice(dstVal.Type(), srcLen, srcLen))
 	}
+	var elemType = dstVal.Type().Elem()
+	if elemType.Kind() == reflect.Ptr {
+		elemType = elemType.Elem()
+	}
 	for i := 0; i < srcLen; i++ {
 		var srcElem = srcVal.Index(i)
-		var dstElem = reflect.New(dstVal.Type().Elem())
+		var dstElem = reflect.New(elemType)
 		var err = scanValue(srcElem, dstElem)
 		if err != nil {
 			return err
 		}
-		// slice index out of range
-		if i >= dstVal.Len() {
-			dstVal.Set(reflect.Append(dstVal, dstElem.Elem()))
-		} else {
-			dstVal.Index(i).Set(dstElem.Elem())
+
+		switch {
+		case dstVal.Type().Elem().Kind() != reflect.Ptr:
+			dstElem = dstElem.Elem()
 		}
+
+		if dstVal.Len() <= i {
+			dstVal.Set(reflect.Append(dstVal, dstElem))
+			continue
+		}
+
+		dstVal.Index(i).Set(dstElem)
 	}
 	return nil
 }
