@@ -6,10 +6,10 @@ import (
 	"github.com/Nigel2392/jsext/v2/errs"
 )
 
-type ListStateFlags uint32
+type StateFlags uint32
 
 const (
-	F_APPEND ListStateFlags = 1 << iota
+	F_APPEND StateFlags = 1 << iota
 	F_PREPEND
 	F_NONE
 )
@@ -17,7 +17,8 @@ const (
 type State struct {
 	Root     js.Value
 	Elements map[string][]StatefulElement
-	Flags    ListStateFlags
+	Flags    StateFlags
+	OnUpdate func()
 }
 
 func New(root js.Value) *State {
@@ -52,6 +53,9 @@ func (s *State) Update(key Keyer, v interface{}) error {
 			return err
 		}
 	}
+	if s.OnUpdate != nil {
+		s.OnUpdate()
+	}
 	return nil
 }
 
@@ -65,10 +69,16 @@ func (s *State) Without(e ...Keyer) error {
 		if !ok {
 			continue
 		}
+		delete(s.Elements, key)
+		if s.Root.IsNull() || s.Root.IsUndefined() {
+			continue
+		}
 		for _, elem := range e {
 			elem.Remove()
 		}
-		delete(s.Elements, key)
+	}
+	if s.OnUpdate != nil {
+		s.OnUpdate()
 	}
 	return nil
 }
@@ -79,10 +89,16 @@ func (s *State) Clear() {
 	}
 	for _, elem := range s.Elements {
 		for _, e := range elem {
+			if s.Root.IsNull() || s.Root.IsUndefined() {
+				continue
+			}
 			e.Remove()
 		}
 	}
 	s.Elements = make(map[string][]StatefulElement)
+	if s.OnUpdate != nil {
+		s.OnUpdate()
+	}
 }
 
 func (s *State) updateOrAdd(e StatefulElement, v interface{}) error {
@@ -101,6 +117,9 @@ func (s *State) update(e StatefulElement, v interface{}) error {
 	err = e.EditState(v)
 	if err != nil {
 		return err
+	}
+	if s.OnUpdate != nil {
+		s.OnUpdate()
 	}
 	var newKey = e.Key()
 	if oldKey != newKey {

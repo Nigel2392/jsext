@@ -6,18 +6,29 @@ import (
 
 	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/errs"
-	"github.com/Nigel2392/jsext/v2/jsrand"
 )
+
+// AUTO_KEY is a function that returns a random string.
+//
+// This can be used to manage state more easily, essentially providing each element with a unique id.
+var AUTO_KEY func(n int) string // = jsrand.String
 
 type Element jsext.Element
 
+// Create a new Element.
 func NewElement(tag string, text ...string) *Element {
 	var e = jsext.CreateElement(tag)
+
 	if len(text) > 0 {
 		e.InnerHTML(strings.Join(text, "\n"))
 	}
+
 	var elem = (*Element)(&e)
-	elem.SetKey(jsrand.String(16))
+
+	if AUTO_KEY != nil {
+		elem.SetKey(AUTO_KEY(16))
+	}
+
 	return elem
 }
 
@@ -112,10 +123,11 @@ func (e *Element) SetKey(key string) *Element {
 }
 
 type (
-	Value     string
-	InnerHTML string
-	InnerText string
-	Classes   []string
+	Value         string
+	InnerHTML     string
+	InnerText     string
+	AddClasses    []string
+	RemoveClasses []string
 )
 
 func (e *Element) EditState(value interface{}) error {
@@ -136,10 +148,18 @@ func (e *Element) EditState(value interface{}) error {
 		e.InnerHTML(string(value))
 	case InnerText:
 		e.InnerText(string(value))
-	case Classes:
-		e.InlineClasses(value...)
 	case *Element:
 		e.Replace(value)
+	case AddClasses:
+		var classList = e.ClassList()
+		for _, class := range value {
+			classList.Add(class)
+		}
+	case RemoveClasses:
+		var classList = e.ClassList()
+		for _, class := range value {
+			classList.Remove(class)
+		}
 	default:
 		return errs.Error("unknown type")
 	}

@@ -28,6 +28,16 @@ func (e *FormElement) Element() *Element {
 	return (*Element)(e)
 }
 
+// Name returns the name of the element.
+func (e *FormElement) Name() string {
+	return e.Get("name").String()
+}
+
+// Value returns the value of the element.
+func (e *FormElement) Value() string {
+	return e.Get("value").String()
+}
+
 // FormGroup returns a div with the classes specified.
 func (e *FormElement) FormGroup(classes ...string) *FormElement {
 	var l = Div(classes...)
@@ -97,15 +107,15 @@ func (e *FormElement) DelAttr(key string) *FormElement {
 // OnSubmit sets the onsubmit event handler.
 //
 // This function will do nothing if the element on which this was called is not a html form.
-func (e *FormElement) OnSubmit(autoclear bool, f func(this *Element, event jsext.Event, v url.Values)) *FormElement {
+func (e *FormElement) OnSubmit(f func(this *Element, event jsext.Event, v url.Values)) js.Func {
 
 	var nodeName = e.Element().Get("nodeName")
 	if nodeName.IsUndefined() || nodeName.IsNull() {
-		return e
+		return js.Func{Value: js.Null()}
 	}
 
 	if nodeName.String() != "FORM" {
-		return e
+		return js.Func{Value: js.Null()}
 	}
 
 	var newF = func(this *Element, event jsext.Event) {
@@ -123,16 +133,64 @@ func (e *FormElement) OnSubmit(autoclear bool, f func(this *Element, event jsext
 			if !ok {
 				mapValue = make([]string, 0)
 			}
-			if autoclear {
-				element.Set("value", "")
-			}
 			formValues[name] = append(mapValue, value)
 		}
 		f(this, event, formValues)
 	}
 
-	e.Element().AddEventListener("submit", newF)
+	return e.Element().AddEventListener("submit", newF)
+}
+
+// Reset resets the form.
+//
+// This function will do nothing if the element on which this was called is not a html form.
+func (e *FormElement) Reset() *FormElement {
+	for _, element := range e.Elements() {
+		if element.IsZero() {
+			continue
+		}
+		element.Set("value", "")
+	}
 	return e
+}
+
+// GetElements returns the elements of the form, keyed by their name.
+func (e *FormElement) Field(name string) *FormElement {
+	var elements = e.Get("elements")
+	for i := 0; i < elements.Length(); i++ {
+		var element = elements.Index(i)
+		if element.Get("name").String() == name {
+			return (*FormElement)(&element)
+		}
+	}
+	return nil
+}
+
+// Fields returns all fields of the form which have the name specified.
+func (e *FormElement) Fields(name string) []*FormElement {
+	var elements = e.Get("elements")
+	var ret = make([]*FormElement, 0)
+	for i := 0; i < elements.Length(); i++ {
+		var element = elements.Index(i)
+		if element.Get("name").String() == name {
+			ret = append(ret, (*FormElement)(&element))
+		}
+	}
+	return ret
+}
+
+// Elements returns all the elements of the form, keyed by their name.
+func (e *FormElement) Elements() []*FormElement {
+	var elements = e.Get("elements")
+	var ret = make([]*FormElement, 0)
+	for i := 0; i < elements.Length(); i++ {
+		var element = elements.Index(i)
+		if element.IsZero() {
+			continue
+		}
+		ret = append(ret, (*FormElement)(&element))
+	}
+	return ret
 }
 
 // /////////////////////////////////////////////////////////
@@ -175,6 +233,9 @@ func (e *FormElement) IsNull() bool {
 }
 func (e *FormElement) IsUndefined() bool {
 	return e.JSValue().IsUndefined()
+}
+func (e *FormElement) IsZero() bool {
+	return e.JSValue().IsNull() || e.JSValue().IsUndefined()
 }
 func (e *FormElement) Length() int {
 	return e.JSValue().Length()
