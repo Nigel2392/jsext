@@ -38,7 +38,12 @@ func New(url string, protocols ...string) *WebSocket {
 }
 
 func (w *WebSocket) Reconnect() error {
-	w.Close(1000)
+	if w == nil {
+		return errs.Error("websocket: nil")
+	}
+	if !(w.value.IsNull() || w.value.IsUndefined()) {
+		w.Close(1000)
+	}
 	var ws = New(w.url, w.protocols...)
 	w.value = ws.value
 	w.value.Set("onopen", js.FuncOf(w.onOpen))
