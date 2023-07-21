@@ -19,7 +19,7 @@ func (r ReadyState) String() string {
 	return "Unknown"
 }
 
-func (r ReadyState) Is(c int) bool {
+func (r ReadyState) Is(c ReadyState) bool {
 	return r == ReadyState(c)
 }
 
