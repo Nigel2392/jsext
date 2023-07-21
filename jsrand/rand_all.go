@@ -1,37 +1,42 @@
-//go:build !skipimports
-// +build !skipimports
-
 package jsrand
 
 import (
-	"math/rand"
-	"unsafe"
+	"syscall/js"
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-var src = rand.NewSource(0<<63 - 1)
-
-// https://stackoverflow.com/a/31832326/18020941
 func String(n int) string {
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
+	var b = make([]byte, n)
+	Reader.Read(b)
+	for i := 0; i < n; i++ {
+		b[i] = (b[i] % 16) + 97
 	}
+	return string(b)
+}
 
-	return *(*string)(unsafe.Pointer(&b))
+// Everything below here is taken from crypto/rand_js.go
+// This is to avoid a dependency on the crypto package.
+
+// Reader is a global, shared instance of a cryptographically
+// secure random number generator.
+var Reader interface {
+	Read([]byte) (int, error)
+}
+
+func init() {
+	Reader = &reader{}
+}
+
+var jsCrypto = js.Global().Get("crypto")
+var uint8Array = js.Global().Get("Uint8Array")
+
+// reader implements a pseudorandom generator
+// using JavaScript crypto.getRandomValues method.
+// See https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues.
+type reader struct{}
+
+func (r *reader) Read(b []byte) (int, error) {
+	a := uint8Array.New(len(b))
+	jsCrypto.Call("getRandomValues", a)
+	js.CopyBytesToGo(b, a)
+	return len(b), nil
 }

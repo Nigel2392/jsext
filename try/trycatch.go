@@ -35,11 +35,11 @@ func Catch(f js.Func, args ...interface{}) (js.Value, error) {
 	var argnames = make([]string, len(args))
 	args = make([]interface{}, len(args))
 	for i, arg := range argsJS {
-		argnames[i] = jsrand.String(16)
+		argnames[i] = "arg_" + jsrand.String(16)
 		args[i] = arg
 	}
 	// set the function to the global scope
-	var funcName = jsrand.String(32)
+	var funcName = "f_" + jsrand.String(32)
 	js.Global().Set(funcName, f)
 
 	// delete the function after we're done

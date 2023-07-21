@@ -1,6 +1,7 @@
 package fetch
 
 import (
+	"io"
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2/errs"
@@ -24,70 +25,84 @@ func fetch(options Request) (*Response, error) {
 		options.Body = nil
 	}
 
+	ac := js.Global().Get("AbortController")
+	if !ac.IsUndefined() {
+		// Some browsers that support WASM don't necessarily support
+		// the AbortController. See
+		// https://developer.mozilla.org/en-US/docs/Web/API/AbortController#Browser_compatibility.
+		ac = ac.New()
+	}
+
 	var jsReq, err = options.MarshalJS()
 	if err != nil {
 		return nil, err
 	}
 
-	var fetch = js.Global().Call("fetch", options.URL, jsReq)
-	if fetch.IsUndefined() {
-		panic("fetch is undefined")
-	}
+	var (
+		fetchPromise     = js.Global().Call("fetch", options.URL, jsReq)
+		respCh           = make(chan *Response, 1)
+		errCh            = make(chan error, 1)
+		success, failure js.Func
+	)
+	success = js.FuncOf(func(this js.Value, args []js.Value) any {
+		success.Release()
+		failure.Release()
 
-	var respChan = make(chan *Response)
-	var then = fetch.Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		var response = args[0]
-		var headers = response.Get("headers")
+		result := args[0]
 		var jsHeaders = make(map[string][]string)
-		keys := headers.Call("keys")
-		for i := 0; i < keys.Length(); i++ {
-			var key = keys.Index(i).String()
-			var value = headers.Call("get", key)
-			var values []string
-			if value.Type() == js.TypeString {
-				values = []string{value.String()}
-			} else {
-				for j := 0; j < value.Length(); j++ {
-					values = append(values, value.Index(j).String())
-				}
+		var headersIt = result.Get("headers").Call("entries")
+		for {
+			n := headersIt.Call("next")
+			if n.Get("done").Bool() {
+				break
 			}
-			jsHeaders[key] = values
+			pair := n.Get("value")
+			key, value := pair.Index(0).String(), pair.Index(1).String()
+			jsHeaders[key] = append(jsHeaders[key], value)
 		}
-		var statusCode = response.Get("status").Int()
-		var resp = &Response{
+
+		var b = result.Get("body")
+		var body io.ReadCloser
+		// The body is undefined when the browser does not support streaming response bodies (Firefox),
+		// and null in certain error cases, i.e. when the request is blocked because of CORS settings.
+		if !b.IsUndefined() && !b.IsNull() {
+			body = &streamReader{stream: b.Call("getReader")}
+		} else {
+			// Fall back to using ArrayBuffer
+			// https://developer.mozilla.org/en-US/docs/Web/API/Body/arrayBuffer
+			body = &arrayReader{arrayPromise: result.Call("arrayBuffer")}
+		}
+
+		var code = result.Get("status").Int()
+		respCh <- &Response{
+			Status:     StatusText(code),
+			StatusCode: code,
 			Headers:    jsHeaders,
-			StatusCode: statusCode,
-			JS:         response,
+			Body:       body,
+			Request:    &options,
+			JS:         result,
 		}
-		response.Call("arrayBuffer").Call("then", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-			var arrBuff = args[0]
-			var uint8Array = js.Global().Get("Uint8Array").New(arrBuff)
-			var length = uint8Array.Get("length").Int()
-			var b = make([]byte, length)
-			js.CopyBytesToGo(b, uint8Array)
-			resp.Body = b
-			respChan <- resp
-			return nil
-		}))
+
 		return nil
-	}))
-	if then.IsUndefined() {
-		close(respChan)
-		return nil, errs.Error("then is undefined")
-	}
-	var errChan = make(chan error)
-	then.Call("catch", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		var err = args[0]
-		var errString = err.Get("message").String()
-		errChan <- errs.Error(errString)
+	})
+	failure = js.FuncOf(func(this js.Value, args []js.Value) any {
+		success.Release()
+		failure.Release()
+		errCh <- errs.Error("jsext/fetch: Fetch() failed: " + args[0].Get("message").String())
 		return nil
-	}))
-	var resp *Response
+	})
+
+	fetchPromise.Call("then", success, failure)
 	select {
-	case resp = <-respChan:
-	case err = <-errChan:
+	case <-options.Context().Done():
+		if !ac.IsUndefined() {
+			// Abort the Fetch request.
+			ac.Call("abort")
+		}
+		return nil, options.Context().Err()
+	case resp := <-respCh:
+		return resp, nil
+	case err := <-errCh:
+		return nil, err
 	}
-	close(respChan)
-	close(errChan)
-	return resp, err
 }

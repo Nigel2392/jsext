@@ -2,6 +2,7 @@ package fetch
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"syscall/js"
@@ -21,6 +22,25 @@ type Request struct {
 	Redirect    string
 	Referrer    string
 	URL         string
+	ctx         context.Context
+}
+
+func NewRequest(method, url string) *Request {
+	return &Request{
+		URL: url,
+		ctx: context.Background(),
+	}
+}
+
+func (f *Request) Context() context.Context {
+	if f.ctx == nil {
+		f.ctx = context.Background()
+	}
+	return f.ctx
+}
+
+func (f *Request) SetContext(ctx context.Context) {
+	f.ctx = ctx
 }
 
 func (f *Request) SetHeader(key, value string) {
@@ -45,25 +65,25 @@ func (f *Request) DeleteHeader(key string) {
 }
 
 func (f *Request) SetBody(body any) (err error) {
-	switch body.(type) {
+	switch body := body.(type) {
 	case []byte:
-		f.Body = body.([]byte)
+		f.Body = body
 	case string:
-		f.Body = []byte(body.(string))
-	case io.Reader:
+		f.Body = []byte(body)
+	case io.ReadCloser:
 		var buf bytes.Buffer
-		if _, err = io.Copy(&buf, body.(io.Reader)); err != nil {
+		if _, err = io.Copy(&buf, body); err != nil {
 			return err
 		}
 		f.Body = buf.Bytes()
-	case io.ReadCloser:
+	case io.Reader:
 		var buf bytes.Buffer
-		if _, err = io.Copy(&buf, body.(io.ReadCloser)); err != nil {
+		if _, err = io.Copy(&buf, body); err != nil {
 			return err
 		}
 		f.Body = buf.Bytes()
 	case func() (io.ReadCloser, error):
-		f.GetBody = body.(func() (io.ReadCloser, error))
+		f.GetBody = body
 	default:
 		var buf bytes.Buffer
 		err = json.NewEncoder(&buf).Encode(body)

@@ -1,10 +1,19 @@
 package fetch
 
-import "syscall/js"
+import (
+	"syscall/js"
+)
+
+type ReadCloser interface {
+	Read(p []byte) (n int, err error)
+	Close() error
+}
 
 type Response struct {
-	Body       []byte
 	Headers    map[string][]string
 	StatusCode int
 	JS         js.Value
+	Status     string // e.g. "200 OK"
+	Request    *Request
+	Body       ReadCloser
 }
