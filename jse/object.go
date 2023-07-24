@@ -445,6 +445,11 @@ func (e *Element) CallFunc(name string, args ...interface{}) {
 	e.Call(name, args...)
 }
 
+// NodeName returns the node name of the Element
+func (e *Element) NodeName() string {
+	return e.JSValue().Get("nodeName").String()
+}
+
 // /////////////////////////////////////////////////////////
 //
 // js.Value methods.
