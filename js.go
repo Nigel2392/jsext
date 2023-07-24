@@ -4,7 +4,6 @@
 package jsext
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -39,12 +38,12 @@ type FuncUnmarshaller interface {
 
 // Default syscall/js values, some wrapped.
 var (
-	Export          export.Export
-	Global          js.Value
+	Global          js.Value = js.Global()
 	Document        js.Value
+	Export          export.Export
 	DocumentValue   Value
-	DocumentElement Element
 	Window          Value
+	DocumentElement Element
 	Body            Element
 	Head            Element
 )
@@ -75,7 +74,6 @@ func EmitInitiated() {
 
 func init() {
 	// Initialize default values
-	Global = js.Global()
 	Document = Global.Get("document")
 	DocumentValue = Value(Document)
 	DocumentElement = Element(Document)
@@ -253,7 +251,6 @@ func SetFavicon(url string) error {
 
 // Eval evaluates raw javascript code, returns the result as a js.Value.
 func Eval(script string) Value {
-	fmt.Println(Global)
 	return Value(Global.Call("eval", script))
 }
 
