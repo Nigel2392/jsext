@@ -4,6 +4,7 @@
 package jsext
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -252,6 +253,7 @@ func SetFavicon(url string) error {
 
 // Eval evaluates raw javascript code, returns the result as a js.Value.
 func Eval(script string) Value {
+	fmt.Println(Global)
 	return Value(Global.Call("eval", script))
 }
 
