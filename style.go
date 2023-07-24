@@ -25,7 +25,7 @@ func (s Style) Get(key string) js.Value {
 }
 
 func (s Style) Set(key string, value interface{}) {
-	value = replaceArgs(value)[0]
+	value = MarshallableArguments(value)[0]
 	s.Value().Set(key, value)
 }
 

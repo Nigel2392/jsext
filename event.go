@@ -114,7 +114,7 @@ func (e Event) Get(p string) js.Value {
 	return e.JSValue().Get(p)
 }
 func (e Event) Call(m string, args ...interface{}) js.Value {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	return e.JSValue().Call(m, args...)
 }
 func (e Event) Delete(p string) {

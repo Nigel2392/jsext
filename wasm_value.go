@@ -169,7 +169,7 @@ func (w Value) QuerySelectorAll(selector string) Elements {
 	return elements
 }
 
-func replaceArgs(args ...any) []any {
+func MarshallableArguments(args ...any) []any {
 	var err error
 	for i, arg := range args {
 		switch arg := arg.(type) {
@@ -196,7 +196,7 @@ func (w Value) Bool() bool {
 	return w.Value().Bool()
 }
 func (w Value) Call(m string, args ...any) Value {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	return Value(w.Value().Call(m, args...))
 }
 func (w Value) Delete(p string) {
@@ -221,7 +221,7 @@ func (w Value) Int() int {
 	return w.Value().Int()
 }
 func (w Value) Invoke(args ...any) Value {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	return Value(w.Value().Invoke(args...))
 }
 
@@ -243,15 +243,15 @@ func (w Value) Length() int {
 	return w.Value().Length()
 }
 func (w Value) New(args ...any) Value {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	return Value(w.Value().New(args...))
 }
 func (w Value) Set(p string, x any) {
-	x = replaceArgs(x)[0]
+	x = MarshallableArguments(x)[0]
 	w.Value().Set(p, x)
 }
 func (w Value) SetIndex(i int, x any) {
-	x = replaceArgs(x)[0]
+	x = MarshallableArguments(x)[0]
 	w.Value().SetIndex(i, x)
 }
 func (w Value) String() string {

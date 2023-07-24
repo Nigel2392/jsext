@@ -76,7 +76,7 @@ func (e Element) Value() Value {
 
 // Set sets a property on the element.
 func (e Element) Set(p string, v interface{}) Element {
-	v = replaceArgs(v)[0]
+	v = MarshallableArguments(v)[0]
 	e.JSValue().Set(p, v)
 	return e
 }
@@ -88,13 +88,13 @@ func (e Element) Get(p string) Value {
 
 // Call calls a method on the element.
 func (e Element) Call(m string, args ...interface{}) Value {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	return Value(e.JSValue().Call(m, args...))
 }
 
 // CallFunc is used by state management.
 func (e Element) CallFunc(name string, args ...interface{}) {
-	args = replaceArgs(args...)
+	args = MarshallableArguments(args...)
 	e.Call(name, args...)
 }
 

@@ -69,6 +69,7 @@ func (s *SelectElement) InlineClasses(classes ...string) *SelectElement {
 }
 
 func (s *SelectElement) Set(name string, value any) *SelectElement {
+	value = jsext.MarshallableArguments(value)[0]
 	s.Value().Set(name, value)
 	return s
 }

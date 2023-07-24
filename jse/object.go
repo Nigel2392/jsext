@@ -454,6 +454,7 @@ func (e *Element) Bool() bool {
 	return e.JSValue().Bool()
 }
 func (e *Element) Call(m string, args ...any) jsext.Value {
+	args = jsext.MarshallableArguments(args...)
 	return jsext.Value(e.JSValue().Call(m, args...))
 }
 func (e *Element) Delete(p string) {
@@ -475,6 +476,7 @@ func (e *Element) Int() int {
 	return e.JSValue().Int()
 }
 func (e *Element) Invoke(args ...any) jsext.Value {
+	args = jsext.MarshallableArguments(args...)
 	return jsext.Value(e.JSValue().Invoke(args...))
 }
 func (e *Element) IsNaN() bool {
@@ -490,9 +492,11 @@ func (e *Element) Length() int {
 	return e.JSValue().Length()
 }
 func (e *Element) Set(p string, x any) {
+	x = jsext.MarshallableArguments(x)[0]
 	e.JSValue().Set(p, x)
 }
 func (e *Element) SetIndex(i int, x any) {
+	x = jsext.MarshallableArguments(x)[0]
 	e.JSValue().SetIndex(i, x)
 }
 func (e *Element) String() string {

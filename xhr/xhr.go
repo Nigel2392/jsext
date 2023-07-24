@@ -9,6 +9,7 @@ import (
 )
 
 var xhrGlobal = js.Global().Get("XMLHttpRequest")
+var XHRAsync = true
 
 type XMLHttpRequest struct {
 	Timeout       time.Duration
@@ -43,7 +44,7 @@ func (x *XMLHttpRequest) Open(method, url string, user User) {
 	)
 
 	if user == nil {
-		x.Call("open", method, url, true)
+		x.Call("open", method, url, XHRAsync)
 		return
 	}
 
@@ -51,16 +52,16 @@ func (x *XMLHttpRequest) Open(method, url string, user User) {
 	password = user.Password()
 
 	if username != "" && password != "" {
-		x.Call("open", method, url, true, username, password)
+		x.Call("open", method, url, XHRAsync, username, password)
 		return
 	}
 
 	if username != "" {
-		x.Call("open", method, url, true, username)
+		x.Call("open", method, url, XHRAsync, username)
 		return
 	}
 
-	x.Call("open", method, url, true)
+	x.Call("open", method, url, XHRAsync)
 }
 
 func (x *XMLHttpRequest) MarshalJS() js.Value {
@@ -155,7 +156,6 @@ func (x *XMLHttpRequest) Send(data any) (response js.Value, err error) {
 	onLoad = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		select {
 		case <-closed:
-			return nil
 		default:
 			respChan <- x.Response()
 		}
@@ -181,7 +181,6 @@ func (x *XMLHttpRequest) Send(data any) (response js.Value, err error) {
 	onAbort = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		select {
 		case <-closed:
-			return nil
 		default:
 			errChan <- ErrAborted
 		}

@@ -135,6 +135,9 @@ func ValueOf(f interface{}) (js.Value, error) {
 			return js.Null(), err
 		}
 		return jsValue, nil
+	case jsext.FuncMarshaller:
+		var jsFunc = val.MarshalJS()
+		return jsFunc.Value, nil
 	case int, int64, int32, int16, int8,
 		float64, float32,
 		uint, uint64, uint32, uint16, uint8, uintptr,
