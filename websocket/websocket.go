@@ -4,11 +4,11 @@
 package websocket
 
 import (
-	"encoding/json"
 	"syscall/js"
 	"time"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/encoding"
 	"github.com/Nigel2392/jsext/v2/errs"
 )
 
@@ -35,6 +35,10 @@ func New(url string, protocols ...string) *WebSocket {
 		url:       url,
 		protocols: protocols,
 	}
+}
+
+func (w *WebSocket) MarshalJS() js.Value {
+	return w.value
 }
 
 func (w *WebSocket) Reconnect() error {
@@ -211,12 +215,12 @@ func (w *WebSocket) SendJSON(v interface{}) error {
 		return errs.Error("websocket: not open")
 	}
 
-	var data, err = json.MarshalIndent(v, "", "  ")
+	var data, err = encoding.EncodeJSON[[]byte](v)
 	if err != nil {
 		return err
 	}
 
-	return w.SendBytes(data)
+	return w.SendBytes([]byte(data))
 }
 
 func (w *WebSocket) OnOpen(f func(w *WebSocket, e MessageEvent)) {

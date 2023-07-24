@@ -15,7 +15,7 @@ func (e simpleError) Error() string {
 
 type Export interface {
 	// Value returns the js.Value of the export.
-	Value() js.Value
+	MarshalJS() js.Value
 
 	// Set a value on the export's js.Value.
 	Set(name string, value interface{})
@@ -46,7 +46,7 @@ func NewExport(exportName string) Export {
 		js.Global().Delete(exportName)
 		return nil
 	}))
-	js.Global().Set(exportName, e.Value())
+	js.Global().Set(exportName, e.MarshalJS())
 	return e
 }
 
@@ -56,7 +56,7 @@ func NewFromValue(value js.Value) Export {
 }
 
 // Value returns the js.Value of the export.
-func (e export) Value() js.Value {
+func (e export) MarshalJS() js.Value {
 	return js.Value(e)
 }
 

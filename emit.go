@@ -14,6 +14,7 @@ var Runtime export.Export = export.NewFromValue(Eval("new EventTarget();").Value
 
 // Emit an event on the global Runtime object.
 func EventEmit(name string, args ...interface{}) Value {
+	args = replaceArgs(args...)
 	var event = js.Global().Get("Event").New(name)
 	event.Set("args", args)
 	return Value(Runtime.Call("dispatchEvent", event))
@@ -21,7 +22,7 @@ func EventEmit(name string, args ...interface{}) Value {
 
 // Listen for an event on the global Runtime object.
 func EventOn(name string, f func(args ...interface{})) Value {
-	return Value(Runtime.Value().Call("addEventListener", name, js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	return Value(Runtime.MarshalJS().Call("addEventListener", name, js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		var jsArgs = args[0].Get("args")
 		var arguments = ArrayToSlice(jsArgs)
 		f(arguments...)

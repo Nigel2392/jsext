@@ -13,6 +13,10 @@ func (w Value) Value() js.Value {
 	return js.Value(w)
 }
 
+func (w Value) MarshalJS() js.Value {
+	return w.Value()
+}
+
 // Returns the jsext.Element of the value.
 func (w Value) ToElement() Element {
 	return Element(w.Value())
@@ -62,8 +66,8 @@ func (w Value) IsElement() bool {
 	return InstanceOf(w.Value(), HTMLElement) || InstanceOf(w.Value(), Element)
 }
 
-// Convert a slice of strings to a slice of interfaces.
-func SliceToInterface(s []string) []interface{} {
+// Convert a slice of T to a slice of interfaces.
+func SliceToInterface[T any](s []T) []interface{} {
 	var anyList = make([]interface{}, len(s))
 	for i, v := range s {
 		anyList[i] = v
@@ -116,7 +120,7 @@ func (w Value) PrependChild(child Element) {
 	// if !child.IsElement() || !w.IsElement() {
 	// panic("replaceChild: child and w must be elements")
 	// }
-	w.Value().Call("prepend", child.Value())
+	w.Value().Call("prepend", child.MarshalJS())
 }
 
 // InsertBefore inserts a node before another node.
@@ -124,7 +128,7 @@ func (w Value) InsertBefore(child Element, before Element) {
 	// if !before.IsElement() || !child.IsElement() || !w.IsElement() {
 	// panic("replaceChild: before, child and w must be elements")
 	// }
-	w.Value().Call("insertBefore", child.Value(), before.Value())
+	w.Value().Call("insertBefore", child.MarshalJS(), before.MarshalJS())
 }
 
 // ReplaceChild replaces the child with the before element.
@@ -132,7 +136,7 @@ func (w Value) ReplaceChild(child Element, before Element) {
 	// if !before.IsElement() || !child.IsElement() || !w.IsElement() {
 	// panic("replaceChild: before, child and w must be elements")
 	// }
-	w.Value().Call("replaceChild", child.Value(), before.Value())
+	w.Value().Call("replaceChild", child.MarshalJS(), before.MarshalJS())
 }
 
 // GetElementById returns the first element with the given id.
@@ -165,6 +169,24 @@ func (w Value) QuerySelectorAll(selector string) Elements {
 	return elements
 }
 
+func replaceArgs(args ...any) []any {
+	var err error
+	for i, arg := range args {
+		switch arg := arg.(type) {
+		case Marshaller:
+			args[i] = arg.MarshalJS()
+		case ErrorMarshaller:
+			args[i], err = arg.MarshalJS()
+			if err != nil {
+				panic("jsext: error marshalling argument: " + err.Error())
+			}
+		case FuncMarshaller:
+			args[i] = arg.MarshalJS()
+		}
+	}
+	return args
+}
+
 ///////////////////////////////////////////////////////////
 //
 // js.Value methods.
@@ -174,6 +196,7 @@ func (w Value) Bool() bool {
 	return w.Value().Bool()
 }
 func (w Value) Call(m string, args ...any) Value {
+	args = replaceArgs(args...)
 	return Value(w.Value().Call(m, args...))
 }
 func (w Value) Delete(p string) {
@@ -198,6 +221,7 @@ func (w Value) Int() int {
 	return w.Value().Int()
 }
 func (w Value) Invoke(args ...any) Value {
+	args = replaceArgs(args...)
 	return Value(w.Value().Invoke(args...))
 }
 
@@ -219,12 +243,15 @@ func (w Value) Length() int {
 	return w.Value().Length()
 }
 func (w Value) New(args ...any) Value {
+	args = replaceArgs(args...)
 	return Value(w.Value().New(args...))
 }
 func (w Value) Set(p string, x any) {
+	x = replaceArgs(x)[0]
 	w.Value().Set(p, x)
 }
 func (w Value) SetIndex(i int, x any) {
+	x = replaceArgs(x)[0]
 	w.Value().SetIndex(i, x)
 }
 func (w Value) String() string {

@@ -27,6 +27,11 @@ type Import struct {
 	jsVal Element
 }
 
+// MarshalJS returns the underlying js.Value.
+func (e Import) MarshalJS() js.Value {
+	return e.jsVal.MarshalJS()
+}
+
 // Value returns the jsext.Value of the import.
 func (i Import) Value() Value {
 	return Value(i.jsVal)

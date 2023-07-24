@@ -8,6 +8,11 @@ import "syscall/js"
 // Wrapper for javascript events to make life easier.
 type Event js.Value
 
+// MarshalJS returns the underlying js.Value.
+func (e Event) MarshalJS() js.Value {
+	return js.Value(e)
+}
+
 // Returns the js.Value of the event.
 func (e Event) JSValue() js.Value {
 	return js.Value(e)
@@ -109,6 +114,7 @@ func (e Event) Get(p string) js.Value {
 	return e.JSValue().Get(p)
 }
 func (e Event) Call(m string, args ...interface{}) js.Value {
+	args = replaceArgs(args...)
 	return e.JSValue().Call(m, args...)
 }
 func (e Event) Delete(p string) {

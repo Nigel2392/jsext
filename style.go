@@ -7,6 +7,11 @@ import "syscall/js"
 
 type Style js.Value
 
+// MarshalJS returns the underlying js.Value.
+func (e Style) MarshalJS() js.Value {
+	return js.Value(e)
+}
+
 func (s Style) Value() js.Value {
 	return js.Value(s)
 }
@@ -20,6 +25,7 @@ func (s Style) Get(key string) js.Value {
 }
 
 func (s Style) Set(key string, value interface{}) {
+	value = replaceArgs(value)[0]
 	s.Value().Set(key, value)
 }
 

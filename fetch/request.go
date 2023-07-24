@@ -3,9 +3,10 @@ package fetch
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"syscall/js"
+
+	"github.com/Nigel2392/jsext/v2/encoding"
 )
 
 type Request struct {
@@ -85,12 +86,10 @@ func (f *Request) SetBody(body any) (err error) {
 	case func() (io.ReadCloser, error):
 		f.GetBody = body
 	default:
-		var buf bytes.Buffer
-		err = json.NewEncoder(&buf).Encode(body)
+		f.Body, err = encoding.EncodeJSON[[]byte](body)
 		if err != nil {
 			return err
 		}
-		f.Body = buf.Bytes()
 		f.SetHeader("Content-Type", "application/json")
 	}
 	return nil

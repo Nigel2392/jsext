@@ -13,7 +13,7 @@ func (w Promise) Value() Value {
 }
 
 // Returns the js.Value of the Promise.
-func (w Promise) JSValue() js.Value {
+func (w Promise) MarshalJS() js.Value {
 	return w.p.Value()
 }
 
@@ -60,7 +60,7 @@ func (w Promise) Then(f func(Value)) Promise {
 		f(Value(result))
 		return nil
 	}
-	var promise = w.JSValue().Call("then", js.FuncOf(fn))
+	var promise = w.MarshalJS().Call("then", js.FuncOf(fn))
 	return Promise{Value(promise)}
 }
 
@@ -74,6 +74,6 @@ func (w Promise) Catch(f func(error)) Promise {
 		f(js.Error{Value: err})
 		return nil
 	}
-	var promise = w.JSValue().Call("catch", js.FuncOf(fn))
+	var promise = w.MarshalJS().Call("catch", js.FuncOf(fn))
 	return Promise{Value(promise)}
 }

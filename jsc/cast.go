@@ -6,6 +6,7 @@ import (
 	"syscall/js"
 	"unsafe"
 
+	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/errs"
 )
 
@@ -103,8 +104,8 @@ func Cast[T ObjectConstraints](value js.Value) (T, error) {
 	//
 	// and avoiding the extra interface{} conversion.
 	switch typeOf.(type) {
-	case Unmarshaller:
-		var err = typeOf.(Unmarshaller).UnmarshalJS(value)
+	case jsext.Unmarshaller:
+		var err = typeOf.(jsext.Unmarshaller).UnmarshalJS(value)
 		if err != nil {
 			return preTypeOf, err
 		}

@@ -42,6 +42,11 @@ func (e Elements) RemoveEventListener(event string, listener func(this Value, ev
 // Element is a wrapper around js.Value.
 type Element js.Value
 
+// MarshalJS returns the underlying js.Value.
+func (e Element) MarshalJS() js.Value {
+	return js.Value(e)
+}
+
 func (e Element) IsNull() bool {
 	return js.Value(e).IsNull()
 }
@@ -71,6 +76,7 @@ func (e Element) Value() Value {
 
 // Set sets a property on the element.
 func (e Element) Set(p string, v interface{}) Element {
+	v = replaceArgs(v)[0]
 	e.JSValue().Set(p, v)
 	return e
 }
@@ -82,11 +88,13 @@ func (e Element) Get(p string) Value {
 
 // Call calls a method on the element.
 func (e Element) Call(m string, args ...interface{}) Value {
+	args = replaceArgs(args...)
 	return Value(e.JSValue().Call(m, args...))
 }
 
 // CallFunc is used by state management.
 func (e Element) CallFunc(name string, args ...interface{}) {
+	args = replaceArgs(args...)
 	e.Call(name, args...)
 }
 

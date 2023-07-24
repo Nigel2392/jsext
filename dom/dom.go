@@ -32,6 +32,10 @@ func Parse(html string) Document {
 
 type Document js.Value
 
+func (d Document) MarshalJS() js.Value {
+	return (js.Value)(d)
+}
+
 func (d Document) Head() js.Value {
 	return (js.Value)(d).Get("head")
 }

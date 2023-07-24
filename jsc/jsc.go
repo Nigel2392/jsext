@@ -9,7 +9,6 @@ import (
 	"github.com/Nigel2392/jsext/v2"
 	"github.com/Nigel2392/jsext/v2/console"
 	"github.com/Nigel2392/jsext/v2/errs"
-	"github.com/Nigel2392/jsext/v2/jse"
 )
 
 // TINYGO is used to check if we are using tinygo as a compiler.
@@ -28,14 +27,6 @@ var BASE64 = true
 //
 // When using tinygo as a compiler, be sure to set jsc.TINYGO = true.
 // This will try to make sure no unforseen panics happen during runtime.
-
-type Marshaller interface {
-	MarshalJS() js.Value
-}
-
-type ErrorMarshaller interface {
-	MarshalJS() (js.Value, error)
-}
 
 /*
 
@@ -136,21 +127,14 @@ func ValueOf(f interface{}) (js.Value, error) {
 	switch val := f.(type) {
 	case js.Value, js.Func:
 		return js.ValueOf(val), nil
-	case jsext.Value:
-		return val.Value(), nil
-	case *jse.Element:
-		return val.JSValue(), nil
-	case jsext.Element:
-		return val.JSValue(), nil
-	case jsext.Event:
-		return val.JSValue(), nil
-	case jsext.Import:
-		return val.JSValue(), nil
-	case jsext.Promise:
-		return val.JSValue(), nil
-	case []byte:
-		var enc = base64.StdEncoding.EncodeToString(val)
-		return js.ValueOf(enc), nil
+	case jsext.Marshaller:
+		return val.MarshalJS(), nil
+	case jsext.ErrorMarshaller:
+		var jsValue, err = val.MarshalJS()
+		if err != nil {
+			return js.Null(), err
+		}
+		return jsValue, nil
 	case int, int64, int32, int16, int8,
 		float64, float32,
 		uint, uint64, uint32, uint16, uint8, uintptr,
@@ -171,14 +155,9 @@ func ValueOf(f interface{}) (js.Value, error) {
 			return js.Null(), nil
 		}
 		return js.FuncOf(val).Value, nil
-	case Marshaller:
-		return val.MarshalJS(), nil
-	case ErrorMarshaller:
-		var jsValue, err = val.MarshalJS()
-		if err != nil {
-			return js.Null(), err
-		}
-		return jsValue, nil
+	case []byte:
+		var enc = base64.StdEncoding.EncodeToString(val)
+		return js.ValueOf(enc), nil
 	}
 	var valueOf = reflect.ValueOf(f)
 	if !valueOf.IsValid() {
@@ -321,6 +300,13 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 		if TINYGO {
 			panic("(reflect.Type).In() not supported in tinygo: cannot convert func to js.Func")
 		}
+
+		var vinter = valueOf.Interface()
+		if funcMarshaller, ok := vinter.(jsext.FuncMarshaller); ok {
+			var jsFunc = funcMarshaller.MarshalJS()
+			return jsFunc.Value, nil
+		}
+
 		return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			var in = make([]reflect.Value, len(args))
 			for i := range args {
@@ -404,10 +390,6 @@ const (
 	ErrCannotSet errs.Error = "cannot set dst field"
 )
 
-type Unmarshaller interface {
-	UnmarshalJS(js.Value) error
-}
-
 func Scan(src js.Value, dst interface{}) error {
 	if src.IsNull() || src.IsUndefined() {
 		return ErrUndefined
@@ -465,15 +447,15 @@ func scanStruct(src js.Value, dstVal reflect.Value, dstTyp reflect.Type) error {
 	return nil
 }
 
-var unmarshallerType = reflect.TypeOf((*Unmarshaller)(nil)).Elem()
+var unmarshallerType = reflect.TypeOf((*jsext.Unmarshaller)(nil)).Elem()
 
 func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 	if dstVal.Kind() == reflect.Ptr {
 		dstVal = dstVal.Elem()
 	}
 
-	if dstVal.CanAddr() && dstVal.Addr().Type().Implements(unmarshallerType) {
-		var unmarshaller = dstVal.Addr().Interface().(Unmarshaller)
+	if canAddr := dstVal.CanAddr(); canAddr && dstVal.Addr().Type().Implements(unmarshallerType) {
+		var unmarshaller = dstVal.Addr().Interface().(jsext.Unmarshaller)
 		return unmarshaller.UnmarshalJS(srcVal)
 	}
 

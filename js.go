@@ -16,6 +16,26 @@ import (
 	"github.com/Nigel2392/jsext/v2/export"
 )
 
+type Marshaller interface {
+	MarshalJS() js.Value
+}
+
+type ErrorMarshaller interface {
+	MarshalJS() (js.Value, error)
+}
+
+type Unmarshaller interface {
+	UnmarshalJS(js.Value) error
+}
+
+type FuncMarshaller interface {
+	MarshalJS() js.Func
+}
+
+type FuncUnmarshaller interface {
+	UnmarshalJS(js.Func) error
+}
+
 // Default syscall/js values, some wrapped.
 var (
 	Export          export.Export
@@ -63,7 +83,7 @@ func init() {
 	Head = Element(Document.Get("head"))
 	// Initialize jsext export object.
 	Export = export.NewExport("jsext")
-	Export.Set("runtime", Runtime.Value())
+	Export.Set("runtime", Runtime.MarshalJS())
 	// Register runtime eventlisteners.
 	Runtime.Set("eventEmit", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		eventName := args[0].String()
@@ -90,6 +110,11 @@ func init() {
 type JSFunc func(this js.Value, args []js.Value) interface{}
 type JSExtFunc func(this Value, args Args) interface{}
 type JSExtEventFunc func(this Value, event Event) interface{}
+
+func (f JSFunc) MarshalJS() js.Value {
+	var jsF = (func(this js.Value, args []js.Value) interface{})(f)
+	return js.FuncOf(jsF).Value
+}
 
 // Conver to javascript function.
 func ToJSFunc(f JSExtFunc) js.Func {
@@ -229,7 +254,9 @@ func SetFavicon(url string) error {
 	// Get the first link element in the head
 	var link, err = QuerySelector("link[rel='icon']")
 	if err != nil {
-		return err
+		link = CreateLink(map[string]string{
+			"rel": "icon",
+		})
 	}
 	var t string
 	if url[len(url)-3:] == "ico" {
@@ -292,24 +319,18 @@ func TypeOf(value, constructor js.Value) bool {
 // Returns the value of a property.
 func ValueOf(value any) Value {
 	switch v := value.(type) {
-	case Value:
-		return v
+	case Marshaller:
+		return Value(v.MarshalJS())
+	case ErrorMarshaller:
+		var jsV, err = v.MarshalJS()
+		if err != nil {
+			return Value(js.Null())
+		}
+		return Value(jsV)
 	case js.Value:
 		return Value(v)
-	case Element:
-		return v.Value()
-	case Style:
-		return v.JSExt()
-	case Event:
-		return v.Value()
-	case export.Export:
-		return Value(v.Value())
-	case JSExtFunc:
-		return Value(v.ToJSFunc().Value)
-	case Import:
-		return v.Value()
-	case Promise:
-		return v.Value()
+	case FuncMarshaller:
+		return Value(v.MarshalJS().Value)
 	default:
 		return Value(js.ValueOf(v))
 	}
@@ -565,16 +586,19 @@ func Get(key string) Value {
 
 // Set a value in the global scope.
 func Set(key string, value any) {
+	value = replaceArgs(value)[0]
 	Global.Set(key, value)
 }
 
 // Call a function in the global scope.
 func Call(key string, args ...any) Value {
+	args = replaceArgs(args...)
 	return Value(Global.Call(key, args...))
 }
 
 // New a value in the global scope.
 func New(key string, args ...any) Value {
+	args = replaceArgs(args...)
 	return Value(Global.Get(key).New(args...))
 }
 
