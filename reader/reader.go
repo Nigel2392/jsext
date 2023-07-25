@@ -1,4 +1,4 @@
-package fetch
+package reader
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 // Taken from go/src/net/http/roundtrip_js.go
 
-var errClosed = errors.New("net/http: reader is closed")
+var errClosed = errors.New("jsext/reader: reader is closed")
 var uint8Array = js.Global().Get("Uint8Array")
 
 // streamReader implements an io.ReadCloser wrapper for ReadableStream.
@@ -82,14 +82,20 @@ func (r *streamReader) Close() error {
 // arrayReader implements an io.ReadCloser wrapper for ArrayBuffer.
 // https://developer.mozilla.org/en-US/docs/Web/API/Body/arrayBuffer.
 type arrayReader struct {
-	arrayPromise js.Value
-	pending      []byte
-	read         bool
-	err          error // sticky read error
+	buf       js.Value
+	pending   []byte
+	read      bool
+	err       error // sticky read error
+	readFunc  func(js.Value) ([]byte, error)
+	closeFunc func(js.Value)
 }
 
-func NewArrayReader(arrayPromise js.Value) io.ReadCloser {
-	return &arrayReader{arrayPromise: arrayPromise}
+func NewArrayBufferReader(arrayBuffer js.Value) io.ReadCloser {
+	return &arrayReader{buf: arrayBuffer, readFunc: readArrayBuffer}
+}
+
+func NewArrayPromiseReader(arrayPromise js.Value) io.ReadCloser {
+	return &arrayReader{buf: arrayPromise, readFunc: readArrayPromise}
 }
 
 func (r *arrayReader) Read(p []byte) (n int, err error) {
@@ -98,35 +104,11 @@ func (r *arrayReader) Read(p []byte) (n int, err error) {
 	}
 	if !r.read {
 		r.read = true
-		var (
-			bCh   = make(chan []byte, 1)
-			errCh = make(chan error, 1)
-		)
-		success := js.FuncOf(func(this js.Value, args []js.Value) any {
-			// Wrap the input ArrayBuffer with a Uint8Array
-			uint8arrayWrapper := uint8Array.New(args[0])
-			value := make([]byte, uint8arrayWrapper.Get("byteLength").Int())
-			js.CopyBytesToGo(value, uint8arrayWrapper)
-			bCh <- value
-			return nil
-		})
-		defer success.Release()
-		failure := js.FuncOf(func(this js.Value, args []js.Value) any {
-			// Assumes it's a TypeError. See
-			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
-			// for more information on this type.
-			// See https://fetch.spec.whatwg.org/#concept-body-consume-body for reasons this might error.
-			errCh <- errors.New(args[0].Get("message").String())
-			return nil
-		})
-		defer failure.Release()
-		r.arrayPromise.Call("then", success, failure)
-		select {
-		case b := <-bCh:
-			r.pending = b
-		case err := <-errCh:
+		var b, err = r.readFunc(r.buf)
+		if err != nil {
 			return 0, err
 		}
+		r.pending = b
 	}
 	if len(r.pending) == 0 {
 		return 0, io.EOF
@@ -137,8 +119,51 @@ func (r *arrayReader) Read(p []byte) (n int, err error) {
 }
 
 func (r *arrayReader) Close() error {
+	if r.closeFunc != nil {
+		r.closeFunc(r.buf)
+	}
 	if r.err == nil {
 		r.err = errClosed
 	}
 	return nil
+}
+
+func readArrayBuffer(arrayBuffer js.Value) ([]byte, error) {
+	// Wrap the input ArrayBuffer with a Uint8Array
+	uint8arrayWrapper := uint8Array.New(arrayBuffer)
+	value := make([]byte, uint8arrayWrapper.Get("byteLength").Int())
+	js.CopyBytesToGo(value, uint8arrayWrapper)
+	return value, nil
+}
+
+func readArrayPromise(arrayPromise js.Value) ([]byte, error) {
+	var (
+		bCh   = make(chan []byte, 1)
+		errCh = make(chan error, 1)
+	)
+	success := js.FuncOf(func(this js.Value, args []js.Value) any {
+		// Wrap the input ArrayBuffer with a Uint8Array
+		uint8arrayWrapper := uint8Array.New(args[0])
+		value := make([]byte, uint8arrayWrapper.Get("byteLength").Int())
+		js.CopyBytesToGo(value, uint8arrayWrapper)
+		bCh <- value
+		return nil
+	})
+	defer success.Release()
+	failure := js.FuncOf(func(this js.Value, args []js.Value) any {
+		// Assumes it's a TypeError. See
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError
+		// for more information on this type.
+		// See https://fetch.spec.whatwg.org/#concept-body-consume-body for reasons this might error.
+		errCh <- errors.New(args[0].Get("message").String())
+		return nil
+	})
+	defer failure.Release()
+	arrayPromise.Call("then", success, failure)
+	select {
+	case b := <-bCh:
+		return b, nil
+	case err := <-errCh:
+		return nil, err
+	}
 }

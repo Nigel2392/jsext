@@ -5,6 +5,7 @@ import (
 	"syscall/js"
 
 	"github.com/Nigel2392/jsext/v2/errs"
+	"github.com/Nigel2392/jsext/v2/reader"
 )
 
 // TinyGO fetch request implementation.
@@ -66,11 +67,11 @@ func fetch(options Request) (*Response, error) {
 		// The body is undefined when the browser does not support streaming response bodies (Firefox),
 		// and null in certain error cases, i.e. when the request is blocked because of CORS settings.
 		if !b.IsUndefined() && !b.IsNull() {
-			body = NewStreamReader(b.Call("getReader"))
+			body = reader.NewStreamReader(b.Call("getReader"))
 		} else {
 			// Fall back to using ArrayBuffer
 			// https://developer.mozilla.org/en-US/docs/Web/API/Body/arrayBuffer
-			body = NewArrayReader(result.Call("arrayBuffer"))
+			body = reader.NewArrayPromiseReader(result.Call("arrayBuffer"))
 		}
 
 		var code = result.Get("status").Int()
