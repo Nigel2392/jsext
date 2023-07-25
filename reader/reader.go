@@ -130,6 +130,9 @@ func (r *arrayReader) Close() error {
 
 func readArrayBuffer(arrayBuffer js.Value) ([]byte, error) {
 	// Wrap the input ArrayBuffer with a Uint8Array
+	if arrayBuffer.IsUndefined() || arrayBuffer.IsNull() {
+		return nil, io.EOF
+	}
 	uint8arrayWrapper := uint8Array.New(arrayBuffer)
 	value := make([]byte, uint8arrayWrapper.Get("byteLength").Int())
 	js.CopyBytesToGo(value, uint8arrayWrapper)
