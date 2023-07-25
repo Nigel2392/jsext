@@ -19,6 +19,10 @@ type streamReader struct {
 	err     error // sticky read error
 }
 
+func NewStreamReader(stream js.Value) io.ReadCloser {
+	return &streamReader{stream: stream}
+}
+
 func (r *streamReader) Read(p []byte) (n int, err error) {
 	if r.err != nil {
 		return 0, r.err
@@ -82,6 +86,10 @@ type arrayReader struct {
 	pending      []byte
 	read         bool
 	err          error // sticky read error
+}
+
+func NewArrayReader(arrayPromise js.Value) io.ReadCloser {
+	return &arrayReader{arrayPromise: arrayPromise}
 }
 
 func (r *arrayReader) Read(p []byte) (n int, err error) {
