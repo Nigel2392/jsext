@@ -28,8 +28,9 @@ type Request struct {
 
 func NewRequest(method, url string) *Request {
 	return &Request{
-		URL: url,
-		ctx: context.Background(),
+		Method: method,
+		URL:    url,
+		ctx:    context.Background(),
 	}
 }
 

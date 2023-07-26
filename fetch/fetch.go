@@ -14,10 +14,6 @@ func Fetch(options *Request) (*Response, error) {
 }
 
 func fetch(options Request) (*Response, error) {
-	if options.Method == "" {
-		options.Method = "GET"
-	}
-
 	switch options.Method {
 	case "GET", "HEAD":
 		options.Body = nil

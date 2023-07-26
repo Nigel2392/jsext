@@ -8,6 +8,50 @@ import (
 	"github.com/Nigel2392/jsext/v2/errs"
 )
 
+/*
+	Example:
+
+		var rq = xhr.OpenNew("POST", "https://httpbin.org/post", xhr.NewUser("user", "pass"))
+
+		rq.OnReadyStateChange(func(state int, xhr *xhr.XMLHttpRequest) {
+			console.Log("onreadystatechange")
+			console.Log(state)
+			console.Log(xhr.IsDone())
+			if xhr.IsDone() {
+				console.Log(xhr.Response())
+			}
+		})
+
+		rq.OnStatus(200, func(xr *xhr.XMLHttpRequest) {
+			console.Log("onstatus", xr.Status())
+			console.Log(xr.Response())
+		})
+
+		rq.Upload.LoadStart(func(event xhr.ProgressEvent) {
+			console.Log("loadstart")
+			console.Log(event.Percent())
+		})
+
+		rq.Upload.Progress(func(event xhr.ProgressEvent) {
+			console.Log("progress")
+			console.Log(event.Percent())
+		})
+
+		rq.Upload.LoadEnd(func(event xhr.ProgressEvent) {
+			console.Log("loadend")
+			console.Log(event.Percent())
+		})
+
+		_, err = rq.Send(map[string]string{
+			"hello": "world",
+		})
+		if err != nil {
+			console.Error("error sending request", err)
+			return
+		}
+
+*/
+
 var xhrGlobal = js.Global().Get("XMLHttpRequest")
 var XHRAsync = true
 
@@ -241,6 +285,7 @@ func (x *XMLHttpRequest) Send(data any) (response js.Value, err error) {
 wait:
 	select {
 	case <-time.After(x.Timeout):
+		x.Call("abort")
 		return js.Null(), ErrTimeout
 	case response = <-respChan:
 	case err = <-errChan:
