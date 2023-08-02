@@ -10,20 +10,24 @@ import (
 )
 
 var (
-	jsonGlobal = js.Global().Get("JSON")
-	stringify  = jsonGlobal.Get("stringify")
+	jsonGlobal     = js.Global().Get("JSON")
+	jsonEncodeFunc = jsonGlobal.Get("stringify")
 )
 
 func EncodeJSON[T ~string | ~[]byte](data any) (T, error) {
-	var json, err = jsc.ValueOf(data)
-	if err != nil {
-		return T(""), err
-	}
-	var jsonStr = stringify.Invoke(json)
-	return T(jsonStr.String()), nil
+	return encode[T](data, jsonEncodeFunc)
 }
 
 func DecodeJSON[T ~string | ~[]byte](data T, dst any) error {
 	var obj = jsonGlobal.Call("parse", data)
 	return jsc.Scan(obj, dst)
+}
+
+func encode[T ~string | ~[]byte](data any, encodeFunc js.Value) (T, error) {
+	var obj, err = jsc.ValueOf(data)
+	if err != nil {
+		return T(""), err
+	}
+	var encoded = encodeFunc.Invoke(obj)
+	return T(encoded.String()), nil
 }

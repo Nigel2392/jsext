@@ -6,6 +6,7 @@ package encoding
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 )
 
 func EncodeJSON[T ~string | ~[]byte](data any) (T, error) {

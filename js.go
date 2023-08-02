@@ -107,9 +107,36 @@ func init() {
 
 type JSExtFunc func(this Value, args Args) interface{}
 
+// https://groups.google.com/g/golang-nuts/c/0RqzD2jNADE
+// For now it works. I cannot guarantee that it will work in the future.
 func (f JSExtFunc) MarshalJS() js.Func {
 	var function = *(*func(this js.Value, args []js.Value) interface{})(unsafe.Pointer(&f))
 	return js.FuncOf(function)
+}
+
+// https://groups.google.com/g/golang-nuts/c/0RqzD2jNADE
+// For now it works. I cannot guarantee that it will work in the future.
+//
+// Will create a js.Func from a function that takes a Value and Args, or a js.Value and []js.Value.
+func FuncOf[T func(this Value, args Args) interface{} | func(this js.Value, args []js.Value) interface{} | JSExtFunc](f T) js.Func {
+	var function = *(*func(this js.Value, args []js.Value) interface{})(unsafe.Pointer(&f))
+	return js.FuncOf(function)
+}
+
+// https://groups.google.com/g/golang-nuts/c/0RqzD2jNADE
+// For now it works. I cannot guarantee that it will work in the future.
+//
+// ReleaseableFuncOf will create a js.Func from a function that takes a Value and Args, or a js.Value and []js.Value.
+//
+// This function will also release the js.Func when the function returns.
+func ReleaseableFuncOf[T func(this Value, args Args) interface{} | func(this js.Value, args []js.Value) interface{} | JSExtFunc](f T) js.Func {
+	var function = *(*func(this js.Value, args []js.Value) interface{})(unsafe.Pointer(&f))
+	var releaseFn js.Func
+	releaseFn = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		releaseFn.Release()
+		return function(this, args)
+	})
+	return releaseFn
 }
 
 // Arguments for wrapped functions.
