@@ -405,8 +405,7 @@ func (e *Element) Dataset() jsext.Value {
 
 // Return the *Element's dataset as map
 func (e *Element) MapDataset() map[string]string {
-	var dataset = e.Dataset()
-	return jsext.ObjectToMapT[string](dataset.Value())
+	return e.Element().MapDataset()
 }
 
 // Get the *Element's first child.

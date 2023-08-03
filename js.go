@@ -164,24 +164,7 @@ func (a Args) Value() []js.Value {
 func (a Args) Slice() []interface{} {
 	var s = make([]interface{}, 0)
 	for _, v := range a {
-		switch v.Type() {
-		case js.TypeObject:
-			s = append(s, ObjectToMap(v))
-		case js.TypeNull:
-			s = append(s, nil)
-		case js.TypeBoolean:
-			s = append(s, v.Bool())
-		case js.TypeNumber:
-			s = append(s, v.Float())
-		case js.TypeString:
-			s = append(s, v.String())
-		default:
-			if v.InstanceOf(Global.Get("Array")) {
-				s = append(s, ArrayToSlice(v))
-			} else {
-				s = append(s, v)
-			}
-		}
+		s = append(s, ToGo(v))
 	}
 	return s
 }
@@ -403,101 +386,54 @@ func IsMobile() bool {
 	return re.MatchString(ua)
 }
 
-// Convert a js.Value to a map[string]T.
+// Will convert a javascript value to one of:
 //
-// Uses unsafe.Pointer to convert the value to the type of T.
-//
-// Example:
-//
-//	var m = ObjectToMapT[string](js.ValueOf(map[string]interface{
-//		"hello": "world",
-//	}))
-//	fmt.Println(m["hello"])
-func ObjectToMapT[T any](obj js.Value) map[string]T {
-	var m = make(map[string]T)
-	var keys = obj.Call("keys")
-	for i := 0; i < keys.Length(); i++ {
-		var key = keys.Index(i).String()
-		switch any(*new(T)).(type) {
-		case string:
-			var v = obj.Get(key).String()
-			m[key] = *(*T)(unsafe.Pointer(&v))
-		case int, int8, int16, int32, int64:
-			var v T
-			switch any(*new(T)).(type) {
-			case int:
-				var intie = obj.Get(key).Int()
-				v = *(*T)(unsafe.Pointer(&intie))
-			case int8:
-				var intie = int8(obj.Get(key).Int())
-				v = *(*T)(unsafe.Pointer(&intie))
-			case int16:
-				var intie = int16(obj.Get(key).Int())
-				v = *(*T)(unsafe.Pointer(&intie))
-			case int32:
-				var intie = int32(obj.Get(key).Int())
-				v = *(*T)(unsafe.Pointer(&intie))
-			case int64:
-				var intie = int64(obj.Get(key).Int())
-				v = *(*T)(unsafe.Pointer(&intie))
-			}
-			m[key] = v
-		case float64, float32:
-			var v T
-			switch any(*new(T)).(type) {
-			case float64:
-				var floatie = obj.Get(key).Float()
-				v = *(*T)(unsafe.Pointer(&floatie))
-			case float32:
-				var floatie = float32(obj.Get(key).Float())
-				v = *(*T)(unsafe.Pointer(&floatie))
-			}
-			m[key] = v
-		case bool:
-			var v = obj.Get(key).Bool()
-			m[key] = *(*T)(unsafe.Pointer(&v))
-		case js.Value, Value, Element, Event:
-			m[key] = any(obj.Get(key)).(T)
-		case []byte:
-			var b = make([]byte, obj.Get(key).Length())
-			js.CopyBytesToGo(b, obj.Get(key))
-			m[key] = any(b).(T)
-		case []any:
-			m[key] = any(ArrayToSlice(obj.Get(key))).(T)
-		case map[string]any:
-			m[key] = any(ObjectToMap(obj.Get(key))).(T)
-		default:
-			panic("unsupported type")
+// 1. map[string]interface{}
+// 2. []interface{}
+// 3. []byte
+// 4. string
+// 5. float64
+// 6. bool
+// 7. nil
+// 8. js.Value
+func ToGo(v js.Value) interface{} {
+	var s any
+	if v.IsUndefined() || v.IsNull() {
+		s = nil
+	}
+	switch v.Type() {
+	case js.TypeObject:
+		s = ObjectToMap(v)
+	case js.TypeNull:
+		s = nil
+	case js.TypeBoolean:
+		s = v.Bool()
+	case js.TypeNumber:
+		s = v.Float()
+	case js.TypeString:
+		s = v.String()
+	default:
+		if v.InstanceOf(Global.Get("Uint8Array")) {
+			var b = make([]byte, v.Get("byteLength").Int())
+			js.CopyBytesToGo(b, v)
+			s = b
+		} else if v.InstanceOf(Global.Get("Array")) {
+			s = ArrayToSlice(v)
+		} else {
+			s = v
 		}
 	}
-	return m
+	return s
 }
 
 // Convert a js.Value to a map[string]interface{}.
 func ObjectToMap(obj js.Value) map[string]interface{} {
 	var m = make(map[string]interface{})
-	var keys = obj.Call("keys")
+	var keys = Global.Get("Object").Call("keys", obj)
 	for i := 0; i < keys.Length(); i++ {
 		var key = keys.Index(i).String()
 		var v = obj.Get(key)
-		switch v.Type() {
-		case js.TypeObject:
-			m[key] = ObjectToMap(v)
-		case js.TypeNull:
-			m[key] = nil
-		case js.TypeBoolean:
-			m[key] = v.Bool()
-		case js.TypeNumber:
-			m[key] = v.Float()
-		case js.TypeString:
-			m[key] = v.String()
-		default:
-			if v.InstanceOf(Global.Get("Array")) {
-				m[key] = ArrayToSlice(v)
-			} else {
-				m[key] = v
-			}
-		}
+		m[key] = ToGo(v)
 	}
 	return m
 }
@@ -506,31 +442,14 @@ func ObjectToMap(obj js.Value) map[string]interface{} {
 func ArrayToSlice(arr js.Value) []interface{} {
 	var s = make([]interface{}, arr.Length())
 	for i := 0; i < arr.Length(); i++ {
-		var v = arr.Index(i)
-		switch v.Type() {
-		case js.TypeObject:
-			s[i] = ObjectToMap(v)
-		case js.TypeNull:
-			s[i] = nil
-		case js.TypeBoolean:
-			s[i] = v.Bool()
-		case js.TypeNumber:
-			s[i] = v.Float()
-		case js.TypeString:
-			s[i] = v.String()
-		default:
-			if v.InstanceOf(Global.Get("Array")) {
-				s[i] = ArrayToSlice(v)
-			} else {
-				s[i] = v
-			}
-		}
+		s[i] = ToGo(arr.Index(i))
 	}
 	return s
 }
 
 // Convert a slice to a js.Value array.
 func SliceToArray(s []any) Value {
+	s = MarshallableArguments(s...)
 	var arr = NewArray()
 	for i, v := range s {
 		//lint:ignore S1034 Need the switch statement as is.

@@ -357,7 +357,14 @@ func (e Element) Dataset() Value {
 // Return the element's dataset as map
 func (e Element) MapDataset() map[string]string {
 	var dataset = e.Dataset()
-	return ObjectToMapT[string](dataset.Value())
+	var data = make(map[string]string)
+	var keys = Global.Get("Object").Call("keys", dataset.MarshalJS())
+	for i := 0; i < keys.Length(); i++ {
+		var key = keys.Index(i).String()
+		data[key] = dataset.Get(key).String()
+	}
+	return data
+
 }
 
 // Get the element's first child.
