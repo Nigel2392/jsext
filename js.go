@@ -396,11 +396,11 @@ func IsMobile() bool {
 // 6. bool
 // 7. nil
 // 8. js.Value
-// 9. js.Func
 func ToGo(v js.Value) interface{} {
 	var s any
+
 	if v.IsUndefined() || v.IsNull() {
-		s = nil
+		return nil
 	}
 
 	switch {
