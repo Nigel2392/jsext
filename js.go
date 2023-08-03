@@ -396,34 +396,47 @@ func IsMobile() bool {
 // 6. bool
 // 7. nil
 // 8. js.Value
+// 9. js.Func
 func ToGo(v js.Value) interface{} {
 	var s any
 	if v.IsUndefined() || v.IsNull() {
 		s = nil
 	}
+
+	switch {
+	case v.InstanceOf(Global.Get("Uint8Array")):
+		var b = make([]byte, v.Get("byteLength").Int())
+		js.CopyBytesToGo(b, v)
+		s = b
+		return s
+	case v.InstanceOf(Global.Get("Array")):
+		return ArrayToSlice(v)
+	case v.InstanceOf(Global.Get("HTMLElement")):
+		return ToGo(ElementToObject(v))
+	case v.InstanceOf(Global.Get("Date")):
+		var d = v.Get("toISOString").Invoke().String()
+		var t, err = time.Parse(time.RFC3339, d)
+		if err != nil {
+			return nil
+		}
+		return t
+	}
+
 	switch v.Type() {
 	case js.TypeObject:
-		s = ObjectToMap(v)
-	case js.TypeNull:
-		s = nil
+		return ObjectToMap(v)
+	case js.TypeNull, js.TypeUndefined:
+		return nil
 	case js.TypeBoolean:
-		s = v.Bool()
+		return v.Bool()
 	case js.TypeNumber:
-		s = v.Float()
+		return v.Float()
 	case js.TypeString:
-		s = v.String()
-	default:
-		if v.InstanceOf(Global.Get("Uint8Array")) {
-			var b = make([]byte, v.Get("byteLength").Int())
-			js.CopyBytesToGo(b, v)
-			s = b
-		} else if v.InstanceOf(Global.Get("Array")) {
-			s = ArrayToSlice(v)
-		} else {
-			s = v
-		}
+		return v.String()
+	case js.TypeSymbol:
+		return v.String()
 	}
-	return s
+	return v
 }
 
 // Convert a js.Value to a map[string]interface{}.
@@ -436,6 +449,37 @@ func ObjectToMap(obj js.Value) map[string]interface{} {
 		m[key] = ToGo(v)
 	}
 	return m
+}
+
+func ElementToObject(el js.Value) js.Value {
+	var obj = Global.Get("Object").New()
+
+	var attributes = el.Get("attributes")
+	obj.Set("attributes", ObjectToMap(attributes))
+
+	var id = el.Get("id")
+	obj.Set("id", ToGo(id))
+
+	var classList = el.Get("classList")
+	obj.Set("classList", ArrayToSlice(classList))
+
+	var tagName = el.Get("tagName")
+	obj.Set("tagName", ToGo(tagName))
+
+	var value = el.Get("value")
+	obj.Set("value", ToGo(value))
+
+	var innerHTML = el.Get("innerHTML")
+	obj.Set("innerHTML", ToGo(innerHTML))
+
+	var children = el.Get("childNodes")
+	var objChildren = Global.Get("Array").New(children.Length())
+	for i := 0; i < children.Length(); i++ {
+		var child = children.Index(i)
+		objChildren.SetIndex(i, ElementToObject(child))
+	}
+
+	return obj
 }
 
 // Convert a js.Value array to a []interface{}.
