@@ -299,6 +299,14 @@ func TypeOf(value, constructor js.Value) bool {
 }
 
 // Returns the value of a property.
+// Will convert the following to a js.Value:
+//
+// 1. Marshaller
+// 2. ErrorMarshaller
+// 3. js.Value
+// 4. FuncMarshaller
+// 5. []byte
+// see js.ValueOf for other supported types.
 func ValueOf(value any) Value {
 	switch v := value.(type) {
 	case Marshaller:
@@ -313,6 +321,8 @@ func ValueOf(value any) Value {
 		return Value(v)
 	case FuncMarshaller:
 		return Value(v.MarshalJS().Value)
+	case []byte:
+		return Value(BytesToArray(v).Value())
 	default:
 		return Value(js.ValueOf(v))
 	}
@@ -542,7 +552,7 @@ func MapToObject(m map[string]interface{}) Value {
 
 // Convert a byte slice to a js.Value array.
 func BytesToArray(b []byte) Value {
-	var buffer js.Value = Global.Get("ArrayBuffer").New(len(b))
+	var buffer js.Value = Global.Get("Uint8Array").New(len(b))
 	js.CopyBytesToJS(buffer, b)
 	return Value(buffer)
 }
