@@ -441,6 +441,9 @@ func ToGo(v js.Value) interface{} {
 
 // Convert a js.Value to a map[string]interface{}.
 func ObjectToMap(obj js.Value) map[string]interface{} {
+	if obj.IsUndefined() || obj.IsNull() {
+		return nil
+	}
 	var m = make(map[string]interface{})
 	var keys = Global.Get("Object").Call("keys", obj)
 	for i := 0; i < keys.Length(); i++ {
@@ -452,6 +455,10 @@ func ObjectToMap(obj js.Value) map[string]interface{} {
 }
 
 func ElementToObject(el js.Value) js.Value {
+	if el.IsUndefined() || el.IsNull() {
+		return el
+	}
+
 	var obj = Global.Get("Object").New()
 
 	var attributes = el.Get("attributes")
@@ -484,6 +491,9 @@ func ElementToObject(el js.Value) js.Value {
 
 // Convert a js.Value array to a []interface{}.
 func ArrayToSlice(arr js.Value) []interface{} {
+	if arr.IsUndefined() || arr.IsNull() {
+		return nil
+	}
 	var s = make([]interface{}, arr.Length())
 	for i := 0; i < arr.Length(); i++ {
 		s[i] = ToGo(arr.Index(i))
