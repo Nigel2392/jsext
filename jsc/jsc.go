@@ -138,13 +138,6 @@ func ValueOf(f interface{}) (js.Value, error) {
 	case jsext.FuncMarshaller:
 		var jsFunc = val.MarshalJS()
 		return jsFunc.Value, nil
-	case int, int64, int32, int16, int8,
-		float64, float32,
-		uint, uint64, uint32, uint16, uint8, uintptr,
-		string, bool:
-		// []interface{}, map[string]interface{}: // Removed so we can call jss.ValueOf on a slice or map.
-
-		return js.ValueOf(val), nil
 	case func():
 		if val == nil {
 			return js.Null(), nil
@@ -153,12 +146,34 @@ func ValueOf(f interface{}) (js.Value, error) {
 			val()
 			return nil
 		}).Value, nil
+	case func(js.Value):
+		if val == nil {
+			return js.Null(), nil
+		}
+		var fn = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			if !this.IsNull() || !this.IsUndefined() {
+				val(this)
+				return nil
+			}
+			if len(args) == 0 {
+				val(js.Null())
+				return nil
+			}
+			val(args[0])
+			return nil
+		})
+		return fn.Value, nil
 	case func(this js.Value, args []js.Value) interface{}:
 		if val == nil {
 			return js.Null(), nil
 		}
 		return js.FuncOf(val).Value, nil
 	case []byte:
+		if !BASE64 {
+			var array = js.Global().Get("Uint8Array").New(len(val))
+			js.CopyBytesToJS(array, val)
+			return array, nil
+		}
 		var enc = base64.StdEncoding.EncodeToString(val)
 		return js.ValueOf(enc), nil
 	}
@@ -172,16 +187,6 @@ func ValueOf(f interface{}) (js.Value, error) {
 
 func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 	switch kind {
-	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
-		return js.ValueOf(valueOf.Int()), nil
-	case reflect.Uint, reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uintptr:
-		return js.ValueOf(valueOf.Uint()), nil
-	case reflect.Float64, reflect.Float32:
-		return js.ValueOf(valueOf.Float()), nil
-	case reflect.String:
-		return js.ValueOf(valueOf.String()), nil
-	case reflect.Bool:
-		return js.ValueOf(valueOf.Bool()), nil
 	case reflect.Slice, reflect.Array:
 		// Check if bytes
 		if valueOf.Type().Elem().Kind() == reflect.Uint8 {
@@ -349,7 +354,7 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 			return v
 		}).Value, nil
 	default:
-		return js.Null(), errs.Error("ValueOf: unsupported type " + kind.String())
+		return js.ValueOf(valueOf.Interface()), nil
 	}
 }
 
