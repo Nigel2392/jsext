@@ -187,6 +187,16 @@ func ValueOf(f interface{}) (js.Value, error) {
 
 func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 	switch kind {
+	case reflect.Int, reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8:
+		return js.ValueOf(valueOf.Int()), nil
+	case reflect.Uint, reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uintptr:
+		return js.ValueOf(valueOf.Uint()), nil
+	case reflect.Float64, reflect.Float32:
+		return js.ValueOf(valueOf.Float()), nil
+	case reflect.String:
+		return js.ValueOf(valueOf.String()), nil
+	case reflect.Bool:
+		return js.ValueOf(valueOf.Bool()), nil
 	case reflect.Slice, reflect.Array:
 		// Check if bytes
 		if valueOf.Type().Elem().Kind() == reflect.Uint8 {
@@ -354,7 +364,7 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 			return v
 		}).Value, nil
 	default:
-		return js.ValueOf(valueOf.Interface()), nil
+		return js.Null(), errs.Error("ValueOf: unsupported type " + kind.String())
 	}
 }
 

@@ -169,6 +169,9 @@ func (w Value) QuerySelectorAll(selector string) Elements {
 	return elements
 }
 
+// Converts all arguments to js.Value.
+//
+// This function will panic if an ErrorMarshaller returns an error.
 func MarshallableArguments(args ...any) []any {
 	var err error
 	for i, arg := range args {
@@ -182,6 +185,8 @@ func MarshallableArguments(args ...any) []any {
 			}
 		case FuncMarshaller:
 			args[i] = arg.MarshalJS()
+		default:
+			args[i] = ValueOf(arg).MarshalJS()
 		}
 	}
 	return args

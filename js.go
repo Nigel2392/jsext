@@ -424,12 +424,8 @@ func ToGo(v js.Value) interface{} {
 	case v.InstanceOf(Global.Get("HTMLElement")):
 		return ToGo(ElementToObject(v))
 	case v.InstanceOf(Global.Get("Date")):
-		var d = v.Get("toISOString").Invoke().String()
-		var t, err = time.Parse(time.RFC3339, d)
-		if err != nil {
-			return nil
-		}
-		return t
+		var d = v.Call("getTime").Int()
+		return time.Unix(0, int64(d)*int64(time.Millisecond))
 	}
 
 	switch v.Type() {
