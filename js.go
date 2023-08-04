@@ -306,6 +306,8 @@ func TypeOf(value, constructor js.Value) bool {
 // 3. js.Value
 // 4. FuncMarshaller
 // 5. []byte
+// 6. time.Time
+// 7. time.Duration
 // see js.ValueOf for other supported types.
 func ValueOf(value any) Value {
 	switch v := value.(type) {
@@ -323,6 +325,10 @@ func ValueOf(value any) Value {
 		return Value(v.MarshalJS().Value)
 	case []byte:
 		return Value(BytesToArray(v).Value())
+	case time.Time:
+		return NewDate().Call("setTime", v.UnixNano()/int64(time.Millisecond))
+	case time.Duration:
+		return NewDate().Call("setTime", v.Nanoseconds()/int64(time.Millisecond))
 	default:
 		return Value(js.ValueOf(v))
 	}
