@@ -1,8 +1,20 @@
 package jsrand
 
 import (
+	"encoding/hex"
 	"syscall/js"
 )
+
+// XorBytes returns a hex encoded string of the XOR of each byte in the string with the previous byte.
+func XorBytes(s string) string {
+	var b = []byte(s)
+	var last = byte(0)
+	for i := 0; i < len(b); i++ {
+		b[i] ^= last
+		last = b[i]
+	}
+	return hex.EncodeToString(b)
+}
 
 func String(n int) string {
 	var b = make([]byte, n)

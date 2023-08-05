@@ -231,6 +231,24 @@ func UnpackArray[T Value | js.Value | Element | Style | Event](v js.Value) []T {
 	return slice
 }
 
+// Get the document height and width.
+func GetDocumentSize() (x int, y int) {
+	var width = Document.Get("width")
+	var height = Document.Get("height")
+	if !height.IsUndefined() && !width.IsUndefined() {
+		return width.Int(), height.Int()
+	}
+	var body = Document.Get("body")
+	if !body.IsUndefined() {
+		var width = body.Get("clientWidth")
+		var height = body.Get("clientHeight")
+		if !height.IsUndefined() && !width.IsUndefined() {
+			return width.Int(), height.Int()
+		}
+	}
+	return 0, 0
+}
+
 // Set a favicon for the document.
 func SetFavicon(url string) error {
 	// Get the first link element in the head
