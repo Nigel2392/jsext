@@ -565,19 +565,40 @@ func Alert(message string) {
 
 // Get a value from the global scope.
 func Get(key string) Value {
-	return Value(Global.Get(key))
+	var keys = strings.Split(key, ".")
+	var value = Global
+	for _, k := range keys {
+		value = value.Get(k)
+	}
+	return Value(value)
 }
 
 // Set a value in the global scope.
 func Set(key string, value any) {
 	value = MarshallableArguments(value)[0]
-	Global.Set(key, value)
+	var keys = strings.Split(key, ".")
+	var v = Global
+	for i, k := range keys {
+		if i == len(keys)-1 {
+			v.Set(k, value)
+			return
+		}
+		v = v.Get(k)
+	}
 }
 
 // Call a function in the global scope.
 func Call(key string, args ...any) Value {
 	args = MarshallableArguments(args...)
-	return Value(Global.Call(key, args...))
+	var keys = strings.Split(key, ".")
+	var v = Global
+	for i, k := range keys {
+		if i == len(keys)-1 {
+			return Value(v.Call(k, args...))
+		}
+		v = v.Get(k)
+	}
+	return Value(Undefined())
 }
 
 // New a value in the global scope.
