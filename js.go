@@ -388,6 +388,11 @@ func DeleteCookie(name string) {
 	SetCookie(name, "", -1)
 }
 
+// Set the document title.
+func SetTitle(title string) {
+	Document.Set("title", title)
+}
+
 // Check if the user agent is mobile.
 func IsMobile() bool {
 	var ua string
@@ -609,7 +614,15 @@ func New(key string, args ...any) Value {
 
 // Delete a value in the global scope.
 func Delete(key string) {
-	Global.Delete(key)
+	var keys = strings.Split(key, ".")
+	var v = Global
+	for i, k := range keys {
+		if i == len(keys)-1 {
+			v.Delete(k)
+			return
+		}
+		v = v.Get(k)
+	}
 }
 
 //type JavaScript interface {
