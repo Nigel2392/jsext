@@ -19,8 +19,17 @@ func EncodeJSON[T ~string | ~[]byte](data any) (T, error) {
 }
 
 func DecodeJSON[T ~string | ~[]byte](data T, dst any) error {
-	var obj = jsonGlobal.Call("parse", data)
+	var obj = jsonGlobal.Call("parse", string(data))
 	return jsc.Scan(obj, dst)
+}
+
+func EncodeBase64[T ~string | ~[]byte](data T) (T, error) {
+	return encode[T](data, js.Global().Get("btoa"))
+}
+
+func DecodeBase64[T ~string | ~[]byte](data T) (T, error) {
+	var obj = js.Global().Get("atob").Invoke(string(data))
+	return T(obj.String()), nil
 }
 
 func encode[T ~string | ~[]byte](data any, encodeFunc js.Value) (T, error) {

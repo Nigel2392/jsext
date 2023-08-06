@@ -11,10 +11,21 @@ func MarshalCookie(name string, value any, ttl time.Duration) error {
 	if err != nil {
 		return err
 	}
+	encoded, err = EncodeBase64[string](encoded)
+	if err != nil {
+		return err
+	}
 	return jsext.SetCookie(name, encoded, ttl)
 }
 
 func UnmarshalCookie(name string, dst any) error {
 	var encoded = jsext.GetCookie(name)
-	return DecodeJSON[string](encoded, dst)
+	if encoded == "" {
+		return nil
+	}
+	var decoded, err = DecodeBase64[string](encoded)
+	if err != nil {
+		return err
+	}
+	return DecodeJSON(decoded, dst)
 }

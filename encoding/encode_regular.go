@@ -5,6 +5,7 @@ package encoding
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 )
 
@@ -20,4 +21,13 @@ func DecodeJSON[T ~string | ~[]byte](data T, dst any) error {
 	return json.NewDecoder(
 		bytes.NewReader([]byte(data)),
 	).Decode(dst)
+}
+
+func EncodeBase64[T ~string | ~[]byte](data T) (T, error) {
+	return T(base64.StdEncoding.EncodeToString([]byte(data))), nil
+}
+
+func DecodeBase64[T ~string | ~[]byte](data T) (T, error) {
+	var decoded, err = base64.StdEncoding.DecodeString(string(data))
+	return T(decoded), err
 }
