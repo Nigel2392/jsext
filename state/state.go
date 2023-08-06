@@ -28,19 +28,71 @@ func New(root js.Value) *State {
 	}
 }
 
-func (s *State) With(value interface{}, e StatefulElement) error {
-	if s == nil {
-		return errs.Error("stateful is nil")
+func (s *State) AddByKey(k Keyer, e ...StatefulElement) error {
+	if err := s.chk(); err != nil {
+		return err
 	}
-	if s.Elements == nil {
-		s.Elements = make(map[string][]StatefulElement)
+	var key = k.Key()
+	for _, elem := range e {
+		if elem == nil {
+			continue
+		}
+		s.Elements[key] = append(s.Elements[key], elem)
+		if !s.Root.IsNull() && !s.Root.IsUndefined() {
+			switch {
+			case s.Flags&F_APPEND != 0:
+				s.Root.Call("appendChild", elem.MarshalJS())
+			case s.Flags&F_PREPEND != 0:
+				s.Root.Call("prepend", elem.MarshalJS())
+			default:
+				return nil
+			}
+		}
 	}
-	return s.updateOrAdd(e, value)
+	return nil
+}
+
+func (s *State) Add(e ...StatefulElement) error {
+	if err := s.chk(); err != nil {
+		return err
+	}
+	for _, elem := range e {
+		var key = elem.Key()
+		if elem == nil {
+			continue
+		}
+		s.Elements[key] = append(s.Elements[key], elem)
+		if !s.Root.IsNull() && !s.Root.IsUndefined() {
+			switch {
+			case s.Flags&F_APPEND != 0:
+				s.Root.Call("appendChild", elem.MarshalJS())
+			case s.Flags&F_PREPEND != 0:
+				s.Root.Call("prepend", elem.MarshalJS())
+			default:
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+func (s *State) With(value interface{}, e ...StatefulElement) error {
+	if err := s.chk(); err != nil {
+		return err
+	}
+	var err error
+	for _, elem := range e {
+		err = s.updateOrAdd(elem, value)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *State) Update(key Keyer, v interface{}) error {
-	if s == nil {
-		return errs.Error("stateful is nil")
+	if err := s.chk(); err != nil {
+		return err
 	}
 	var e, ok = s.Elements[key.Key()]
 	if !ok {
@@ -99,6 +151,16 @@ func (s *State) Clear() {
 	if s.OnUpdate != nil {
 		s.OnUpdate()
 	}
+}
+
+func (s *State) chk() error {
+	if s == nil {
+		return errs.Error("stateful is nil")
+	}
+	if s.Elements == nil {
+		s.Elements = make(map[string][]StatefulElement)
+	}
+	return nil
 }
 
 func (s *State) updateOrAdd(e StatefulElement, v interface{}) error {
