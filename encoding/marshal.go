@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Nigel2392/jsext/v2"
+	"github.com/Nigel2392/jsext/v2/jsc"
 )
 
 func MarshalCookie(name string, value any, ttl time.Duration) error {
@@ -11,7 +12,7 @@ func MarshalCookie(name string, value any, ttl time.Duration) error {
 	if err != nil {
 		return err
 	}
-	encoded, err = EncodeBase64[string](encoded)
+	encoded, err = jsc.EncodeBase64[string](encoded)
 	if err != nil {
 		return err
 	}
@@ -23,7 +24,7 @@ func UnmarshalCookie(name string, dst any) error {
 	if encoded == "" {
 		return nil
 	}
-	var decoded, err = DecodeBase64[string](encoded)
+	var decoded, err = jsc.DecodeBase64[string](encoded)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,6 @@
 package jsc
 
 import (
-	"encoding/base64"
 	"reflect"
 	"strings"
 	"syscall/js"
@@ -174,8 +173,11 @@ func ValueOf(f interface{}) (js.Value, error) {
 			js.CopyBytesToJS(array, val)
 			return array, nil
 		}
-		var enc = base64.StdEncoding.EncodeToString(val)
-		return js.ValueOf(enc), nil
+		var enc, err = EncodeBase64[[]byte](val)
+		if err != nil {
+			return js.Null(), err
+		}
+		return js.ValueOf(string(enc)), nil
 	}
 	var valueOf = reflect.ValueOf(f)
 	if !valueOf.IsValid() {
@@ -206,8 +208,12 @@ func valueOfJS(valueOf reflect.Value, kind reflect.Kind) (js.Value, error) {
 				js.CopyBytesToJS(array, valueOf.Bytes())
 				return array, nil
 			}
-			var enc = base64.StdEncoding.EncodeToString(valueOf.Bytes())
-			return js.ValueOf(enc), nil
+			var enc, err = EncodeBase64[[]byte](valueOf.Bytes())
+			if err != nil {
+				return js.Null(), err
+			}
+
+			return js.ValueOf(string(enc)), nil
 		}
 		var length = valueOf.Len()
 		var array = js.Global().Get("Array").New(length)
@@ -496,7 +502,7 @@ func scanValue(srcVal js.Value, dstVal reflect.Value) error {
 				dstVal.SetBytes(b)
 				return nil
 			}
-			var bytes, err = base64.StdEncoding.DecodeString(srcVal.String())
+			var bytes, err = DecodeBase64[[]byte]([]byte(srcVal.String()))
 			if err == nil {
 				dstVal.SetBytes(bytes)
 			} else {
